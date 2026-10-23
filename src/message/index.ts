@@ -1,0 +1,10 @@
+export { default as Message } from "./Message.vue";
+export { default as MessageContent } from "./MessageContent.vue";
+export { default as MessageAvatar } from "./MessageAvatar.vue";
+export { default as MessageHeader } from "./MessageHeader.vue";
+export { default as MessageActions } from "./MessageActions.vue";
+export { default as MessageFooter } from "./MessageActions.vue";
+export { default as MessageAction } from "./MessageAction.vue";
+export { default as MessageCopyAction } from "./MessageCopyAction.vue";
+export type { MessageRole } from "./context";
+export { default as MessageParts } from "./MessageParts.vue";

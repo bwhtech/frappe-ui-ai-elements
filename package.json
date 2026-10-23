@@ -1,0 +1,75 @@
+{
+	"name": "@bwhtech/frappe-ui-ai-elements",
+	"version": "0.1.0",
+	"description": "AI chat and agent components for Vue 3, built on frappe-ui. A port of shadcn AI Elements.",
+	"type": "module",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/bwhtech/frappe-ui-ai-elements.git"
+	},
+	"keywords": [
+		"vue",
+		"frappe-ui",
+		"ai",
+		"chat",
+		"ai-sdk",
+		"ai-elements"
+	],
+	"files": [
+		"dist",
+		"src",
+		"tailwind.js",
+		"NOTICE"
+	],
+	"sideEffects": [
+		"**/*.css"
+	],
+	"main": "./dist/index.js",
+	"module": "./dist/index.js",
+	"types": "./dist/types/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/types/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./styles.css": "./src/styles.css",
+		"./tailwind": "./tailwind.js"
+	},
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build -c vite.lib.config.ts && node scripts/vue-tsc.cjs -p tsconfig.lib.json",
+		"build:demo": "vite build",
+		"typecheck": "node scripts/vue-tsc.cjs --noEmit -p tsconfig.json",
+		"build:demo:dist": "DEMO_FROM_DIST=1 vite build",
+		"prepare": "npm run build"
+	},
+	"peerDependencies": {
+		"ai": ">=7.0.0",
+		"frappe-ui": ">=1.0.0",
+		"vue": ">=3.5.0"
+	},
+	"peerDependenciesMeta": {
+		"ai": {
+			"optional": true
+		}
+	},
+	"dependencies": {
+		"dompurify": "^3.4.17",
+		"highlight.js": "^11.12.0",
+		"marked": "^15.0.12"
+	},
+	"devDependencies": {
+		"@vitejs/plugin-vue": "^6.0.10",
+		"ai": "^7.0.150",
+		"autoprefixer": "^10.6.1",
+		"frappe-ui": "^1.0.2",
+		"postcss": "^8.5.31",
+		"tailwindcss": "^3.4.19",
+		"typescript": "^7.0.2",
+		"vite": "^8.3.5",
+		"vue": "^3.5.44",
+		"vue-router": "^4.6.4",
+		"vue-tsc": "^3.3.13"
+	}
+}

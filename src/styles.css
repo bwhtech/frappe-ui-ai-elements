@@ -1,0 +1,292 @@
+/*
+ * CSS that Tailwind utilities cannot express: the shimmer and scroll-fade
+ * utilities (ported from shadcn's tailwind.css), the highlight.js theme for
+ * CodeBlock, and a few structural selectors for Trace.
+ *
+ * Kept in @layer utilities so Tailwind variants work on them, e.g.
+ * `data-[status=running]:shimmer`.
+ */
+
+@property --shimmer-angle {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 20deg;
+}
+
+@keyframes ai-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+@keyframes ai-scroll-fade-t {
+  from {
+    --scroll-fade-t: 0px;
+  }
+  to {
+    --scroll-fade-t: var(--scroll-fade-size, 40px);
+  }
+}
+
+@keyframes ai-scroll-fade-b {
+  from {
+    --scroll-fade-b: var(--scroll-fade-size, 40px);
+  }
+  to {
+    --scroll-fade-b: 0px;
+  }
+}
+
+@keyframes ai-scroll-fade-s {
+  from {
+    --scroll-fade-s: 0px;
+  }
+  to {
+    --scroll-fade-s: var(--scroll-fade-size, 40px);
+  }
+}
+
+@keyframes ai-scroll-fade-e {
+  from {
+    --scroll-fade-e: var(--scroll-fade-size, 40px);
+  }
+  to {
+    --scroll-fade-e: 0px;
+  }
+}
+
+@property --scroll-fade-t {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-fade-b {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-fade-s {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 0px;
+}
+@property --scroll-fade-e {
+  syntax: '<length-percentage>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@layer utilities {
+  /* Text shimmer. The highlight derives from currentColor. */
+  .shimmer {
+    --_spread: var(--shimmer-spread, calc(3ch + 40px));
+    --_base: currentColor;
+    --_highlight: var(--shimmer-color, oklch(from currentColor l c h / calc(alpha * 0.2)));
+    background-image: var(
+      --shimmer-image,
+      linear-gradient(
+        calc(90deg + var(--shimmer-angle)),
+        var(--_base) calc(50% - var(--_spread)),
+        color-mix(in oklch, var(--_highlight), var(--_base) 50%) calc(50% - var(--_spread) * 0.5),
+        var(--_highlight) 50%,
+        color-mix(in oklch, var(--_highlight), var(--_base) 50%) calc(50% + var(--_spread) * 0.5),
+        var(--_base) calc(50% + var(--_spread))
+      )
+    );
+    background-repeat: no-repeat;
+    background-size: calc(200% + var(--_spread) * 2) 100%;
+    background-position: 0 0;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: var(--shimmer-text-fill, transparent);
+    animation: ai-shimmer var(--shimmer-duration, 2s) linear infinite;
+  }
+  [data-theme='dark'] .shimmer {
+    --_highlight: var(
+      --shimmer-color,
+      oklch(from currentColor max(0.8, calc(l + 0.4)) c h / calc(alpha + 0.4))
+    );
+  }
+  .shimmer-once {
+    animation-iteration-count: 1;
+  }
+  .shimmer-none {
+    --shimmer-image: none;
+    --shimmer-text-fill: currentColor;
+  }
+
+  /* Edge fades on scroll containers. The fade grows as content hides past an edge. */
+  .scroll-fade-y,
+  .scroll-fade-b {
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--scroll-fade-t, 0px),
+      #000 calc(100% - var(--scroll-fade-b, 0px)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 var(--scroll-fade-t, 0px),
+      #000 calc(100% - var(--scroll-fade-b, 0px)),
+      transparent 100%
+    );
+  }
+  .scroll-fade-x {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--scroll-fade-s, 0px),
+      #000 calc(100% - var(--scroll-fade-e, 0px)),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0,
+      #000 var(--scroll-fade-s, 0px),
+      #000 calc(100% - var(--scroll-fade-e, 0px)),
+      transparent 100%
+    );
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--outline-gray-3, rgba(0, 0, 0, 0.2)) transparent;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  .scroll-fade-y {
+    animation: ai-scroll-fade-t 1ms ease-in-out, ai-scroll-fade-b 1ms ease-in-out;
+    animation-timeline: scroll(self y), scroll(self y);
+    animation-range: 0 96px, calc(100% - 96px) 100%;
+    animation-fill-mode: both;
+  }
+  .scroll-fade-b {
+    animation: ai-scroll-fade-b 1ms ease-in-out;
+    animation-timeline: scroll(self y);
+    animation-range: calc(100% - 96px) 100%;
+    animation-fill-mode: both;
+  }
+  .scroll-fade-x {
+    animation: ai-scroll-fade-s 1ms ease-in-out, ai-scroll-fade-e 1ms ease-in-out;
+    animation-timeline: scroll(self inline), scroll(self inline);
+    animation-range: 0 96px, calc(100% - 96px) 100%;
+    animation-fill-mode: both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+    background-image: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}
+
+/* Trace: a link or button that wraps a line hugs its content. */
+[data-slot='trace'] > :is(a, button):has(> [data-slot='trace-line']) {
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  border-radius: 6px;
+  text-align: left;
+}
+:is(a, button) > [data-slot='trace-line'] {
+  cursor: pointer;
+}
+:is(a, button):hover > [data-slot='trace-line']:not([data-status='error']) {
+  color: var(--ink-gray-8);
+}
+
+/* highlight.js tokens, GitHub light/dark — the theme frappe-ui's editor uses. */
+[data-slot='code-block'] {
+  --hl-keyword: #d73a49;
+  --hl-title: #6f42c1;
+  --hl-constant: #005cc5;
+  --hl-string: #032f62;
+  --hl-builtin: #e36209;
+  --hl-comment: #6a737d;
+  --hl-tag: #22863a;
+}
+[data-theme='dark'] [data-slot='code-block'] {
+  --hl-keyword: #ff7b72;
+  --hl-title: #d2a8ff;
+  --hl-constant: #79c0ff;
+  --hl-string: #a5d6ff;
+  --hl-builtin: #ffa657;
+  --hl-comment: #8b949e;
+  --hl-tag: #7ee787;
+}
+[data-slot='code-block'] :is(.hljs-doctag, .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type) {
+  color: var(--hl-keyword);
+}
+[data-slot='code-block'] :is(.hljs-title, .hljs-title.function_, .hljs-title.class_) {
+  color: var(--hl-title);
+}
+[data-slot='code-block']
+  :is(.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-class, .hljs-selector-id) {
+  color: var(--hl-constant);
+}
+[data-slot='code-block'] :is(.hljs-regexp, .hljs-string) {
+  color: var(--hl-string);
+}
+[data-slot='code-block'] :is(.hljs-built_in, .hljs-symbol) {
+  color: var(--hl-builtin);
+}
+[data-slot='code-block'] :is(.hljs-comment, .hljs-code, .hljs-formula) {
+  color: var(--hl-comment);
+}
+[data-slot='code-block'] :is(.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo) {
+  color: var(--hl-tag);
+}
+[data-slot='code-block'] .hljs-addition {
+  color: var(--hl-tag);
+}
+[data-slot='code-block'] .hljs-deletion {
+  color: var(--hl-keyword);
+}
+
+/* Numbered code lines draw their number from a CSS counter. */
+[data-slot='code-block-content'][data-numbered] [data-slot='code-block-line'] {
+  counter-increment: line;
+}
+[data-slot='code-block-content'][data-numbered] [data-slot='code-block-line']::before {
+  content: counter(line);
+  min-width: 1.5rem;
+  margin-right: 0.75rem;
+  display: inline-block;
+  text-align: right;
+  color: var(--ink-gray-4);
+  user-select: none;
+}
+
+/* Response: long unbroken strings (URLs, ids, inline code) wrap instead of widening the reply.
+   Table cells keep normal wrapping; the table scrolls inside its own region. */
+[data-slot='response'] :is(p, li, blockquote, h1, h2, h3, h4, h5, h6) {
+  overflow-wrap: anywhere;
+}
+[data-slot='response-table'] {
+  max-width: 100%;
+  margin: 0.75rem 0;
+  overflow-x: auto;
+  border-radius: 6px;
+}
+[data-slot='response-table'] > table {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+[data-slot='response-table'] th,
+[data-slot='response-table'] td {
+  min-width: 6rem;
+}

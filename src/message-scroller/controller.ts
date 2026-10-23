@@ -1,0 +1,318 @@
+import { reactive, ref } from "vue";
+import { blockPadding, contentBottom, elementTop, flexGap, scrollItems } from "./geometry";
+
+export type MessageScrollerDefaultScrollPosition = "start" | "end" | "last-anchor";
+export type MessageScrollerScrollAlign = "start" | "center" | "end" | "nearest";
+
+export interface MessageScrollerScrollOptions {
+	align?: MessageScrollerScrollAlign;
+	behavior?: ScrollBehavior;
+	scrollMargin?: number;
+}
+
+export interface MessageScrollerOptions {
+	/** Follow new content at the bottom while the viewport is at the end. */
+	autoScroll: boolean;
+	/** Where a saved transcript opens on its first non-empty render. */
+	defaultScrollPosition: MessageScrollerDefaultScrollPosition;
+	/** Distance from an edge that still counts as at the edge. */
+	scrollEdgeThreshold: number;
+	/** Pixels of the previous item kept visible above a newly anchored row. */
+	scrollPreviousItemPeek: number;
+	/** Margin on the aligned edge for commands. */
+	scrollMargin: number;
+}
+
+type Mode =
+	| "following-bottom" // pinned to the latest message
+	| "free-scrolling" // the reader scrolled away; leave the position alone
+	| "anchored-to-message"; // holding a new turn near the top while its reply streams
+
+const EPSILON = 0.5;
+const AUTOSCROLL_CLEAR_DELAY = 400;
+const USER_SCROLL_KEYS = new Set(["ArrowDown", "ArrowUp", "End", "Home", "PageDown", "PageUp", " "]);
+
+/**
+ * Owns scroll position for a chat transcript: follows the live end while the
+ * reader is there, anchors each new `scrollAnchor` turn near the top while its
+ * reply streams below it, and lets go as soon as the reader scrolls.
+ * A Vue port of shadcn's headless MessageScroller (without visibility tracking).
+ */
+export class MessageScrollerController {
+	readonly scrollable = reactive({ start: false, end: false });
+	readonly autoscrolling = ref(false);
+	readonly pendingScroll = ref(true);
+
+	private viewport: HTMLElement | null = null;
+	private content: HTMLElement | null = null;
+	private spacer: HTMLElement | null = null;
+	private mode: Mode = "free-scrolling";
+	private itemCount = 0;
+	private anchor: HTMLElement | null = null;
+	private handledAnchors = new WeakSet<HTMLElement>();
+	private lastScrollTop = 0;
+	private spacerHeight = 0;
+	private frame: number | null = null;
+	private autoscrollTimer: ReturnType<typeof setTimeout> | null = null;
+	private resizeObserver: ResizeObserver | null = null;
+	private mutationObserver: MutationObserver | null = null;
+
+	constructor(private readonly options: () => MessageScrollerOptions) {}
+
+	// --- wiring -----------------------------------------------------------
+
+	setViewport(element: HTMLElement | null) {
+		this.viewport = element;
+		this.connect();
+	}
+
+	setContent(element: HTMLElement | null) {
+		this.content = element;
+		this.connect();
+	}
+
+	setSpacer(element: HTMLElement | null) {
+		this.spacer = element;
+	}
+
+	disconnect() {
+		this.resizeObserver?.disconnect();
+		this.mutationObserver?.disconnect();
+		this.resizeObserver = this.mutationObserver = null;
+		if (this.frame !== null) cancelAnimationFrame(this.frame);
+		if (this.autoscrollTimer) clearTimeout(this.autoscrollTimer);
+	}
+
+	// --- commands ---------------------------------------------------------
+
+	scrollToEnd(options: MessageScrollerScrollOptions = {}) {
+		const viewport = this.viewport;
+		if (!viewport || !this.content) return false;
+		this.setSpacerHeight(0);
+		const top = Math.max(0, this.contentBottom() - viewport.clientHeight);
+		this.mode = this.options().autoScroll ? "following-bottom" : "free-scrolling";
+		this.anchor = null;
+		this.scrollTo(top, options.behavior ?? "smooth");
+		return true;
+	}
+
+	scrollToStart(options: MessageScrollerScrollOptions = {}) {
+		if (!this.viewport) return false;
+		this.mode = "free-scrolling";
+		this.anchor = null;
+		this.scrollTo(0, options.behavior ?? "smooth");
+		return true;
+	}
+
+	scrollToMessage(messageId: string, options: MessageScrollerScrollOptions = {}) {
+		const item = this.items().find((element) => element.dataset.messageId === messageId);
+		if (!item || !this.viewport) return false;
+		this.mode = "free-scrolling";
+		this.anchor = null;
+		this.scrollTo(this.alignedTop(item, options), options.behavior ?? "smooth");
+		return true;
+	}
+
+	// --- DOM events -------------------------------------------------------
+
+	onScroll() {
+		const viewport = this.viewport;
+		if (!viewport) return;
+		const scrolledUp = viewport.scrollTop < this.lastScrollTop - EPSILON;
+		this.lastScrollTop = viewport.scrollTop;
+		const atEnd = !this.hasOverflowBelow();
+
+		if (this.autoscrolling.value) return this.commitState();
+		if (this.mode === "following-bottom" && scrolledUp) this.mode = "free-scrolling";
+		else if (this.mode === "free-scrolling" && atEnd && this.options().autoScroll) this.mode = "following-bottom";
+		this.trimSpacer();
+		this.commitState();
+	}
+
+	onWheel(event: WheelEvent) {
+		if (event.deltaY < 0 || this.mode === "anchored-to-message") this.releaseToReader();
+	}
+
+	onTouchMove() {
+		this.releaseToReader();
+	}
+
+	onKeydown(event: KeyboardEvent) {
+		if (USER_SCROLL_KEYS.has(event.key)) this.releaseToReader();
+	}
+
+	// --- reconciliation ---------------------------------------------------
+
+	private connect() {
+		if (!this.viewport || !this.content || this.resizeObserver) return;
+		this.resizeObserver = new ResizeObserver(() => this.schedule(() => this.handleResize()));
+		this.resizeObserver.observe(this.viewport);
+		this.resizeObserver.observe(this.content);
+		this.mutationObserver = new MutationObserver(() => this.handleContentChange());
+		this.mutationObserver.observe(this.content, { childList: true });
+		this.handleContentChange();
+		if (this.itemCount === 0) this.pendingScroll.value = false;
+	}
+
+	private handleContentChange() {
+		const items = this.items();
+		const previousCount = this.itemCount;
+		this.itemCount = items.length;
+
+		if (previousCount === 0) {
+			if (items.length > 0) this.applyDefaultScrollPosition(items);
+			return this.commitState();
+		}
+		if (items.length > previousCount) {
+			const anchors = items.slice(previousCount).filter(isScrollAnchor);
+			const following = this.mode === "following-bottom" && this.options().autoScroll;
+			if (anchors.length > 1 && following) return void this.scrollToEnd({ behavior: "auto" });
+			const anchor = anchors[0] ?? items.find((item) => isScrollAnchor(item) && !this.handledAnchors.has(item));
+			if (anchor) return this.anchorTo(anchor, "smooth");
+		}
+		if (this.mode === "following-bottom" && this.options().autoScroll) this.scrollToEnd({ behavior: "auto" });
+		else this.commitState();
+	}
+
+	private handleResize() {
+		if (this.mode === "following-bottom" && this.options().autoScroll) {
+			this.scrollToEnd({ behavior: "auto" });
+			return;
+		}
+		if (this.mode === "anchored-to-message" && this.anchor?.isConnected) {
+			const previousSpacer = this.spacerHeight;
+			this.holdAnchor();
+			// The reply has filled the space under the anchor: hand off to following.
+			if (this.options().autoScroll && previousSpacer > 0 && this.spacerHeight === 0) {
+				this.scrollToEnd({ behavior: "auto" });
+			}
+			return;
+		}
+		this.trimSpacer();
+		this.commitState();
+	}
+
+	private applyDefaultScrollPosition(items: HTMLElement[]) {
+		const position = this.options().defaultScrollPosition;
+		items.filter(isScrollAnchor).forEach((item) => this.handledAnchors.add(item));
+		if (position === "start") this.scrollToStart({ behavior: "auto" });
+		else if (position === "last-anchor") this.openAtLastAnchor(items);
+		else this.scrollToEnd({ behavior: "auto" });
+		requestAnimationFrame(() => (this.pendingScroll.value = false));
+	}
+
+	private openAtLastAnchor(items: HTMLElement[]) {
+		const anchor = [...items].reverse().find(isScrollAnchor);
+		const viewport = this.viewport!;
+		const lastTurnFits = anchor && this.contentBottom() - elementTop(anchor, viewport) <= viewport.clientHeight;
+		if (!anchor || lastTurnFits) this.scrollToEnd({ behavior: "auto" });
+		else this.anchorTo(anchor, "auto");
+	}
+
+	/** Puts `element` near the top, adding a tail spacer if the content below is short. */
+	private anchorTo(element: HTMLElement, behavior: ScrollBehavior) {
+		this.handledAnchors.add(element);
+		this.anchor = element;
+		this.mode = "anchored-to-message";
+		this.holdAnchor(behavior);
+	}
+
+	private holdAnchor(behavior: ScrollBehavior = "auto") {
+		const viewport = this.viewport;
+		if (!viewport || !this.anchor) return;
+		const peek = this.options().scrollPreviousItemPeek;
+		const target = Math.max(0, this.alignedTop(this.anchor, { align: "start" }) - peek);
+		const missing = target + viewport.clientHeight - this.contentBottom();
+		this.setSpacerHeight(Math.max(0, missing));
+		if (Math.abs(viewport.scrollTop - target) > EPSILON) this.scrollTo(target, behavior);
+		this.commitState();
+	}
+
+	/** Shrinks the tail spacer to what the current scroll position still needs. */
+	private trimSpacer() {
+		if (this.spacerHeight === 0 || !this.viewport) return;
+		const needed = this.viewport.scrollTop + this.viewport.clientHeight - this.contentBottom();
+		this.setSpacerHeight(Math.max(0, Math.min(this.spacerHeight, needed)));
+	}
+
+	private releaseToReader() {
+		if (this.mode !== "free-scrolling") this.mode = "free-scrolling";
+		this.anchor = null;
+		this.setAutoscrolling(false);
+	}
+
+	private commitState() {
+		const viewport = this.viewport;
+		if (!viewport) return;
+		const threshold = this.options().scrollEdgeThreshold;
+		this.scrollable.start = viewport.scrollTop > threshold;
+		// While following, a streamed chunk opens a gap we are about to close; do not flash the button.
+		this.scrollable.end = this.mode !== "following-bottom" && this.hasOverflowBelow();
+	}
+
+	// --- low-level helpers ------------------------------------------------
+
+	private hasOverflowBelow() {
+		const viewport = this.viewport!;
+		return this.contentBottom() - viewport.scrollTop - viewport.clientHeight > this.options().scrollEdgeThreshold;
+	}
+
+	private alignedTop(element: HTMLElement, options: MessageScrollerScrollOptions) {
+		const viewport = this.viewport!;
+		const margin = options.scrollMargin ?? this.options().scrollMargin;
+		const padding = blockPadding(this.content);
+		const top = elementTop(element, viewport);
+		const height = element.getBoundingClientRect().height;
+		if (options.align === "end") return top - viewport.clientHeight + height + padding.end + margin;
+		if (options.align === "center") return top - (viewport.clientHeight - height) / 2;
+		return top - padding.start - margin;
+	}
+
+	private contentBottom() {
+		return contentBottom(this.content!, this.spacer, this.viewport!);
+	}
+
+	private items() {
+		return this.content ? scrollItems(this.content, this.spacer) : [];
+	}
+
+	private setSpacerHeight(height: number) {
+		this.spacerHeight = Math.round(height);
+		if (!this.spacer) return;
+		// The content's flex gap already separates the spacer from the last item.
+		const gap = flexGap(this.content);
+		this.spacer.style.display = this.spacerHeight > 0 ? "block" : "none";
+		this.spacer.style.height = `${Math.max(0, this.spacerHeight - gap)}px`;
+	}
+
+	private scrollTo(top: number, requested: ScrollBehavior) {
+		const viewport = this.viewport!;
+		const behavior = requested === "smooth" && prefersReducedMotion() ? "auto" : requested;
+		if (behavior === "smooth") this.setAutoscrolling(true);
+		viewport.scrollTo({ top, behavior });
+		this.lastScrollTop = viewport.scrollTop;
+		this.commitState();
+	}
+
+	private setAutoscrolling(value: boolean) {
+		if (this.autoscrollTimer) clearTimeout(this.autoscrollTimer);
+		this.autoscrolling.value = value;
+		if (value) this.autoscrollTimer = setTimeout(() => this.setAutoscrolling(false), AUTOSCROLL_CLEAR_DELAY);
+	}
+
+	private schedule(task: () => void) {
+		if (this.frame !== null) return;
+		this.frame = requestAnimationFrame(() => {
+			this.frame = null;
+			task();
+		});
+	}
+}
+
+function prefersReducedMotion() {
+	return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
+function isScrollAnchor(element: HTMLElement) {
+	return element.dataset.scrollAnchor === "true";
+}

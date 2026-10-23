@@ -1,0 +1,8 @@
+{
+	"extends": "frappe-ui/tsconfig.base.json",
+	"compilerOptions": {
+		"types": ["vite/client"],
+		"paths": { "@bwhtech/frappe-ui-ai-elements": ["./src/index.ts"], "@bwhtech/frappe-ui-ai-elements/*": ["./src/*"] }
+	},
+	"include": ["src/**/*.ts", "src/**/*.vue", "demo/**/*.ts", "demo/**/*.vue", "demo/env.d.ts"]
+}
