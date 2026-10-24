@@ -18,6 +18,8 @@ const props = withDefaults(
 		name?: string;
 		count?: number;
 		url?: string;
+		/** A second button, "Edit in Studio", for a Studio page. */
+		editUrl?: string;
 		icon?: string | Component;
 		label?: string;
 	}>(),
@@ -30,6 +32,7 @@ const KIND = {
 	doctype: { icon: "lucide-table-properties", label: "DocType", action: "Open DocType" },
 	new: { icon: "lucide-file-plus", label: "New record", action: "Add a record" },
 	page: { icon: "lucide-globe", label: "Web page", action: "Open page" },
+	studio: { icon: "lucide-layout-dashboard", label: "Studio page", action: "Open page" },
 } satisfies Record<DeskCardKind, { icon: string; label: string; action: string }>;
 
 const meta = computed(() => {
@@ -56,8 +59,9 @@ const meta = computed(() => {
 				<p v-if="meta" class="mt-0.5 truncate text-xs text-ink-gray-5">{{ meta }}</p>
 				<p v-if="summary" class="mt-1.5 text-p-sm text-ink-gray-7 [overflow-wrap:anywhere]">{{ summary }}</p>
 			</div>
-			<div data-slot="desk-card-actions" class="shrink-0 self-center">
+			<div data-slot="desk-card-actions" class="flex shrink-0 items-center gap-1.5 self-center">
 				<slot name="actions">
+					<Button v-if="url && editUrl" variant="ghost" label="Edit in Studio" :href="editUrl" />
 					<Button
 						v-if="url"
 						variant="subtle"

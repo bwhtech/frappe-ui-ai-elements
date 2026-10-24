@@ -83,10 +83,11 @@ function answer(output: AskUserOutput) {
 		:title="desk.input.title"
 		:summary="desk.input.summary"
 		:kind="desk.input.kind"
-		:doctype="desk.input.kind === 'page' ? desk.input.route : desk.input.doctype"
+		:doctype="desk.input.kind === 'page' ? desk.input.route : desk.input.kind === 'studio' ? desk.output?.route : desk.input.doctype"
 		:name="desk.input.name"
 		:count="desk.output?.count"
 		:url="desk.output?.url"
+		:edit-url="desk.output?.editUrl"
 	/>
 	<Tool v-else>
 		<ToolHeader
