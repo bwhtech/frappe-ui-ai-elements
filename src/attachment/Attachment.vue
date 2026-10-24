@@ -47,7 +47,14 @@ function formatSize(bytes?: number) {
 			<span v-else :class="[icon, 'size-4']" aria-hidden="true" />
 		</div>
 		<div class="min-w-0 flex-1 leading-tight">
-			<p class="truncate text-sm-medium text-ink-gray-8">{{ name }}</p>
+			<a
+				v-if="url && !removable"
+				:href="url"
+				target="_blank"
+				rel="noreferrer noopener"
+				class="block truncate text-sm-medium text-ink-gray-8 hover:underline"
+			>{{ name }}</a>
+			<p v-else class="truncate text-sm-medium text-ink-gray-8">{{ name }}</p>
 			<p v-if="description" class="mt-0.5 truncate text-xs text-ink-gray-5 group-data-[state=error]/attachment:text-ink-red-6">
 				{{ description }}
 			</p>
