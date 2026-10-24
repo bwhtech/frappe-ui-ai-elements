@@ -110,11 +110,13 @@ The structure follows shadcn. Most elements are built on a few building blocks (
 | `TraceCollapsibleTrigger` | — | default | A button with a rotating chevron. |
 | `TraceCollapsibleContent` | `keepMounted` | default | Animates its height. `class` goes to the inner panel. |
 | `MessageScrollerProvider` | `autoScroll`, `defaultScrollPosition: start \| end \| last-anchor`, `scrollEdgeThreshold`, `scrollPreviousItemPeek`, `scrollMargin` | default | Owns scroll state. |
-| `MessageScroller`, `MessageScrollerViewport`, `MessageScrollerContent` | — | default | The frame, the scroller, and the `role="log"` column with its tail spacer. |
-| `MessageScrollerItem` | `messageId`, `scrollAnchor` | default | Set `scrollAnchor` on the person's turns. |
+| `MessageScroller`, `MessageScrollerContent` | — | default | The frame, and the `role="log"` column with its tail spacer. |
+| `MessageScrollerViewport` | `preserveScrollOnPrepend = true` | default. Emits `reach-start`. | The scroller. When rows are inserted above the reader (older messages), the first visible row with a `messageId` stays where it was, also while a reply streams. `false` also turns off the browser's own scroll anchoring. `reach-start` fires when the reader scrolls to the top edge: load older rows there. |
+| `MessageScrollerItem` | `messageId`, `scrollAnchor` | default | Set `scrollAnchor` on the person's turns. Give message rows a stable `messageId`, so that the scroller can hold them on prepend and track them. |
 | `MessageScrollerButton` | `direction: end \| start`, `behavior` | default `{ active, scroll }` | Hides when you are already at that edge. |
 | `useMessageScroller()` | — | — | Returns `{ scrollToEnd, scrollToStart, scrollToMessage }`. |
 | `useMessageScrollerScrollable()` | — | — | Returns `{ start, end }`. |
+| `useMessageScrollerVisibility()` | — | — | Returns `{ currentAnchorId, visibleMessageIds, firstVisibleMessageId, lastVisibleMessageId }`. `currentAnchorId` is the anchored turn the reader is in; it stays set after its top scrolls away. `visibleMessageIds` are in document order. Only rows with a `messageId` count. Tracking uses an `IntersectionObserver` that exists only while a component that calls this is mounted. |
 | `Bubble` / `BubbleContent` / `BubbleGroup` | `variant: default \| secondary \| muted \| tinted \| outline \| ghost \| destructive`, `align` / `as` | default | |
 | `CodeBlock` | `variant: default \| destructive`, `size: default \| sm` | default | |
 | `CodeBlockHeader`, `CodeBlockTitle (icon)`, `CodeBlockActions`, `CodeBlockFooter` | | default | When `CodeBlockActions` is a direct child of `CodeBlock`, it floats in the top-right corner and shows on hover. |
@@ -131,12 +133,13 @@ The structure follows shadcn. Most elements are built on a few building blocks (
 | --- | --- | --- |
 | **Chat** | `Conversation (autoScroll = true, defaultScrollPosition)`, `ConversationContent` (attrs go to the column), `ConversationItem (messageId, scrollAnchor)`, `ConversationScrollButton`, `ConversationEmptyState (title, description, icon; #actions)` | The message list |
 | **Message** | `Message (from: user \| assistant \| system, align?)`, `MessageContent (bare)` puts the person's text in a muted bubble, `MessageAvatar (name, src)`, `MessageHeader`, `MessageActions` / `MessageFooter`, `MessageAction (label, icon, pressed; @click)`, `MessageCopyAction (value)` | `role` |
-| **MessageParts** | `message`, `streaming`. Emits `approve(id)` and `deny(id)`. This is the AI SDK adapter for a whole message. | `text`, `reasoning`, `dynamic-tool`, `tool-*`, `file`, `source-url` |
+| **MessageParts** | `message`, `streaming`. Emits `approve(id)`, `deny(id)`, `answer({ toolCallId, output })` and `dismiss(toolCallId)`. This is the AI SDK adapter for a whole message. | `text`, `reasoning`, `dynamic-tool`, `tool-*`, `file`, `source-url` |
 | **Response** (`MessageResponse`) | `content`, `parseIncomplete = true`, `size: sm \| base` | `text`. Uses marked and DOMPurify. While the text streams, it closes open fences, bold, inline code and links. Fenced code renders as a `CodeBlock`. Finished blocks are cached. A table scrolls sideways in its own focusable region, `[data-slot=response-table]`. Long unbroken text (URLs, ids, inline code) wraps. |
 | **PromptInput** | `PromptInput (v-model text, status: ready \| submitted \| streaming \| error, disabled, accept, multiple)` emits `submit({ text, files })` and `stop`. Parts: `PromptInputTextarea (placeholder, maxRows, autofocus)`, `PromptInputHeader`, `PromptInputFooter` / `Toolbar`, `PromptInputTools`, `PromptInputButton (label, icon, iconLeft)`, `PromptInputAttachButton`, `PromptInputSubmit` | Enter sends. Shift+Enter adds a new line. IME composition does not send. `PromptInputSubmit` shows Send, a spinner while submitted, and Stop while streaming. |
 | **Tool** | `Tool (v-model:open, defaultOpen)`, `ToolHeader (state, toolName, title, icon, streaming, approved, preliminary, showBadge)`, `ToolContent`, `ToolInput (input)`, `ToolOutput (output, errorText)`. Helpers: `getToolStatus`, `getToolTitle`, `getStatusBadge`, `formatToolOutput` (unwraps MCP `content[].text`), `getToolName`, `humanizeToolName` | `dynamic-tool`, `tool-*`, in every state |
-| **ToolPart** | `part`, `streaming`, `icon`. Emits `approve(id)` and `deny(id)`. | AI SDK adapter. `approval-requested` renders as a Confirmation. Other states render as a Tool line. |
-| **Confirmation** | `Confirmation (approval, state, icon)`, `ConfirmationTitle (title, description; #description)`, `ConfirmationRequest`, `ConfirmationAccepted`, `ConfirmationRejected`, `ConfirmationActions`, `ConfirmationAction (label, variant, theme; @click)`. Ready-made: `ToolConfirmation (toolName, input, reason; @approve @deny)` | `approval-requested`, `approval-responded`, `output-denied` |
+| **ToolPart** | `part`, `streaming`, `icon`. Emits `approve(id)`, `deny(id)`, `answer({ toolCallId, output })` and `dismiss(toolCallId)`. | AI SDK adapter. `approval-requested` renders as a Confirmation. A `tool-ask_user` part renders as a Questionnaire, then as a summary of the answers. Other states render as a Tool line. |
+| **Confirmation** | `Confirmation (approval, state, icon)`, `ConfirmationTitle (title, description; #description)`, `ConfirmationRequest`, `ConfirmationAccepted`, `ConfirmationRejected`, `ConfirmationActions`, `ConfirmationAction (label, variant, theme; @click)`. Ready-made: `ToolConfirmation (toolName, input, reason; @approve @deny)`, which shows a one-line summary of what the call acts on (`summarizeToolInput`: the doctype and a name, or "20 Student Feedback records" for a bulk `docs` call). `ConfirmationBatch (count, disabled; @approve @deny)`: the "Approve all / Deny all" bar; `MessageParts` shows it above the first pending card when two or more approvals wait in one message | `approval-requested`, `approval-responded`, `output-denied` |
+| **Questionnaire** | `Questionnaire (v-model answers, v-model:item, disabled, shortcuts: numbers \| letters \| none)` emits `submit({ answers, skipped })`. Parts: `QuestionnaireProgress` (slot `{ current, total, first, last }`), `QuestionnaireItem (name, required, multiple, disabled)`, `QuestionnaireTitle (title)`, `QuestionnaireDescription (description)`, `QuestionnaireChoices`, `QuestionnaireChoice (value, label, description, disabled)`, `QuestionnaireInput (placeholder, label)` for "Other…", `QuestionnaireError (message)`, `QuestionnaireActions`, `QuestionnairePrevious`, `QuestionnaireSkip`, `QuestionnaireNext`, `QuestionnaireSubmit` (each takes `label`). `useQuestionnaireItem()` binds your own control to an item. Ready-made: `ToolQuestionnaire (input, output, disabled; @answer @dismiss)`, with a "Not now" button, `QuestionnaireSummary (title, questions, answers)` | `tool-ask_user`. One question at a time. Number keys pick answer N, arrow keys move between answers (and select, in a radio group), Enter goes to the next question and submits on the last, Mod+Enter works from any field. Escape never skips or leaves a question; in the "Other…" field it moves focus back to the answers. A required item must have an answer before Next. Skip leaves an optional item out and moves on (on the last item, it submits). `disabled` while the reply streams. |
 | **Reasoning** | `Reasoning (isStreaming, v-model:open, defaultOpen, duration)`, `ReasoningTrigger` (slot `{ isStreaming, duration }`), `ReasoningContent (content)`, `ReasoningPart (text, streaming, duration)`, `useReasoning()` | `reasoning`. It opens while the model thinks and closes when it finishes. If the person toggles it, their choice wins. The title reads "Thought for Ns", timed on the client when the server does not send a duration. |
 | **Loader** | `text` | Spinner and shimmering status text |
 | **Suggestion** | `Suggestions (wrap)`, `Suggestion (suggestion, icon; @select)` | Send the label with `sendMessage({ text })` |
@@ -155,9 +158,56 @@ The structure follows shadcn. Most elements are built on a few building blocks (
 | **TestResults** | `suites: { name, tests: { name, status, duration?, error? }[] }[]`, `isStreaming`, `duration` | Output of a test tool |
 | **Subagent** | `name`, `status: running \| done \| error`, `task`, `model`, `tools`, `result` (markdown), `duration`, `v-model:open`, `defaultOpen`. Nested tool lines go in the default slot. | A subagent tool and its `output.parts` |
 
+### Questions from the agent (`ask_user`)
+
+The agent asks the person one or more questions with a tool that runs in the browser. Define it on the server without `execute`. The call arrives as a `tool-ask_user` part in state `input-available`. `MessageParts` shows it as a Questionnaire and emits `answer` when the person submits. Give the answer to the AI SDK, and let the chat send again:
+
+```ts
+import { lastAssistantMessageIsCompleteWithApprovalResponses, lastAssistantMessageIsCompleteWithToolCalls } from "ai";
+
+const { addToolOutput } = useChat({
+	sendAutomaticallyWhen: (options) =>
+		lastAssistantMessageIsCompleteWithApprovalResponses(options) || lastAssistantMessageIsCompleteWithToolCalls(options),
+});
+```
+
+```vue
+<MessageParts :message="message" @answer="({ toolCallId, output }) => addToolOutput({ tool: 'ask_user', toolCallId, output })" />
+```
+
+The input (`AskUserInput`):
+
+| Field | Type | Notes |
+| --- | --- | --- |
+| `title` | `string?` | Shown above the questions. |
+| `questions` | `AskUserQuestion[]` | One or more. Keep it short: one to four. |
+| `questions[].id` | `string` | Unique in the call. Keys the answer. |
+| `questions[].header` | `string?` | A short step label, such as "Fields". |
+| `questions[].question` | `string` | The question. |
+| `questions[].description` | `string?` | Help text under the question. |
+| `questions[].kind` | `single \| multiple \| text \| number \| date \| boolean` | The type of question. It picks the control. It is not a colour. |
+| `questions[].options` | `{ value, label, description? }[]` | Required for `single` and `multiple`. Up to 6 show as rows with number keys. More show as a Select (`single`, up to 12), a Combobox (`single`, more than 12) or a MultiSelect (`multiple`). |
+| `questions[].allowOther` | `boolean?` | Adds an "Other…" text answer to `single` and `multiple`. |
+| `questions[].required` | `boolean?` | Defaults to `true`. An optional question shows Skip. A `boolean` question is a switch, so it always has an answer. |
+| `questions[].placeholder` | `string?` | For `text`, `number`, `date` and the "Other…" field. |
+
+The output (`AskUserOutput`) is `{ answers: Record<id, answer> }`, with one entry for each question. An answer is the option `value` (`single`), an array of option values (`multiple`), a string (`text`), a number (`number`), `"YYYY-MM-DD"` (`date`), `true` or `false` (`boolean`), or `null` when the person skipped the question. The "Other…" text goes in as a string: the answer itself for `single`, one more array entry for `multiple`.
+
+An input that does not match this shape renders as a normal Tool line. Validate the same rules on the server (options for `single` and `multiple`, unique ids), so the SDK sends a bad call back to the model to fix. `parseAskUserInput`, `toAskUserOutput`, `parseAskUserOutput`, `formatAskUserAnswer` and `openAskUserCalls` are exported.
+
+**Every call needs a result.** The model cannot see the thread again while a tool call has no result, and the provider rejects it. So close an open `ask_user` in two cases:
+
+- The person clicks "Not now": `MessageParts` emits `dismiss(toolCallId)`.
+- The person writes in the chat instead of answering: before `sendMessage`, close each id from `openAskUserCalls(messages)`.
+
+In both cases call `addToolOutput({ tool: "ask_user", toolCallId, state: "output-error", errorText })`. The part then shows "Questions not answered". A server can also close calls left open when a later user message arrives, as a safety net.
+
+On the server, give the tool a `toModelOutput` that turns the answer ids into plain lines with the option labels, so the model keeps their meaning many steps later. `strict: true` helps providers that support strict tool calls.
+
 ### Differences from shadcn
 
-- Visibility tracking in MessageScroller (`useMessageScrollerVisibility`) and preserving the scroll position on prepend are not ported. Follow, anchor, release and the tail spacer are ported.
+- MessageScroller is fully ported, with follow, anchor, release, the tail spacer, prepend preservation and visibility tracking. Three additions: `MessageScrollerViewport` emits `reach-start` (shadcn has no start-edge event), `useMessageScrollerVisibility()` also returns `firstVisibleMessageId` and `lastVisibleMessageId`, and `preserveScrollOnPrepend = false` also sets `overflow-anchor: none`. The visibility state is a read-only reactive object, not a snapshot.
+- Questionnaire keeps shadcn's parts and validation rules. It is not a native form post: answers are a `v-model` object, and `submit` gives `{ answers, skipped }`, not `FormData`. Answer rows are `role="radio"` / `role="checkbox"` elements, not native inputs. Number keys are on by default. Skip on the last item submits.
 - InlineCitation shows all sources in one hover card, not in a carousel.
 - ModelSelector is a menu without search, as in the current shadcn pattern.
 - Tool keeps a status badge next to the line, because frappe apps use badges for status.

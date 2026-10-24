@@ -17,16 +17,18 @@ import {
 	PromptInputTextarea,
 	Suggestion,
 	Suggestions,
+	type AskUserOutput,
 } from "@bwhtech/frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
+import type { ScenarioAsk } from "../scenario/ask";
 import { ScenarioPlayer } from "../scenario/player";
 import { scenarioSuggestions, type ScenarioBranch } from "../scenario/script";
 
 const props = defineProps<{ v: Values; worst: boolean }>();
 const log = useLog();
 const player = new ScenarioPlayer(
-	() => ({ speed: Number(props.v.speed), branch: props.v.branch as ScenarioBranch, text: props.worst ? "worst" : "normal" }),
+	() => ({ speed: Number(props.v.speed), branch: props.v.branch as ScenarioBranch, ask: props.v.ask as ScenarioAsk, text: props.worst ? "worst" : "normal" }),
 	log,
 );
 const { messages, status, playing, finished, step, waiting } = player;
@@ -40,9 +42,15 @@ function answer(approved: boolean, approvalId: string) {
 	player.respond(approved);
 }
 
+// In a real chat: addToolOutput({ tool: "ask_user", toolCallId, output }), then sendAutomaticallyWhen sends.
+function submitAnswers(event: { toolCallId: string; output: AskUserOutput }) {
+	log("answer", event);
+	player.submitAnswers(event.output);
+}
+
 onMounted(() => props.v.autoplay && player.play());
 // The branch and the text are read when a run starts, so a change replays the turn.
-watch([() => props.v.branch, () => props.worst], () => messages.value.length && player.restart());
+watch([() => props.v.branch, () => props.v.ask, () => props.worst], () => messages.value.length && player.restart());
 onBeforeUnmount(() => player.dispose());
 </script>
 
@@ -74,6 +82,7 @@ onBeforeUnmount(() => player.dispose());
 										:streaming="busy && message === last"
 										@approve="answer(true, $event)"
 										@deny="answer(false, $event)"
+										@answer="submitAnswers"
 									/>
 								</MessageContent>
 							</Message>

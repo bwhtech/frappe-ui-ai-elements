@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onBeforeUnmount } from "vue";
 import { provideMessageScroller } from "./context";
-import { MessageScrollerController, type MessageScrollerDefaultScrollPosition } from "./controller";
+import { MessageScrollerController } from "./controller";
+import type { MessageScrollerDefaultScrollPosition } from "./types";
 
 const props = withDefaults(
 	defineProps<{

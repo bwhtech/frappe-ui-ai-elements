@@ -1,42 +1,27 @@
 import type { DynamicToolUIPart, ReasoningUIPart, TextUIPart, ToolUIPart, UIMessage } from "ai";
 import { hugeJson, worst } from "../worst";
+import { defaultAnswers, describeAnswers, presetAnswers, volunteerDoctype, volunteerQuestions, type ScenarioAsk } from "./ask";
 import type { ScenarioApi } from "./player";
 
 export type ScenarioBranch = "interactive" | "approve" | "deny" | "error";
 export type ScenarioText = "normal" | "worst";
 
-const doctype = {
-	doctype: "DocType",
-	name: "Volunteer",
-	module: "Custom",
-	custom: 1,
-	fields: [
-		{ fieldname: "full_name", label: "Full Name", fieldtype: "Data", reqd: 1 },
-		{ fieldname: "phone", label: "Phone", fieldtype: "Data", options: "Phone" },
-		{ fieldname: "area", label: "Area", fieldtype: "Link", options: "Territory" },
-		{ fieldname: "available_days", label: "Available Days", fieldtype: "Small Text" },
-	],
-};
-
 const copy = {
 	normal: {
 		ask: "We run a food bank. Help me track volunteers: their name, phone, area, and the days they are free.",
 		reasoning:
-			"They want a **volunteer tracker**. This is DocType design, so I should load the doctype-design instructions first.\n\nThen check whether a Volunteer or Member DocType already exists, so I don't make a duplicate. \"Area\" can link to Territory if the site has it.",
-		intro: "There is no Volunteer list yet, so I'll create one with four fields. Please approve the change.",
+			"They want a **volunteer tracker**. This is DocType design, so I should load the doctype-design instructions first.\n\nThen check whether a Volunteer or Member DocType already exists, so I don't make a duplicate. Before building, I should ask which fields, areas and sign-up flow they want.",
+		asking: "There is no Volunteer list yet. Before I build one, a few quick questions.",
 		reply: `Done. I created a **Volunteer** list for you:
 
-| Field | Type |
-| --- | --- |
-| Full Name | Text, required |
-| Phone | Phone |
-| Area | Link to Territory |
-| Available Days | Short text |
+{table}
+
+{followUp}
 
 Open it in the Desk at [/desk/volunteer](https://example.org/desk/volunteer). A volunteer record looks like this:
 
 \`\`\`json
-{ "doctype": "Volunteer", "full_name": "Asha Rao", "phone": "+91 98450 12345", "area": "Jayanagar", "available_days": "Sat, Sun" }
+{ "doctype": "Volunteer", "full_name": "Asha Rao", "phone": "+91 98450 12345", "area": "{area}", "available_days": "Sat, Sun" }
 \`\`\`
 
 Want me to add a sign-up form or some sample volunteers next?`,
@@ -46,7 +31,7 @@ Want me to add a sign-up form or some sample volunteers next?`,
 	worst: {
 		ask: `${worst.hindi} ${worst.emoji}`,
 		reasoning: `${worst.marathi}\n\n${worst.unbroken}\n\nThe person wrote in Hindi. I'll answer in Hindi and keep the DocType labels in English.`,
-		intro: `${worst.hindi} ${worst.unbroken}`,
+		asking: `${worst.hindi} ${worst.emoji}`,
 		reply: `${worst.marathi}\n\n**${worst.name}**\n\n\`${worst.unbroken}\`\n\n\`\`\`json\n${JSON.stringify(hugeJson(8), null, 2)}\n\`\`\``,
 		denied: `${worst.marathi} ${worst.emoji}`,
 		failed: `${worst.hindi} \`${worst.unbroken}\``,
@@ -58,8 +43,8 @@ export const scenarioSuggestions = ["Add a sign-up form", "Add 20 sample volunte
 let ids = 0;
 const id = (prefix: string) => `${prefix}-${++ids}`;
 
-/** The Seva conversation: ask → reasoning → load_skill → search → create (approval) → reply. */
-export async function script(api: ScenarioApi, options: { branch: ScenarioBranch; text: ScenarioText }) {
+/** The Seva conversation: ask → reasoning → load_skill → search → ask_user → create (approval) → reply. */
+export async function script(api: ScenarioApi, options: { branch: ScenarioBranch; ask: ScenarioAsk; text: ScenarioText }) {
 	const text = copy[options.text];
 	api.label("The person asks");
 	api.push({ id: id("user"), role: "user", parts: [{ type: "text", text: text.ask }] });
@@ -95,9 +80,12 @@ export async function script(api: ScenarioApi, options: { branch: ScenarioBranch
 	await api.wait(1100);
 	api.update(search, { state: "output-available", output: { content: [{ type: "text", text: '{"results":["Email Group Member"]}' }] } });
 
+	const answers = options.ask === "skip" ? defaultAnswers : await askQuestions(api, reply, options);
+	const plan = describeAnswers(answers, options.ask !== "skip");
+
 	api.label("The agent explains");
 	const intro = api.addPart<TextUIPart>(reply, { type: "text", text: "", state: "streaming" });
-	await api.stream(intro, text.intro);
+	await api.stream(intro, options.text === "worst" ? `${worst.hindi} ${worst.unbroken}` : plan.intro);
 
 	api.label("create_document input streams");
 	const create = api.addPart<DynamicToolUIPart>(reply, {
@@ -108,7 +96,7 @@ export async function script(api: ScenarioApi, options: { branch: ScenarioBranch
 		input: { doctype: "DocType" },
 	});
 	await api.wait(700);
-	api.update(create, { state: "input-available", input: options.text === "worst" ? hugeJson(30) : doctype });
+	api.update(create, { state: "input-available", input: options.text === "worst" ? hugeJson(30) : volunteerDoctype(answers) });
 	await api.wait(300);
 	const approvalId = id("approval");
 	api.update(create, { state: "approval-requested", approval: { id: approvalId } });
@@ -149,8 +137,27 @@ export async function script(api: ScenarioApi, options: { branch: ScenarioBranch
 		output: { content: [{ type: "text", text: '{"name":"Volunteer","modified":"2026-10-23 18:02:11"}' }] },
 	});
 	api.label("The final reply streams");
-	await api.stream(api.addPart<TextUIPart>(reply, { type: "text", text: "", state: "streaming" }), text.reply, 7);
+	const done = text.reply.replace("{table}", plan.table).replace("{followUp}", plan.followUp).replace("{area}", plan.area);
+	await api.stream(api.addPart<TextUIPart>(reply, { type: "text", text: "", state: "streaming" }), done, 7);
 	api.setStatus("ready");
+}
+
+/** The agent calls ask_user and waits; the answers arrive as its output, then the chat sends again. */
+async function askQuestions(api: ScenarioApi, reply: UIMessage, options: { ask: ScenarioAsk; text: ScenarioText }) {
+	api.label("The agent asks first");
+	await api.stream(api.addPart<TextUIPart>(reply, { type: "text", text: "", state: "streaming" }), copy[options.text].asking);
+	const input = volunteerQuestions(options.text === "worst");
+	const ask = api.addPart(reply, { type: "tool-ask_user", toolCallId: id("call"), state: "input-streaming", input: { title: input.title } } as ToolUIPart);
+	await api.wait(600);
+	api.update(ask, { state: "input-available", input });
+
+	api.label(options.ask === "interactive" ? "Waiting for your answers" : `Waiting (auto: ${options.ask})`);
+	const output = await api.awaitAnswers(options.ask === "interactive" ? null : presetAnswers[options.ask as "form" | "staff"]);
+	api.update(ask, { state: "output-available", output });
+	api.setStatus("submitted");
+	await api.wait(700);
+	api.setStatus("streaming");
+	return output;
 }
 
 export type { UIMessage };

@@ -7,3 +7,4 @@ export { default as ConfirmationActions } from "./ConfirmationActions.vue";
 export { default as ConfirmationAction } from "./ConfirmationAction.vue";
 export { default as ToolConfirmation } from "./ToolConfirmation.vue";
 export type { ConfirmationApproval } from "./context";
+export { default as ConfirmationBatch } from "./ConfirmationBatch.vue";

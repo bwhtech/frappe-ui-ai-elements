@@ -1,5 +1,7 @@
+import type { AskUserOutput } from "@bwhtech/frappe-ui-ai-elements";
 import type { ChatStatus, UIMessage } from "ai";
 import { ref } from "vue";
+import type { ScenarioAsk } from "./ask";
 import { script, type ScenarioBranch, type ScenarioText } from "./script";
 
 type Part = UIMessage["parts"][number];
@@ -9,8 +11,9 @@ class Cancelled extends Error {}
 /**
  * A fake agent. Streams a scripted Seva turn into `messages` the way useChat
  * would: parts appear, text grows chunk by chunk, tool parts move through
- * their states, and an approval waits for Approve / Deny (or answers itself
- * when the branch says so). Supports pause, speed and restart.
+ * their states, an ask_user call waits for the person's answers and an
+ * approval waits for Approve / Deny (each answers itself when the branch says
+ * so). Supports pause, speed and restart.
  */
 export class ScenarioPlayer {
 	readonly messages = ref<UIMessage[]>([]);
@@ -18,15 +21,16 @@ export class ScenarioPlayer {
 	readonly playing = ref(false);
 	readonly finished = ref(false);
 	readonly step = ref("Ready");
-	/** True while the script waits for the person to approve or deny. */
+	/** True while the script waits for the person: answers, or approve / deny. */
 	readonly waiting = ref(false);
 
 	private run = 0;
 	private resume: (() => void) | null = null;
 	private answer: ((approved: boolean) => void) | null = null;
+	private answerQuestions: ((output: AskUserOutput) => void) | null = null;
 
 	constructor(
-		private readonly options: () => { speed: number; branch: ScenarioBranch; text: ScenarioText },
+		private readonly options: () => { speed: number; branch: ScenarioBranch; ask: ScenarioAsk; text: ScenarioText },
 		private readonly onEvent: (name: string, payload?: unknown) => void = () => {},
 	) {}
 
@@ -64,6 +68,11 @@ export class ScenarioPlayer {
 		this.answer?.(approved);
 	}
 
+	/** Called when the person submits the questionnaire: what addToolOutput does in a real chat. */
+	submitAnswers(output: AskUserOutput) {
+		this.answerQuestions?.(output);
+	}
+
 	private async start() {
 		const run = this.run;
 		try {
@@ -94,6 +103,22 @@ export class ScenarioPlayer {
 			}
 			check();
 		};
+		// The stream has ended and the turn waits on the person, unless the branch answers for them.
+		const waitForPerson = async <T>(autoAnswer: T | null, listen: (resolve: (value: T) => void) => void) => {
+			check();
+			this.status.value = "ready";
+			if (autoAnswer !== null) {
+				await wait(1600);
+				return autoAnswer;
+			}
+			this.playing.value = false;
+			this.waiting.value = true;
+			const value = await new Promise<T>(listen);
+			this.waiting.value = false;
+			check();
+			this.playing.value = true;
+			return value;
+		};
 		return {
 			wait,
 			label: (text: string) => {
@@ -119,20 +144,14 @@ export class ScenarioPlayer {
 			},
 			update: (part: object, patch: Record<string, unknown>) => Object.assign(part, patch),
 			awaitApproval: async (autoAnswer: boolean | null) => {
-				check();
-				this.status.value = "ready";
-				if (autoAnswer !== null) {
-					await wait(1600);
-					return autoAnswer;
-				}
-				this.playing.value = false;
-				this.waiting.value = true;
-				const approved = await new Promise<boolean>((resolve) => (this.answer = resolve));
+				const approved = await waitForPerson(autoAnswer, (resolve) => (this.answer = resolve));
 				this.answer = null;
-				this.waiting.value = false;
-				check();
-				this.playing.value = true;
 				return approved;
+			},
+			awaitAnswers: async (autoAnswer: AskUserOutput | null) => {
+				const output = await waitForPerson(autoAnswer, (resolve) => (this.answerQuestions = resolve));
+				this.answerQuestions = null;
+				return output;
 			},
 		};
 	}

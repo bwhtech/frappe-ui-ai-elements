@@ -1,27 +1,8 @@
 import { reactive, ref } from "vue";
 import { blockPadding, contentBottom, elementTop, flexGap, scrollItems } from "./geometry";
-
-export type MessageScrollerDefaultScrollPosition = "start" | "end" | "last-anchor";
-export type MessageScrollerScrollAlign = "start" | "center" | "end" | "nearest";
-
-export interface MessageScrollerScrollOptions {
-	align?: MessageScrollerScrollAlign;
-	behavior?: ScrollBehavior;
-	scrollMargin?: number;
-}
-
-export interface MessageScrollerOptions {
-	/** Follow new content at the bottom while the viewport is at the end. */
-	autoScroll: boolean;
-	/** Where a saved transcript opens on its first non-empty render. */
-	defaultScrollPosition: MessageScrollerDefaultScrollPosition;
-	/** Distance from an edge that still counts as at the edge. */
-	scrollEdgeThreshold: number;
-	/** Pixels of the previous item kept visible above a newly anchored row. */
-	scrollPreviousItemPeek: number;
-	/** Margin on the aligned edge for commands. */
-	scrollMargin: number;
-}
+import { PrependAnchor } from "./prepend";
+import { MessageScrollerVisibility } from "./visibility";
+import type { MessageScrollerOptions, MessageScrollerScrollOptions } from "./types";
 
 type Mode =
 	| "following-bottom" // pinned to the latest message
@@ -35,13 +16,24 @@ const USER_SCROLL_KEYS = new Set(["ArrowDown", "ArrowUp", "End", "Home", "PageDo
 /**
  * Owns scroll position for a chat transcript: follows the live end while the
  * reader is there, anchors each new `scrollAnchor` turn near the top while its
- * reply streams below it, and lets go as soon as the reader scrolls.
- * A Vue port of shadcn's headless MessageScroller (without visibility tracking).
+ * reply streams below it, lets go as soon as the reader scrolls, and keeps the
+ * reader's row in place when older rows are inserted above it.
+ * A Vue port of shadcn's headless MessageScroller.
  */
 export class MessageScrollerController {
 	readonly scrollable = reactive({ start: false, end: false });
 	readonly autoscrolling = ref(false);
 	readonly pendingScroll = ref(true);
+	readonly visibility = new MessageScrollerVisibility({
+		viewport: () => this.viewport,
+		content: () => this.content,
+		spacer: () => this.spacer,
+		readingLine: () => this.options().scrollMargin + this.options().scrollPreviousItemPeek,
+	});
+	/** Keep the first visible row still when rows are inserted above it. Set by the viewport. */
+	preserveScrollOnPrepend = true;
+	/** Called when the viewport reaches the start edge, e.g. to load older rows. Set by the viewport. */
+	onReachStart: (() => void) | null = null;
 
 	private viewport: HTMLElement | null = null;
 	private content: HTMLElement | null = null;
@@ -50,6 +42,7 @@ export class MessageScrollerController {
 	private itemCount = 0;
 	private anchor: HTMLElement | null = null;
 	private handledAnchors = new WeakSet<HTMLElement>();
+	private prependAnchor = new PrependAnchor();
 	private lastScrollTop = 0;
 	private spacerHeight = 0;
 	private frame: number | null = null;
@@ -64,6 +57,7 @@ export class MessageScrollerController {
 	setViewport(element: HTMLElement | null) {
 		this.viewport = element;
 		this.connect();
+		this.visibility.reconnect();
 	}
 
 	setContent(element: HTMLElement | null) {
@@ -79,6 +73,7 @@ export class MessageScrollerController {
 		this.resizeObserver?.disconnect();
 		this.mutationObserver?.disconnect();
 		this.resizeObserver = this.mutationObserver = null;
+		this.visibility.disconnect();
 		if (this.frame !== null) cancelAnimationFrame(this.frame);
 		if (this.autoscrollTimer) clearTimeout(this.autoscrollTimer);
 	}
@@ -122,6 +117,8 @@ export class MessageScrollerController {
 		this.lastScrollTop = viewport.scrollTop;
 		const atEnd = !this.hasOverflowBelow();
 
+		this.capturePrependAnchor();
+		this.visibility.schedule();
 		if (this.autoscrolling.value) return this.commitState();
 		if (this.mode === "following-bottom" && scrolledUp) this.mode = "free-scrolling";
 		else if (this.mode === "free-scrolling" && atEnd && this.options().autoScroll) this.mode = "following-bottom";
@@ -155,6 +152,13 @@ export class MessageScrollerController {
 	}
 
 	private handleContentChange() {
+		this.reconcileContent();
+		this.capturePrependAnchor();
+		this.visibility.schedule();
+	}
+
+	/** Branch order matters: first content, then rows inserted above, then appends. */
+	private reconcileContent() {
 		const items = this.items();
 		const previousCount = this.itemCount;
 		this.itemCount = items.length;
@@ -163,6 +167,7 @@ export class MessageScrollerController {
 			if (items.length > 0) this.applyDefaultScrollPosition(items);
 			return this.commitState();
 		}
+		if (this.handlePrepend(items)) return;
 		if (items.length > previousCount) {
 			const anchors = items.slice(previousCount).filter(isScrollAnchor);
 			const following = this.mode === "following-bottom" && this.options().autoScroll;
@@ -175,6 +180,12 @@ export class MessageScrollerController {
 	}
 
 	private handleResize() {
+		this.visibility.schedule();
+		this.reconcileResize();
+		this.capturePrependAnchor();
+	}
+
+	private reconcileResize() {
 		if (this.mode === "following-bottom" && this.options().autoScroll) {
 			this.scrollToEnd({ behavior: "auto" });
 			return;
@@ -188,6 +199,10 @@ export class MessageScrollerController {
 			}
 			return;
 		}
+		// Rows above the reader changed height (markdown settling, a loader swapping in).
+		// Hold the reader's row, as native scroll anchoring does where the browser has it.
+		if (this.preserveScrollOnPrepend && this.viewport) this.prependAnchor.restore(this.viewport);
+		this.lastScrollTop = this.viewport?.scrollTop ?? 0;
 		this.trimSpacer();
 		this.commitState();
 	}
@@ -235,6 +250,28 @@ export class MessageScrollerController {
 		this.setSpacerHeight(Math.max(0, Math.min(this.spacerHeight, needed)));
 	}
 
+	private capturePrependAnchor() {
+		this.prependAnchor.capture(this.items(), this.viewport);
+	}
+
+	/**
+	 * Older rows were inserted above the reader. They are history, not a new
+	 * turn, so their anchors are never scrolled to. Keeps the reader's row
+	 * still unless `preserveScrollOnPrepend` is off.
+	 */
+	private handlePrepend(items: HTMLElement[]) {
+		if (!this.prependAnchor.moved(items)) return false;
+		items.filter(isScrollAnchor).forEach((item) => this.handledAnchors.add(item));
+		if (this.preserveScrollOnPrepend && this.viewport) {
+			this.prependAnchor.restore(this.viewport);
+			this.lastScrollTop = this.viewport.scrollTop;
+		}
+		// Rows above an anchored turn moved it down; re-pin it at the reading line.
+		if (this.mode === "anchored-to-message") this.holdAnchor();
+		else this.commitState();
+		return true;
+	}
+
 	private releaseToReader() {
 		if (this.mode !== "free-scrolling") this.mode = "free-scrolling";
 		this.anchor = null;
@@ -245,7 +282,9 @@ export class MessageScrollerController {
 		const viewport = this.viewport;
 		if (!viewport) return;
 		const threshold = this.options().scrollEdgeThreshold;
+		const wasAwayFromStart = this.scrollable.start;
 		this.scrollable.start = viewport.scrollTop > threshold;
+		if (wasAwayFromStart && !this.scrollable.start && this.itemCount > 0) this.onReachStart?.();
 		// While following, a streamed chunk opens a gap we are about to close; do not flash the button.
 		this.scrollable.end = this.mode !== "following-bottom" && this.hasOverflowBelow();
 	}

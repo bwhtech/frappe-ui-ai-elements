@@ -16,6 +16,7 @@ export * from "./response";
 export * from "./prompt-input";
 export * from "./tool";
 export * from "./confirmation";
+export * from "./questionnaire";
 export * from "./reasoning";
 export * from "./suggestion";
 export * from "./sources";

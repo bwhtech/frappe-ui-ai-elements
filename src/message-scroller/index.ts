@@ -4,9 +4,10 @@ export { default as MessageScrollerViewport } from "./MessageScrollerViewport.vu
 export { default as MessageScrollerContent } from "./MessageScrollerContent.vue";
 export { default as MessageScrollerItem } from "./MessageScrollerItem.vue";
 export { default as MessageScrollerButton } from "./MessageScrollerButton.vue";
-export { useMessageScroller, useMessageScrollerScrollable } from "./context";
+export { useMessageScroller, useMessageScrollerScrollable, useMessageScrollerVisibility } from "./context";
 export type {
 	MessageScrollerDefaultScrollPosition,
 	MessageScrollerScrollAlign,
 	MessageScrollerScrollOptions,
-} from "./controller";
+} from "./types";
+export type { MessageScrollerVisibilityState } from "./visibility";

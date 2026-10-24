@@ -5,6 +5,7 @@ import ChatSection from "./sections/ChatSection.vue";
 import MessageSection from "./sections/MessageSection.vue";
 import PromptInputSection from "./sections/PromptInputSection.vue";
 import ToolSection from "./sections/ToolSection.vue";
+import QuestionnaireSection from "./sections/QuestionnaireSection.vue";
 import ReasoningSection from "./sections/ReasoningSection.vue";
 import FeedbackSection from "./sections/FeedbackSection.vue";
 import CodeSection from "./sections/CodeSection.vue";
@@ -19,6 +20,7 @@ const nav = [
 	["message", "Message & Response"],
 	["prompt-input", "Prompt Input"],
 	["tool", "Tool & Confirmation"],
+	["questionnaire", "Questionnaire"],
 	["reasoning", "Reasoning"],
 	["feedback", "Shimmer, Loader, Suggestion"],
 	["code-block", "Code Block"],
@@ -60,6 +62,7 @@ const nav = [
 					<MessageSection />
 					<PromptInputSection />
 					<ToolSection />
+					<QuestionnaireSection />
 					<ReasoningSection />
 					<FeedbackSection />
 					<CodeSection />

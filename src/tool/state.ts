@@ -105,3 +105,47 @@ function prettyText(text: string) {
 function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null;
 }
+
+/**
+ * A short line naming what a tool call acts on, for approval cards: the `doctype` and a
+ * name-like value, looked for at the top level and in `data` / `doc`. Falls back to the
+ * first two short text values. Empty when nothing fits.
+ */
+export function summarizeToolInput(input: unknown): string {
+	if (!input || typeof input !== "object") return "";
+	const record = input as Record<string, unknown>;
+	const batch = docsOf(record) ?? docsOf(record.args) ?? docsOf(record.kwargs);
+	if (batch?.length) {
+		const types = [...new Set(batch.map((doc) => (doc as Record<string, unknown>)?.doctype).filter((type) => typeof type === "string"))];
+		const what = types.length === 1 ? `${types[0]} records` : "records";
+		return `${batch.length} ${batch.length === 1 ? what.replace(/s$/, "") : what}`;
+	}
+	const nested = [record.data, record.doc].find((value) => value && typeof value === "object" && !Array.isArray(value)) as
+		| Record<string, unknown>
+		| undefined;
+	const scopes = [record, nested ?? {}];
+	const pick = (keys: string[]) =>
+		scopes.flatMap((scope) => keys.map((key) => scope[key])).find((value): value is string => typeof value === "string" && value.trim() !== "");
+
+	const doctype = pick(["doctype", "doc_type"]);
+	const name = pick(["title", "name", "full_name", "label"]) ?? firstNameLike(nested ?? record);
+	const parts = [doctype, name].filter(Boolean) as string[];
+	if (parts.length) return parts.join(" · ");
+
+	return Object.values(record)
+		.filter((value): value is string => typeof value === "string" && value.length <= 60)
+		.slice(0, 2)
+		.join(" · ");
+}
+
+/** The `docs` list of a bulk call such as frappe.client.insert_many, if this is one. */
+function docsOf(value: unknown): unknown[] | undefined {
+	if (!value || typeof value !== "object") return undefined;
+	const docs = (value as Record<string, unknown>).docs;
+	return Array.isArray(docs) ? docs : undefined;
+}
+
+function firstNameLike(scope: Record<string, unknown>) {
+	const key = Object.keys(scope).find((key) => /(^|_)(name|title)$/.test(key) && typeof scope[key] === "string");
+	return key ? (scope[key] as string) : undefined;
+}

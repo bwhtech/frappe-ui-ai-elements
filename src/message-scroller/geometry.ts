@@ -29,3 +29,23 @@ export function flexGap(element: HTMLElement | null) {
 	if (!element) return 0;
 	return parseFloat(getComputedStyle(element).rowGap) || 0;
 }
+
+/** Index of the first row crossing the viewport top. Rows are stacked, so binary search works. */
+export function firstVisibleIndex(items: HTMLElement[], viewport: HTMLElement) {
+	const top = viewport.getBoundingClientRect().top;
+	let low = 0;
+	let high = items.length - 1;
+	let found = -1;
+	while (low <= high) {
+		const middle = (low + high) >> 1;
+		if (items[middle].getBoundingClientRect().bottom > top) {
+			found = middle;
+			high = middle - 1;
+		} else low = middle + 1;
+	}
+	return found;
+}
+
+export function viewportTop(element: HTMLElement, viewport: HTMLElement) {
+	return element.getBoundingClientRect().top - viewport.getBoundingClientRect().top;
+}

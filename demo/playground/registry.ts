@@ -6,16 +6,19 @@ import ConversationDemo from "./demos/ConversationDemo.vue";
 import DevDemo from "./demos/DevDemo.vue";
 import LoaderDemo from "./demos/LoaderDemo.vue";
 import MessageDemo from "./demos/MessageDemo.vue";
+import MessageScrollerDemo from "./demos/MessageScrollerDemo.vue";
 import MetaDemo from "./demos/MetaDemo.vue";
 import PromptInputDemo from "./demos/PromptInputDemo.vue";
+import QuestionnaireDemo from "./demos/QuestionnaireDemo.vue";
 import ReasoningDemo from "./demos/ReasoningDemo.vue";
 import ResponseDemo from "./demos/ResponseDemo.vue";
 import ScenarioDemo from "./demos/ScenarioDemo.vue";
 import StepsDemo from "./demos/StepsDemo.vue";
 import SuggestionDemo from "./demos/SuggestionDemo.vue";
 import ToolDemo from "./demos/ToolDemo.vue";
-import type { Control, Entry } from "./types";
+import type { Control, Entry, Option } from "./types";
 
+const askKinds = ["single", "multiple", "text", "number", "date", "boolean"];
 const toolStates = ["input-streaming", "input-available", "approval-requested", "approval-responded", "output-available", "output-error", "output-denied"];
 
 // Shared demos pick their element with a fixed `kind`.
@@ -30,15 +33,23 @@ const bool = (key: string, label: string, value = false): Control => ({ key, lab
 const range = (key: string, label: string, min: number, max: number, value: number, step = 1, unit?: string): Control => ({
 	key, label, type: "range", min, max, step, default: value, unit,
 });
-const select = (key: string, label: string, options: string[], value = options[0]): Control => ({ key, label, type: "select", options, default: value });
+const select = (key: string, label: string, options: Option[], value = optionValue(options[0])): Control => ({ key, label, type: "select", options, default: value });
+const optionValue = (option: Option) => (typeof option === "string" ? option : option.value);
 const segment = (key: string, label: string, options: string[], value = options[0]): Control => ({ key, label, type: "segment", options, default: value });
 const text = (key: string, label: string, value: string): Control => ({ key, label, type: "text", default: value });
 
 export const entries: Entry[] = [
 	{
 		id: "scenario", group: "Scenario", label: "Seva conversation",
-		description: "A scripted agent streams a whole Seva turn through Conversation and MessageParts: reasoning, load_skill, search, an approval and the reply. Approve or Deny in the preview to steer it.",
-		controls: [select("branch", "Branch", ["interactive", "approve", "deny", "error"]), range("speed", "Speed", 0.25, 4, 1, 0.25, "×"), bool("autoplay", "Autoplay on load", true)],
+		description: "A scripted agent streams a whole Seva turn through Conversation and MessageParts: reasoning, load_skill, search, questions (ask_user), an approval and the reply. Your answers change what it builds. Answer, then Approve or Deny in the preview to steer it.",
+		controls: [
+			select("ask", "Questions", [
+				{ label: "Answer them yourself", value: "interactive" },
+				{ label: "Auto: public form, 3 fields", value: "form" },
+				{ label: "Auto: staff only, 1 field", value: "staff" },
+				{ label: "Skip: the agent does not ask", value: "skip" },
+			], "interactive"),
+			select("branch", "Approval", ["interactive", "approve", "deny", "error"]), range("speed", "Speed", 0.25, 4, 1, 0.25, "×"), bool("autoplay", "Autoplay on load", true)],
 		demo: ScenarioDemo,
 	},
 	{
@@ -46,6 +57,12 @@ export const entries: Entry[] = [
 		description: "The thread container. Follows the live end, anchors the person's turn, shows a scroll button.",
 		controls: [range("count", "Messages", 0, 16, 6), segment("position", "Opens at", ["end", "start", "last-anchor"]), bool("autoScroll", "Auto-scroll", true), bool("empty", "Empty state"), text("emptyTitle", "Empty title", "What should we build?")],
 		demo: ConversationDemo,
+	},
+	{
+		id: "message-scroller", group: "Chat", label: "Message Scroller",
+		description: "Load older messages above the reader: the row you are reading stays put, also while a reply streams. The readout shows useMessageScrollerVisibility().",
+		controls: [range("initial", "Rows at first", 4, 40, 8), range("batch", "Older rows per load", 1, 20, 6), range("delay", "Load delay", 0, 2000, 600, 100, "ms"), bool("preserve", "Keep place on prepend", true), bool("autoLoad", "Load on reaching the top", true), bool("autoScroll", "Auto-scroll", true), bool("visibility", "Visibility readout", true)],
+		demo: MessageScrollerDemo,
 	},
 	{
 		id: "message", group: "Chat", label: "Message",
@@ -82,6 +99,23 @@ export const entries: Entry[] = [
 		description: "Approve or deny a tool before it runs. Answering shows the outcome.",
 		controls: [segment("variant", "Variant", ["compound", "tool"]), text("title", "Title", "Create the Volunteer DocType with 4 fields?"), text("details", "Details", "Nothing runs until you approve.")],
 		demo: ConfirmationDemo,
+	},
+	{
+		id: "questionnaire", group: "Agent steps", label: "Questionnaire",
+		description: "The agent asks (an ask_user call); the person steps through with Back, Next, Skip and Submit. Keys: 1–9 pick, arrows move, Enter continues. More than 6 options switch to a picker.",
+		controls: [
+			range("count", "Questions", 1, 4, 3),
+			select("kind1", "Question 1", askKinds, "multiple"),
+			select("kind2", "Question 2", askKinds, "single"),
+			select("kind3", "Question 3", askKinds, "date"),
+			select("kind4", "Question 4", askKinds, "boolean"),
+			range("options", "Options per choice question", 2, 20, 3),
+			bool("allowOther", "Allow Other…", true),
+			bool("required", "Required", true),
+			bool("streaming", "Reply streaming (disabled)"),
+			bool("echo", "Show as output-available after submit", true),
+		],
+		demo: QuestionnaireDemo,
 	},
 	{
 		id: "reasoning", group: "Agent steps", label: "Reasoning",

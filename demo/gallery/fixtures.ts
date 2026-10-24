@@ -122,3 +122,37 @@ export const transcript: UIMessage[] = [
 		],
 	},
 ];
+
+/** An `ask_user` call before building the volunteer tracker. */
+export const volunteerQuestions = {
+	title: "A few questions before I build the tracker",
+	questions: [
+		{
+			id: "fields",
+			header: "Fields",
+			question: "What should each volunteer record hold?",
+			kind: "multiple",
+			options: [
+				{ value: "phone", label: "Phone number" },
+				{ value: "area", label: "Area", description: "Linked to your Territory list" },
+				{ value: "days", label: "Days they are free" },
+				{ value: "skills", label: "Skills", description: "Driving, cooking, packing…" },
+			],
+			allowOther: true,
+		},
+		{
+			id: "signup",
+			header: "Sign-up",
+			question: "How do volunteers sign up?",
+			kind: "single",
+			options: [
+				{ value: "form", label: "A public web form", description: "Anyone with the link can sign up" },
+				{ value: "staff", label: "Staff add them", description: "Only your team enters volunteers" },
+				{ value: "both", label: "Both" },
+			],
+		},
+		{ id: "start", header: "Start", question: "When does the first drive start?", kind: "date", required: false },
+	],
+} as const;
+
+export const volunteerAnswers = { answers: { fields: ["phone", "area", "T-shirt size"], signup: "both", start: null } };

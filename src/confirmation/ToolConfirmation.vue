@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { CodeBlock, CodeBlockContent } from "../code-block";
-import { formatToolInput, humanizeToolName } from "../tool/state";
+import { formatToolInput, humanizeToolName, summarizeToolInput } from "../tool/state";
 import Confirmation from "./Confirmation.vue";
 import ConfirmationAction from "./ConfirmationAction.vue";
 import ConfirmationActions from "./ConfirmationActions.vue";
@@ -13,6 +13,7 @@ defineEmits<{ approve: []; deny: [] }>();
 
 const showDetails = ref(false);
 const details = formatToolInput(props.input);
+const summary = summarizeToolInput(props.input);
 </script>
 
 <template>
@@ -20,6 +21,7 @@ const details = formatToolInput(props.input);
 		<Confirmation :approval="{ id: 'pending' }" state="approval-requested">
 			<ConfirmationTitle :title="`Allow the agent to ${humanizeToolName(toolName)}?`">
 				<template #description>
+					<span v-if="summary" data-slot="confirmation-summary" class="block truncate text-ink-gray-7">{{ summary }}</span>
 					{{ reason || "Nothing runs until you approve." }}
 					<button
 						v-if="details"
