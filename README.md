@@ -227,6 +227,8 @@ The input (`ProposePlanInput`) is `{ title, items: { id, kind, title, detail? }[
 
 `currentPlan(messages)` gives the latest plan with each item's status and its decision (`waiting`, `approved` or `changes`). `isBuilding(plan)` is true for an approved plan with items left. A server can use it to let the plan's writes run without asking again. `openPlanCalls(messages)` lists plans that wait on the person. Close them like open `ask_user` calls when the person writes in the chat instead.
 
+With an approved plan provided, `MessageParts` puts the steps for each plan item under one line (`PlanItemSteps`) with the item's title, status and step count, and does not show the `update_plan` calls. The item in progress is open; finished items are closed, unless the person opened or closed them.
+
 ### Differences from shadcn
 
 - MessageScroller is fully ported, with follow, anchor, release, the tail spacer, prepend preservation and visibility tracking. Three additions: `MessageScrollerViewport` emits `reach-start` (shadcn has no start-edge event), `useMessageScrollerVisibility()` also returns `firstVisibleMessageId` and `lastVisibleMessageId`, and `preserveScrollOnPrepend = false` also sets `overflow-anchor: none`. The visibility state is a read-only reactive object, not a snapshot.

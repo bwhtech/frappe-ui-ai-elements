@@ -21,3 +21,4 @@ export {
 	type ProposePlanOutput,
 	type UpdatePlanInput,
 } from "./build-plan";
+export { default as PlanItemSteps } from "./PlanItemSteps.vue";

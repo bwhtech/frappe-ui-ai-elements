@@ -79,15 +79,18 @@ function sendChanges() {
 		class="min-w-0 rounded-6 border border-outline-gray-2 bg-surface-base p-3 shadow-sm sm:p-4"
 		:aria-label="`Plan: ${input.title}`"
 	>
-		<div class="flex min-w-0 items-center gap-2">
-			<span class="lucide-list-checks size-4 shrink-0 text-ink-gray-5" aria-hidden="true" />
-			<p class="min-w-0 flex-1 truncate text-sm-medium text-ink-gray-8">{{ input.title }}</p>
-			<span
-				class="shrink-0 text-xs tabular-nums"
-				:class="waiting ? 'text-ink-amber-6' : finished ? 'text-ink-green-6' : 'text-ink-gray-5'"
-			>
-				{{ status }}
-			</span>
+		<!-- The status sits beside the title, or under it when the card is narrow. -->
+		<div class="flex min-w-0 items-start gap-2">
+			<span class="lucide-list-checks mt-px size-4 shrink-0 text-ink-gray-5" aria-hidden="true" />
+			<div class="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+				<p class="min-w-0 grow basis-60 text-sm-medium text-ink-gray-8 [overflow-wrap:anywhere]">{{ input.title }}</p>
+				<span
+					class="shrink-0 text-xs tabular-nums"
+					:class="waiting ? 'text-ink-amber-6' : finished ? 'text-ink-green-6' : 'text-ink-gray-5'"
+				>
+					{{ status }}
+				</span>
+			</div>
 		</div>
 
 		<div class="mt-3 flex flex-col gap-3">
