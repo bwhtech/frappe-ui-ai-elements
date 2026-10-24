@@ -119,7 +119,7 @@ export const entries: Entry[] = [
 	},
 	{
 		id: "reasoning", group: "Agent steps", label: "Reasoning",
-		description: "Opens while it streams, closes when done unless you toggled it.",
+		description: "Closed until you open it, also while it streams.",
 		controls: [bool("streaming", "Streaming"), range("duration", "Duration (0 = unknown)", 0, 120, 0, 1, "s"), segment("length", "Text", ["short", "medium", "long", "empty"]), bool("defaultOpen", "Open by default")],
 		demo: ReasoningDemo,
 	},

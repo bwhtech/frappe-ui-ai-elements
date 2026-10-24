@@ -19,7 +19,7 @@ async function play() {
 </script>
 
 <template>
-	<DemoBlock id="reasoning" title="Reasoning" part="reasoning" description="Opens while it streams and closes when done, unless you toggle it. Shows how long it thought.">
+	<DemoBlock id="reasoning" title="Reasoning" part="reasoning" description="Closed until you open it, also while it streams. Shows how long it thought.">
 		<div class="flex flex-col gap-4">
 			<Button size="sm" class="w-fit" icon-left="lucide-play" label="Stream it" :disabled="streaming" @click="play" />
 			<Reasoning :is-streaming="streaming">

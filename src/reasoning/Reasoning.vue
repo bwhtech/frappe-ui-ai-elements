@@ -4,8 +4,8 @@ import { Trace, TraceCollapsible } from "../trace";
 import { provideReasoning } from "./context";
 
 /**
- * The model's thinking. Opens while it streams and closes when it finishes,
- * unless the person opened or closed it — then their choice wins.
+ * The model's thinking. Closed, also while it streams, until the person opens it
+ * (or `defaultOpen`); the title shows "Thinking" and then how long it took.
  * `duration` (seconds) can come from the server; otherwise it is timed here.
  */
 const props = defineProps<{ isStreaming?: boolean; defaultOpen?: boolean; duration?: number }>();
@@ -23,7 +23,7 @@ watch(
 	},
 );
 
-const effectiveOpen = computed(() => open.value ?? !!props.isStreaming);
+const effectiveOpen = computed(() => open.value ?? false);
 provideReasoning({
 	isStreaming: toRef(() => !!props.isStreaming),
 	duration: toRef(() => props.duration ?? measured.value),
