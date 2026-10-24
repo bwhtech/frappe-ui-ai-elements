@@ -6,11 +6,12 @@ import { providePromptInput } from "./context";
 /**
  * The message field: a form around a textarea and its toolbar. `v-model` is the
  * text. Submitting emits `submit` with the text and the attached files, then
- * clears both. While the chat is busy, the submit button emits `stop`. Files can
+ * clears both. While the chat is busy, the submit button emits `stop`; with `queue`,
+ * Enter still submits, so the page can queue the message. Files can
  * also be dropped on it or pasted into it; `accept` filters all three ways.
  */
 const props = withDefaults(
-	defineProps<{ status?: ChatStatus; disabled?: boolean; accept?: string; multiple?: boolean }>(),
+	defineProps<{ status?: ChatStatus; disabled?: boolean; accept?: string; multiple?: boolean; queue?: boolean }>(),
 	{ status: "ready", multiple: true },
 );
 const emit = defineEmits<{ submit: [message: { text: string; files: File[] }]; stop: [] }>();
@@ -21,7 +22,7 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const dragging = ref(false);
 
 const busy = computed(() => props.status === "submitted" || props.status === "streaming");
-const canSubmit = computed(() => !props.disabled && !busy.value && (text.value.trim() !== "" || files.value.length > 0));
+const canSubmit = computed(() => !props.disabled && (props.queue || !busy.value) && (text.value.trim() !== "" || files.value.length > 0));
 
 function submit() {
 	if (!canSubmit.value) return;

@@ -7,4 +7,5 @@ export { default as PromptInputTools } from "./PromptInputTools.vue";
 export { default as PromptInputButton } from "./PromptInputButton.vue";
 export { default as PromptInputAttachButton } from "./PromptInputAttachButton.vue";
 export { default as PromptInputSubmit } from "./PromptInputSubmit.vue";
+export { default as PromptInputQueue, type QueuedMessage } from "./PromptInputQueue.vue";
 export { usePromptInput } from "./context";

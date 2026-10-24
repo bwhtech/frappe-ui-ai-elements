@@ -8,6 +8,7 @@ import {
 	PromptInputButton,
 	PromptInputFooter,
 	PromptInputHeader,
+	PromptInputQueue,
 	PromptInputSubmit,
 	PromptInputTextarea,
 	PromptInputTools,
@@ -15,6 +16,21 @@ import {
 	Attachment,
 } from "@bwhtech/frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
+
+const queued = ref([
+	{ id: "q1", text: "Also add a phone number field", files: 0 },
+	{ id: "q2", text: "Here is last month's attendance sheet", files: 1 },
+]);
+const queueText = ref("");
+const steered = ref("");
+
+function queueMessage(text: string) {
+	queued.value.push({ id: crypto.randomUUID(), text, files: 0 });
+}
+
+function reorder(ids: string[]) {
+	queued.value = ids.map((id) => queued.value.find((item) => item.id === id)!);
+}
 
 const statuses: ChatStatus[] = ["ready", "submitted", "streaming", "error"];
 const texts = ref<Record<string, string>>({ ready: "A sign-up form for our weekend food drive", submitted: "", streaming: "", error: "" });
@@ -74,6 +90,26 @@ const efforts = [
 						<PromptInputSubmit />
 					</PromptInputFooter>
 				</PromptInput>
+			</div>
+			<div class="space-y-1.5">
+				<p class="text-xs-medium text-ink-gray-5">queue while streaming: Enter queues, Steer sends now</p>
+				<div>
+					<PromptInputQueue
+						:items="queued"
+						@steer="(id) => { steered = queued.find((item) => item.id === id)?.text ?? ''; queued = queued.filter((item) => item.id !== id) }"
+						@remove="(id) => (queued = queued.filter((item) => item.id !== id))"
+						@update="(id, text) => (queued.find((item) => item.id === id)!.text = text)"
+						@reorder="reorder"
+					/>
+					<PromptInput v-model="queueText" status="streaming" queue @submit="queueMessage($event.text)">
+						<PromptInputTextarea placeholder="Write while the agent works…" />
+						<PromptInputFooter>
+							<PromptInputTools><PromptInputAttachButton /></PromptInputTools>
+							<PromptInputSubmit />
+						</PromptInputFooter>
+					</PromptInput>
+				</div>
+				<p class="text-sm text-ink-gray-5">Steered: <span class="text-ink-gray-8">{{ steered || "—" }}</span></p>
 			</div>
 			<p class="text-sm text-ink-gray-5">Last submit: <span class="text-ink-gray-8">{{ sent || "—" }}</span></p>
 		</div>
