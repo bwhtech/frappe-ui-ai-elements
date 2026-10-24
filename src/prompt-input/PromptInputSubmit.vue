@@ -15,7 +15,7 @@ const queueing = computed(() => busy.value && canSubmit.value);
 const stopping = computed(() => busy.value && !queueing.value);
 const label = computed(() => (queueing.value ? "Queue" : busy.value ? "Stop" : "Send"));
 const icon = computed(() => {
-	if (queueing.value) return "lucide-arrow-up";
+	if (queueing.value) return "lucide-list-plus";
 	if (status.value === "streaming") return "lucide-square";
 	if (status.value === "submitted") return markRaw(Spinner);
 	return "lucide-arrow-up";
