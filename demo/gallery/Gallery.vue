@@ -7,6 +7,7 @@ import PromptInputSection from "./sections/PromptInputSection.vue";
 import ToolSection from "./sections/ToolSection.vue";
 import QuestionnaireSection from "./sections/QuestionnaireSection.vue";
 import DeskCardSection from "./sections/DeskCardSection.vue";
+import BuildPlanSection from "./sections/BuildPlanSection.vue";
 import ReasoningSection from "./sections/ReasoningSection.vue";
 import FeedbackSection from "./sections/FeedbackSection.vue";
 import CodeSection from "./sections/CodeSection.vue";
@@ -23,6 +24,7 @@ const nav = [
 	["tool", "Tool & Confirmation"],
 	["questionnaire", "Questionnaire"],
 	["desk-card", "Desk Card"],
+	["build-plan", "Build Plan"],
 	["reasoning", "Reasoning"],
 	["feedback", "Shimmer, Loader, Suggestion"],
 	["code-block", "Code Block"],
@@ -66,6 +68,7 @@ const nav = [
 					<ToolSection />
 					<QuestionnaireSection />
 					<DeskCardSection />
+					<BuildPlanSection />
 					<ReasoningSection />
 					<FeedbackSection />
 					<CodeSection />

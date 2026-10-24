@@ -4,6 +4,7 @@ import { computed } from "vue";
 import Attachment from "../attachment/Attachment.vue";
 import ConfirmationBatch from "../confirmation/ConfirmationBatch.vue";
 import ReasoningPart from "../reasoning/ReasoningPart.vue";
+import type { ProposePlanOutput } from "../plan/build-plan";
 import type { AskUserOutput } from "../questionnaire/ask-user";
 import Response from "../response/Response.vue";
 import Sources from "../sources/Sources.vue";
@@ -23,6 +24,8 @@ const emit = defineEmits<{
 	answer: [answer: { toolCallId: string; output: AskUserOutput }];
 	/** The person dismissed an `ask_user` call: `addToolOutput({ tool: "ask_user", toolCallId, state: "output-error", errorText })`. */
 	dismiss: [toolCallId: string];
+	/** The person decided on a `propose_plan` call: `addToolOutput({ tool: "propose_plan", toolCallId, output })`. */
+	decide: [decision: { toolCallId: string; output: ProposePlanOutput }];
 }>();
 
 type Part = UIMessage["parts"][number];
@@ -102,6 +105,7 @@ function isStreamingText(part: Part) {
 					@deny="emit('deny', $event)"
 					@answer="emit('answer', $event)"
 					@dismiss="emit('dismiss', $event)"
+					@decide="emit('decide', $event)"
 				/>
 			</template>
 		</div>

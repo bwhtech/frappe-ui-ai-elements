@@ -1,5 +1,6 @@
 import { defineComponent, h, type Component } from "vue";
 import BasicsDemo from "./demos/BasicsDemo.vue";
+import BuildPlanDemo from "./demos/BuildPlanDemo.vue";
 import CodeBlockDemo from "./demos/CodeBlockDemo.vue";
 import ConfirmationDemo from "./demos/ConfirmationDemo.vue";
 import ConversationDemo from "./demos/ConversationDemo.vue";
@@ -116,6 +117,18 @@ export const entries: Entry[] = [
 			bool("echo", "Show as output-available after submit", true),
 		],
 		demo: QuestionnaireDemo,
+	},
+	{
+		id: "build-plan", group: "Agent steps", label: "Build Plan",
+		description: "The agent proposes everything it will build (a propose_plan call). Approve and build to watch a scripted build tick items off, as update_plan calls do; Request changes sends feedback.",
+		controls: [
+			segment("stage", "Stage", ["waiting", "building", "built", "changes", "unanswered"]),
+			range("count", "Items", 2, 6, 6),
+			range("done", "Done (building)", 0, 6, 2),
+			range("speed", "Build step", 200, 2000, 700, 100, "ms"),
+			bool("streaming", "Reply streaming (disabled)"),
+		],
+		demo: BuildPlanDemo,
 	},
 	{
 		id: "reasoning", group: "Agent steps", label: "Reasoning",

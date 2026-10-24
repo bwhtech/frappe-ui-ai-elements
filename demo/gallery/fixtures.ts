@@ -1,4 +1,5 @@
 import type { DynamicToolUIPart, UIMessage } from "ai";
+import type { ProposePlanInput } from "@bwhtech/frappe-ui-ai-elements";
 
 // Realistic parts for a nonprofit building a volunteer tracker on its Frappe site.
 
@@ -156,3 +157,16 @@ export const volunteerQuestions = {
 } as const;
 
 export const volunteerAnswers = { answers: { fields: ["phone", "area", "T-shirt size"], signup: "both", start: null } };
+
+/** A propose_plan input: what the agent will build for weekend food drives. */
+export const foodDrivePlan = {
+	title: "Weekend food drives: donors, pledges and a weekly dashboard",
+	items: [
+		{ id: "donor-table", kind: "table", title: "Donor table", detail: "Name, phone, email, address, notes." },
+		{ id: "donation-table", kind: "table", title: "Donation table", detail: "Date, donor, food item, quantity and unit, status pledged or collected." },
+		{ id: "coordinator-role", kind: "role", title: "Drive Coordinator role", detail: "Only coordinators and administrators can see or change donors and pledges." },
+		{ id: "pledge-form", kind: "web_form", title: "Public food pledge form", detail: "Open to anyone: name, phone, food item, quantity and the date they will bring it." },
+		{ id: "pledges-dashboard", kind: "studio_page", title: "Pledges per week dashboard", detail: "Pledges each week, totals pledged and collected, and the latest pledges." },
+		{ id: "sample-records", kind: "records", title: "Sample donors and pledges", detail: "About 10 donors and 15 pledges, marked Sample." },
+	],
+} satisfies ProposePlanInput;

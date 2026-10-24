@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, type Component } from "vue";
 import ToolConfirmation from "../confirmation/ToolConfirmation.vue";
+import { parseProposePlanInput, parseProposePlanOutput, PROPOSE_PLAN_TOOL, UPDATE_PLAN_TOOL, type ProposePlanOutput, type UpdatePlanInput } from "../plan/build-plan";
+import { useBuildPlan } from "../plan/context";
+import ToolPlan from "../plan/ToolPlan.vue";
+import { TraceIcon, TraceLine, TraceTitle } from "../trace";
 import DeskCard from "../desk-card/DeskCard.vue";
 import { parseShowInDeskInput, parseShowInDeskOutput, SHOW_IN_DESK_TOOL } from "../desk-card/show-in-desk";
 import { ASK_USER_TOOL, parseAskUserInput, parseAskUserOutput, type AskUserOutput } from "../questionnaire/ask-user";
@@ -16,7 +20,8 @@ import ToolOutput from "./ToolOutput.vue";
  * AI SDK adapter: renders one `tool-*` or `dynamic-tool` part. A pending
  * approval renders as a Confirmation; an `ask_user` call renders as a
  * Questionnaire (then its answers); a `show_in_desk` call renders as a DeskCard;
- * every other state is a Tool line.
+ * a `propose_plan` call renders as a plan card, and `update_plan` as one line per
+ * item it ticked off; every other state is a Tool line.
  */
 const props = withDefaults(defineProps<{ part: ToolMessagePart; streaming?: boolean; icon?: string | Component }>(), { streaming: true });
 const emit = defineEmits<{
@@ -26,6 +31,8 @@ const emit = defineEmits<{
 	answer: [answer: { toolCallId: string; output: AskUserOutput }];
 	/** The person dismissed an `ask_user` call. Close it with addToolOutput's `output-error` state. */
 	dismiss: [toolCallId: string];
+	/** The person approved a `propose_plan` call or asked for changes. Pass it to addToolOutput. */
+	decide: [decision: { toolCallId: string; output: ProposePlanOutput }];
 }>();
 
 const name = computed(() => getToolName(props.part));
@@ -45,6 +52,25 @@ const desk = computed(() => {
 	if (!input) return null;
 	const output = props.part.state === "output-available" ? parseShowInDeskOutput(props.part.output) : null;
 	return { input, output };
+});
+// propose_plan: the card once the input is complete. Its items tick off from the thread's live plan.
+const buildPlan = useBuildPlan();
+const proposed = computed(() => {
+	if (name.value !== PROPOSE_PLAN_TOOL || props.part.state === "input-streaming") return null;
+	const input = parseProposePlanInput(props.part.input);
+	if (!input) return null;
+	const output = props.part.state === "output-available" ? (parseProposePlanOutput(props.part.output) ?? undefined) : undefined;
+	const plan = buildPlan?.value?.toolCallId === props.part.toolCallId ? buildPlan.value : null;
+	return { input, output, plan, unanswered: props.part.state === "output-error" };
+});
+// update_plan: what each update did, named by the plan's item titles.
+const UPDATE_LABELS = { in_progress: "Started", done: "Done", skipped: "Skipped" } as const;
+const UPDATE_ICONS = { in_progress: "lucide-circle-dot", done: "lucide-circle-check", skipped: "lucide-circle-slash" } as const;
+const planUpdates = computed(() => {
+	if (name.value !== UPDATE_PLAN_TOOL || props.part.state !== "output-available") return null;
+	const updates = (props.part.input as UpdatePlanInput | undefined)?.updates ?? [];
+	const titleOf = (id: string) => buildPlan?.value?.items.find((item) => item.id === id)?.title ?? id;
+	return updates.map((update) => ({ ...update, title: titleOf(update.id) }));
 });
 const answers = computed(() => (props.part.state === "output-available" ? (parseAskUserOutput(props.part.output) ?? undefined) : undefined));
 
@@ -78,6 +104,22 @@ function answer(output: AskUserOutput) {
 		@answer="answer"
 		@dismiss="emit('dismiss', part.toolCallId)"
 	/>
+	<ToolPlan
+		v-else-if="proposed"
+		:key="part.toolCallId"
+		:input="proposed.input"
+		:output="proposed.output"
+		:plan="proposed.plan"
+		:unanswered="proposed.unanswered"
+		:streaming="streaming"
+		@decide="emit('decide', { toolCallId: part.toolCallId, output: $event })"
+	/>
+	<div v-else-if="planUpdates" data-slot="plan-updates" class="flex min-w-0 flex-col gap-1.5">
+		<TraceLine v-for="update in planUpdates" :key="update.id + update.status">
+			<TraceIcon :icon="UPDATE_ICONS[update.status]" :class="update.status === 'done' && 'text-ink-green-6'" />
+			<TraceTitle>{{ UPDATE_LABELS[update.status] }}: {{ update.title }}</TraceTitle>
+		</TraceLine>
+	</div>
 	<DeskCard
 		v-else-if="desk"
 		:title="desk.input.title"
