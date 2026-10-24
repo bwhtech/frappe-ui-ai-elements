@@ -33,3 +33,4 @@ export * from "./terminal";
 export * from "./stack-trace";
 export * from "./test-results";
 export * from "./subagent";
+export * from "./desk-card";

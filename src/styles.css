@@ -290,3 +290,20 @@
 [data-slot='response-table'] td {
   min-width: 6rem;
 }
+
+/* DeskCard: when the card itself is narrow (a phone, a side panel), the button
+   gets its own row under the text instead of squeezing it. */
+[data-slot="desk-card"] {
+  container-type: inline-size;
+}
+
+@container (max-width: 30rem) {
+  [data-slot="desk-card-body"] {
+    flex-wrap: wrap;
+  }
+
+  [data-slot="desk-card-actions"] {
+    flex-basis: 100%;
+    padding-left: 3rem;
+  }
+}

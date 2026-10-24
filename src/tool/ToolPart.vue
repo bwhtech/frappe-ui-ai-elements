@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, type Component } from "vue";
 import ToolConfirmation from "../confirmation/ToolConfirmation.vue";
+import DeskCard from "../desk-card/DeskCard.vue";
+import { parseShowInDeskInput, parseShowInDeskOutput, SHOW_IN_DESK_TOOL } from "../desk-card/show-in-desk";
 import { ASK_USER_TOOL, parseAskUserInput, parseAskUserOutput, type AskUserOutput } from "../questionnaire/ask-user";
 import ToolQuestionnaire from "../questionnaire/ToolQuestionnaire.vue";
 import { getToolName, type ToolMessagePart } from "./state";
@@ -13,7 +15,8 @@ import ToolOutput from "./ToolOutput.vue";
 /**
  * AI SDK adapter: renders one `tool-*` or `dynamic-tool` part. A pending
  * approval renders as a Confirmation; an `ask_user` call renders as a
- * Questionnaire (then its answers); every other state is a Tool line.
+ * Questionnaire (then its answers); a `show_in_desk` call renders as a DeskCard;
+ * every other state is a Tool line.
  */
 const props = withDefaults(defineProps<{ part: ToolMessagePart; streaming?: boolean; icon?: string | Component }>(), { streaming: true });
 const emit = defineEmits<{
@@ -34,6 +37,14 @@ const questions = computed(() => {
 	if (name.value !== ASK_USER_TOOL) return null;
 	if (props.part.state !== "input-available" && props.part.state !== "output-available") return null;
 	return parseAskUserInput(props.part.input);
+});
+// show_in_desk: a card while the server checks the target, then with its address.
+const desk = computed(() => {
+	if (name.value !== SHOW_IN_DESK_TOOL || props.part.state === "output-error" || props.part.state === "input-streaming") return null;
+	const input = parseShowInDeskInput(props.part.input);
+	if (!input) return null;
+	const output = props.part.state === "output-available" ? parseShowInDeskOutput(props.part.output) : null;
+	return { input, output };
 });
 const answers = computed(() => (props.part.state === "output-available" ? (parseAskUserOutput(props.part.output) ?? undefined) : undefined));
 
@@ -66,6 +77,16 @@ function answer(output: AskUserOutput) {
 		:disabled="streaming"
 		@answer="answer"
 		@dismiss="emit('dismiss', part.toolCallId)"
+	/>
+	<DeskCard
+		v-else-if="desk"
+		:title="desk.input.title"
+		:summary="desk.input.summary"
+		:kind="desk.input.kind"
+		:doctype="desk.input.kind === 'page' ? desk.input.route : desk.input.doctype"
+		:name="desk.input.name"
+		:count="desk.output?.count"
+		:url="desk.output?.url"
 	/>
 	<Tool v-else>
 		<ToolHeader
