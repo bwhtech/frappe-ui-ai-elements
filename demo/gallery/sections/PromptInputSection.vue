@@ -92,7 +92,7 @@ const efforts = [
 				</PromptInput>
 			</div>
 			<div class="space-y-1.5">
-				<p class="text-xs-medium text-ink-gray-5">queue while streaming: Enter queues, Steer sends now</p>
+				<p class="text-xs-medium text-ink-gray-5">queue while streaming: type to see Queue instead of Stop; Enter or Queue adds it, Steer sends now</p>
 				<div>
 					<PromptInputQueue
 						:items="queued"
