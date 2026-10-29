@@ -1,7 +1,7 @@
 /** The `show_in_desk` tool: the agent points the person at something on their Frappe site. */
 export const SHOW_IN_DESK_TOOL = "show_in_desk";
 
-export type DeskCardKind = "list" | "form" | "doctype" | "new" | "page" | "studio";
+export type DeskCardKind = "list" | "form" | "doctype" | "new" | "page" | "studio" | "print";
 
 export interface ShowInDeskInput {
 	title: string;
@@ -10,6 +10,7 @@ export interface ShowInDeskInput {
 	doctype: string;
 	name?: string;
 	route?: string;
+	printFormat?: string;
 	filters?: Record<string, string | number | boolean>;
 }
 
@@ -21,11 +22,19 @@ export interface ShowInDeskOutput {
 	name?: string;
 	route?: string;
 	count?: number;
-	/** For a Studio page: where to change it in Studio's editor. */
+	/** For a Studio page: where to change it in Studio's editor. For a print format: its editor. */
 	editUrl?: string;
+	/** For a print format: the record printed as a PDF, with a picture of its first page. */
+	sample?: PrintSample;
 }
 
-const KINDS: DeskCardKind[] = ["list", "form", "doctype", "new", "page", "studio"];
+export interface PrintSample {
+	pdfUrl: string;
+	imageUrl?: string;
+	pages?: number;
+}
+
+const KINDS: DeskCardKind[] = ["list", "form", "doctype", "new", "page", "studio", "print"];
 
 export function parseShowInDeskInput(input: unknown): ShowInDeskInput | null {
 	const value = input as Partial<ShowInDeskInput> | undefined;

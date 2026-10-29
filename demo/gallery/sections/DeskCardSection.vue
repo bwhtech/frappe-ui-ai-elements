@@ -37,6 +37,15 @@ const desk = "https://example.frappe.cloud/desk";
 				url="https://example.frappe.cloud/annapurna/meals"
 				edit-url="https://example.frappe.cloud/studio/app/annapurna/page-1a2b3c4d"
 			/>
+			<DeskCard
+				kind="print"
+				title="Donation receipt"
+				summary="Receipt number, donor, what they gave and a signature line, on an A5 page."
+				doctype="Donation"
+				name="DON-00271"
+				url="https://example.frappe.cloud/printview?doctype=Donation&name=DON-00271&format=Donation%20Receipt"
+				edit-url="https://example.frappe.cloud/desk/print-format-builder/Donation%20Receipt"
+			/>
 			<DeskCard kind="page" title="Volunteer sign-up form" summary="Share this link. Anyone can fill it in without an account." doctype="volunteer-sign-up" :url="`https://example.frappe.cloud/volunteer-sign-up`" />
 			<DeskCard kind="list" title="Checking the volunteer list…" doctype="Volunteer" />
 		</div>

@@ -135,6 +135,7 @@ function answer(output: AskUserOutput) {
 		:count="desk.output?.count"
 		:url="desk.output?.url"
 		:edit-url="desk.output?.editUrl"
+		:sample="desk.output?.sample"
 	/>
 	<Tool v-else>
 		<ToolHeader

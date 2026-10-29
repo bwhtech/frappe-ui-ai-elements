@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { Button, Icon } from "frappe-ui";
 import { computed, type Component } from "vue";
-import type { DeskCardKind } from "./show-in-desk";
+import type { DeskCardKind, PrintSample } from "./show-in-desk";
 
 /**
  * A card that opens something on the person's Frappe site: a DocType, its list, one
  * record, a blank form or a public page. `url` opens in a new tab; without it (while
  * the server checks the target) the card shows as loading. `#actions` replaces the
- * button.
+ * button. A print card with a `sample` shows the record's first printed page above,
+ * as a sheet of paper, and opens the PDF.
  */
 const props = withDefaults(
 	defineProps<{
@@ -18,26 +19,30 @@ const props = withDefaults(
 		name?: string;
 		count?: number;
 		url?: string;
-		/** A second button, "Edit in Studio", for a Studio page. */
+		/** A second button: "Edit in Studio" for a Studio page, "Edit layout" for a print format. */
 		editUrl?: string;
+		/** For a print format: the record printed as a PDF. */
+		sample?: PrintSample;
 		icon?: string | Component;
 		label?: string;
 	}>(),
 	{ kind: "list" },
 );
 
-const KIND = {
+const KIND: Record<DeskCardKind, { icon: string; label: string; action: string; edit?: string }> = {
 	list: { icon: "lucide-list", label: "List", action: "Open list" },
 	form: { icon: "lucide-file-text", label: "Record", action: "Open record" },
 	doctype: { icon: "lucide-table-properties", label: "DocType", action: "Open DocType" },
 	new: { icon: "lucide-file-plus", label: "New record", action: "Add a record" },
 	page: { icon: "lucide-globe", label: "Web page", action: "Open page" },
-	studio: { icon: "lucide-layout-dashboard", label: "Studio page", action: "Open page" },
-} satisfies Record<DeskCardKind, { icon: string; label: string; action: string }>;
+	studio: { icon: "lucide-layout-dashboard", label: "Studio page", action: "Open page", edit: "Edit in Studio" },
+	print: { icon: "lucide-printer", label: "Print", action: "Open print view", edit: "Edit layout" },
+};
 
 const meta = computed(() => {
-	const parts = [props.doctype, props.kind === "form" ? props.name : KIND[props.kind].label];
+	const parts = [props.doctype, props.kind === "form" || props.kind === "print" ? props.name : KIND[props.kind].label];
 	if (props.count !== undefined) parts.push(`${props.count} ${props.count === 1 ? "record" : "records"}`);
+	if (props.sample?.pages) parts.push(`${props.sample.pages} ${props.sample.pages === 1 ? "page" : "pages"}`);
 	return parts.filter(Boolean).join(" · ");
 });
 </script>
@@ -48,9 +53,26 @@ const meta = computed(() => {
 		:data-kind="kind"
 		:data-loading="!url || undefined"
 		:aria-busy="!url"
-		class="min-w-0 rounded-6 border border-outline-gray-2 bg-surface-base p-3"
+		class="min-w-0 overflow-hidden rounded-6 border border-outline-gray-2 bg-surface-base"
 	>
-		<div data-slot="desk-card-body" class="flex min-w-0 items-start gap-x-3 gap-y-2.5">
+		<a
+			v-if="sample?.imageUrl"
+			data-slot="desk-card-sample"
+			:href="sample.pdfUrl"
+			target="_blank"
+			rel="noopener"
+			:aria-label="`Open the PDF of ${title}`"
+			class="group relative block h-60 overflow-hidden border-b border-outline-gray-1 bg-surface-gray-2 px-6 pt-5 sm:px-10"
+		>
+			<img
+				:src="sample.imageUrl"
+				alt=""
+				class="mx-auto w-full max-w-md rounded-[2px] bg-white shadow-md ring-1 ring-black/5 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 motion-reduce:transition-none"
+			/>
+			<!-- A tall page fades out at the bottom of the frame. -->
+			<div class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[var(--surface-gray-2)] to-transparent" />
+		</a>
+		<div data-slot="desk-card-body" class="flex min-w-0 items-start gap-x-3 gap-y-2.5 p-3">
 			<div class="flex size-9 shrink-0 items-center justify-center rounded-5 bg-surface-gray-2 text-ink-gray-6">
 				<Icon :icon="icon ?? KIND[kind].icon" class="size-4.5" />
 			</div>
@@ -61,7 +83,8 @@ const meta = computed(() => {
 			</div>
 			<div data-slot="desk-card-actions" class="flex shrink-0 items-center gap-1.5 self-center">
 				<slot name="actions">
-					<Button v-if="url && editUrl" variant="ghost" label="Edit in Studio" :href="editUrl" />
+					<Button v-if="sample" variant="ghost" label="PDF" icon-left="lucide-file-down" :href="sample.pdfUrl" />
+					<Button v-if="url && editUrl" variant="ghost" :label="KIND[kind].edit ?? 'Edit'" :href="editUrl" />
 					<Button
 						v-if="url"
 						variant="subtle"
