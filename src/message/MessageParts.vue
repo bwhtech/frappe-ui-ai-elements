@@ -10,8 +10,11 @@ import PlanItemSteps from "../plan/PlanItemSteps.vue";
 import type { AskUserOutput } from "../questionnaire/ask-user";
 import Response from "../response/Response.vue";
 import Sources from "../sources/Sources.vue";
+import ToolGroup from "../tool/ToolGroup.vue";
 import ToolPart from "../tool/ToolPart.vue";
+import { useToolRenderers } from "../tool/renderers";
 import type { ToolMessagePart } from "../tool/state";
+import { foldSteps, summarizeSteps } from "../tool/work-group";
 import { useMessageRole } from "./context";
 
 /**
@@ -36,6 +39,7 @@ type Part = UIMessage["parts"][number];
 type Group = { kind: "steps"; parts: Part[] } | { kind: "part"; part: Part } | { kind: "plan-item"; id: string; parts: Part[] };
 
 const role = useMessageRole();
+const customTools = new Set(Object.keys(useToolRenderers()));
 const buildPlan = useBuildPlan();
 const sources = computed(() =>
 	props.message.parts
@@ -82,6 +86,11 @@ function groupParts(parts: Part[]): Group[] {
 	return groups;
 }
 
+/** Folds a plain steps group; a plan item's steps already sit under its own line. */
+function workItems(group: Exclude<Group, { kind: "part" }>) {
+	return group.kind === "steps" ? foldSteps(group.parts, customTools) : group.parts.map((part) => ({ kind: "one" as const, part }));
+}
+
 function answerAll(approved: boolean) {
 	for (const id of pendingApprovals.value) {
 		if (approved) emit("approve", id);
@@ -124,11 +133,17 @@ function isStreamingText(part: Part) {
 			@deny="answerAll(false)"
 		/>
 		<component :is="group.kind === 'plan-item' ? PlanItemSteps : 'div'" v-if="group.kind !== 'part'" v-bind="stepsAttrs(group)">
-			<template v-for="(part, stepIndex) in group.parts" :key="stepIndex">
-				<ReasoningPart v-if="part.type === 'reasoning'" :text="part.text" :streaming="isReasoningStreaming(part)" />
+			<template v-for="(item, itemIndex) in workItems(group)" :key="itemIndex">
+				<ToolGroup v-if="item.kind === 'fold'" v-bind="summarizeSteps(item.parts, streaming)">
+					<template v-for="(part, stepIndex) in item.parts" :key="stepIndex">
+						<ReasoningPart v-if="part.type === 'reasoning'" :text="part.text" :streaming="isReasoningStreaming(part)" />
+						<ToolPart v-else :part="asTool(part)" :streaming="streaming" />
+					</template>
+				</ToolGroup>
+				<ReasoningPart v-else-if="item.part.type === 'reasoning'" :text="item.part.text" :streaming="isReasoningStreaming(item.part)" />
 				<ToolPart
 					v-else
-					:part="asTool(part)"
+					:part="asTool(item.part)"
 					:streaming="streaming"
 					@approve="emit('approve', $event)"
 					@deny="emit('deny', $event)"

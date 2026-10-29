@@ -6,3 +6,5 @@ export { default as ToolOutput } from "./ToolOutput.vue";
 export { default as ToolPart } from "./ToolPart.vue";
 export * from "./state";
 export { provideToolRenderers, useToolRenderers, type ToolRenderers } from "./renderers";
+export { default as ToolGroup } from "./ToolGroup.vue";
+export { foldSteps, summarizeSteps, type WorkItem } from "./work-group";

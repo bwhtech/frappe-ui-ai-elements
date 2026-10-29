@@ -10,15 +10,19 @@ import {
 	ConfirmationTitle,
 	Tool,
 	ToolContent,
+	ToolGroup,
 	ToolHeader,
 	ToolInput,
 	ToolOutput,
 	ToolPart,
+	summarizeSteps,
 } from "@bwhtech/frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { longJsonOutput, toolStates } from "../fixtures";
 
 const answer = ref("");
+// Done, failed and running steps, folded the way MessageParts folds them.
+const folded = ["output-available", "output-error", "input-available"].map((label) => toolStates.find((item) => item.label === label)!.part);
 </script>
 
 <template>
@@ -35,6 +39,12 @@ const answer = ref("");
 			</div>
 			<p class="text-sm text-ink-gray-5">Last answer: <span class="text-ink-gray-8">{{ answer || "—" }}</span></p>
 		</div>
+	</DemoBlock>
+
+	<DemoBlock id="tool-group" title="Tool group" description="Two or more plain steps in a row fold under one summary line. Cards and calls that wait on the person never fold.">
+		<ToolGroup v-bind="summarizeSteps(folded, true)">
+			<ToolPart v-for="part in folded" :key="part.toolCallId" :part="part" />
+		</ToolGroup>
 	</DemoBlock>
 
 	<DemoBlock id="tool-compound" title="Tool, composed" description="The parts behind ToolPart, with a long MCP result to check overflow.">
