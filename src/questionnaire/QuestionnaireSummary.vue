@@ -16,7 +16,7 @@ defineProps<{ title?: string; questions: AskUserQuestion[]; answers: Record<stri
 				<dt class="text-p-sm text-ink-gray-5 [overflow-wrap:anywhere]">{{ question.header || question.question }}</dt>
 				<dd class="text-p-sm text-ink-gray-8 [overflow-wrap:anywhere]">
 					<template v-if="formatAskUserAnswer(question, answers[question.id]) !== null">{{ formatAskUserAnswer(question, answers[question.id]) }}</template>
-					<span v-else class="text-ink-gray-4">Skipped</span>
+					<span v-else class="text-ink-gray-5">Skipped</span>
 				</dd>
 			</div>
 		</dl>

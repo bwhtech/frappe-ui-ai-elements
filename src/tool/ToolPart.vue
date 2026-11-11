@@ -9,6 +9,7 @@ import DeskCard from "../desk-card/DeskCard.vue";
 import { parseShowInDeskInput, parseShowInDeskOutput, SHOW_IN_DESK_TOOL } from "../desk-card/show-in-desk";
 import { ASK_USER_TOOL, parseAskUserInput, parseAskUserOutput, type AskUserOutput } from "../questionnaire/ask-user";
 import ToolQuestionnaire from "../questionnaire/ToolQuestionnaire.vue";
+import { useToolLabels } from "./labels";
 import { useToolRenderers } from "./renderers";
 import { getToolName, type ToolMessagePart } from "./state";
 import Tool from "./Tool.vue";
@@ -39,6 +40,9 @@ const emit = defineEmits<{
 
 const name = computed(() => getToolName(props.part));
 const renderers = useToolRenderers();
+// The app's own name for the tool, such as a connector's "Linear · Create issue" (labels.ts).
+const labels = useToolLabels();
+const label = computed(() => labels(name.value));
 const custom = computed(() => renderers[name.value]);
 const needsAnswer = computed(() => props.part.state === "approval-requested" && !props.part.approval.isAutomatic);
 const approved = computed(() => props.part.approval?.approved);
@@ -93,9 +97,13 @@ function answer(output: AskUserOutput) {
 <template>
 	<ToolConfirmation
 		v-if="needsAnswer && part.state === 'approval-requested'"
+		:key="part.toolCallId"
 		:tool-name="name"
+		:approval-id="part.approval.id"
 		:input="part.input"
 		:reason="part.approval.requestReason"
+		:question="label?.question"
+		:always-allow="label?.alwaysAllow"
 		@approve="emit('approve', part.approval.id)"
 		@deny="emit('deny', part.approval.id)"
 	/>
@@ -141,7 +149,7 @@ function answer(output: AskUserOutput) {
 		<ToolHeader
 			:state="part.state"
 			:tool-name="name"
-			:title="askUserTitle"
+			:title="askUserTitle ?? label?.title"
 			:icon="icon"
 			:streaming="streaming"
 			:approved="approved"

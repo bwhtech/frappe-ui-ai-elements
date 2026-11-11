@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { vuePlugin } from "./vite.shared";
 
-const external = [/^vue($|\/)/, /^frappe-ui($|\/)/, /^ai($|\/)/, /^marked($|\/)/, /^dompurify($|\/)/, /^highlight\.js($|\/)/];
+const external = [/^vue($|\/)/, /^frappe-ui($|\/)/, /^ai($|\/)/, /^marked($|\/)/, /^dompurify($|\/)/, /^highlight\.js($|\/)/, /^katex($|\/)/, /^pele($|\/)/];
 
 export default defineConfig({
 	plugins: [vuePlugin()],

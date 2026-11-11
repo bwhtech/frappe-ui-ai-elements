@@ -60,7 +60,7 @@ function toggleHistory() {
 							:scroll-anchor="message.role === 'user'"
 						>
 							<Message :from="message.role">
-								<MessageContent>
+								<MessageContent :bare="message.role === 'user'">
 									<MessageParts
 										:message="message"
 										:streaming="chat.status.value === 'streaming' && message === chat.messages.value.at(-1)"

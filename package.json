@@ -1,12 +1,17 @@
 {
 	"name": "@bwhtech/frappe-ui-ai-elements",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "AI chat and agent components for Vue 3, built on frappe-ui. A port of shadcn AI Elements.",
 	"type": "module",
 	"license": "MIT",
+	"author": "Hussain Nagaria",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bwhtech/frappe-ui-ai-elements.git"
+	},
+	"homepage": "https://github.com/bwhtech/frappe-ui-ai-elements#readme",
+	"bugs": {
+		"url": "https://github.com/bwhtech/frappe-ui-ai-elements/issues"
 	},
 	"keywords": [
 		"vue",
@@ -14,13 +19,16 @@
 		"ai",
 		"chat",
 		"ai-sdk",
-		"ai-elements"
+		"ai-elements",
+		"katex",
+		"mermaid"
 	],
 	"files": [
 		"dist",
 		"src",
 		"tailwind.js",
-		"NOTICE"
+		"NOTICE",
+		"CHANGELOG.md"
 	],
 	"sideEffects": [
 		"**/*.css"
@@ -42,7 +50,8 @@
 		"build:demo": "vite build",
 		"typecheck": "node scripts/vue-tsc.cjs --noEmit -p tsconfig.json",
 		"build:demo:dist": "DEMO_FROM_DIST=1 vite build",
-		"prepare": "npm run build"
+		"prepare": "npm run build",
+		"prepublishOnly": "npm run typecheck"
 	},
 	"peerDependencies": {
 		"ai": ">=7.0.0",
@@ -57,7 +66,9 @@
 	"dependencies": {
 		"dompurify": "^3.4.17",
 		"highlight.js": "^11.12.0",
-		"marked": "^15.0.12"
+		"katex": "^0.19.1",
+		"marked": "^15.0.12",
+		"pele": "^1.13.0"
 	},
 	"devDependencies": {
 		"@vitejs/plugin-vue": "^6.0.10",
@@ -71,5 +82,8 @@
 		"vue": "^3.5.44",
 		"vue-router": "^4.6.4",
 		"vue-tsc": "^3.3.13"
+	},
+	"publishConfig": {
+		"access": "public"
 	}
 }

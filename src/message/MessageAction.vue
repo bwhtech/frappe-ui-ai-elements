@@ -16,7 +16,7 @@ defineEmits<{ click: [event: MouseEvent] }>();
 			:aria-label="label"
 			:aria-pressed="pressed"
 			:disabled="disabled"
-			class="text-ink-gray-5 hover:text-ink-gray-8"
+			class="relative !text-ink-gray-5 after:absolute after:inset-0 after:content-[''] hover:!text-ink-gray-8 [@media(pointer:coarse)]:after:-inset-2"
 			@click="$emit('click', $event)"
 		>
 			<slot />

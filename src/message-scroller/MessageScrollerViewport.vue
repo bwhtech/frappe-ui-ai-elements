@@ -30,11 +30,12 @@ onBeforeUnmount(() => {
 		:data-pending-scroll="controller.pendingScroll.value || undefined"
 		:data-autoscrolling="controller.autoscrolling.value || undefined"
 		:style="preserveScrollOnPrepend ? undefined : { overflowAnchor: 'none' }"
-		class="scroll-fade-b scrollbar-thin size-full min-h-0 min-w-0 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] data-[pending-scroll]:invisible"
+		class="scroll-fade-b scrollbar-thin size-full min-h-0 min-w-0 overflow-y-auto overscroll-contain [scrollbar-gutter:auto] sm:[scrollbar-gutter:stable_both-edges] data-[pending-scroll]:invisible"
 		@scroll.passive="controller.onScroll()"
 		@wheel.passive="controller.onWheel($event)"
 		@touchmove.passive="controller.onTouchMove()"
 		@keydown="controller.onKeydown($event)"
+		@pointerdown="controller.onPointerDown($event)"
 	>
 		<slot />
 	</div>

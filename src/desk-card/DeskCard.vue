@@ -67,7 +67,7 @@ const meta = computed(() => {
 			<img
 				:src="sample.imageUrl"
 				alt=""
-				class="mx-auto w-full max-w-md rounded-[2px] bg-white shadow-md ring-1 ring-black/5 transition-transform duration-200 ease-out group-hover:-translate-y-0.5 motion-reduce:transition-none"
+				class="mx-auto w-full max-w-md rounded-[2px] bg-white shadow-md ring-1 ring-black/5 transition-transform duration-200 ease-out-strong [@media(hover:hover)_and_(pointer:fine)]:group-hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none"
 			/>
 			<!-- A tall page fades out at the bottom of the frame. -->
 			<div class="pointer-events-none absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[var(--surface-gray-2)] to-transparent" />

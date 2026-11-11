@@ -13,14 +13,14 @@ import {
 	Response,
 } from "@bwhtech/frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
-import { replyMarkdown } from "../fixtures";
+import { replyMarkdown, richReplyCitations, richReplyMarkdown } from "../fixtures";
 
 const liked = ref<boolean | null>(null);
 const longWord = "Pneumonoultramicroscopicsilicovolcanoconiosis-and-a-very-long-unbroken-url-https://example.org/a/b/c/d/e/f/g/h";
 </script>
 
 <template>
-	<DemoBlock id="message" title="Message & Response" part="text" description="The person's turn is a muted bubble at the end. The agent's turn is markdown with actions under it.">
+	<DemoBlock id="message" title="Message & Response" part="text" description="The person's turn is a muted bubble at the end. The agent's turn is markdown with actions under it: tables, code, LaTeX maths, Mermaid diagrams and citation chips.">
 		<div class="flex flex-col gap-8">
 			<Message from="user">
 				<MessageContent>We need to track volunteers: name, phone, area and which days they are free.</MessageContent>
@@ -34,6 +34,11 @@ const longWord = "Pneumonoultramicroscopicsilicovolcanoconiosis-and-a-very-long-
 						<MessageAction label="Bad response" icon="lucide-thumbs-down" :pressed="liked === false" @click="liked = false" />
 						<MessageAction label="Retry" icon="lucide-refresh-cw" />
 					</MessageActions>
+				</MessageContent>
+			</Message>
+			<Message from="assistant">
+				<MessageContent>
+					<Response :content="richReplyMarkdown" :citations="richReplyCitations" />
 				</MessageContent>
 			</Message>
 			<Message from="user">

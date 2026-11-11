@@ -44,6 +44,8 @@ export class MessageScrollerController {
 	private handledAnchors = new WeakSet<HTMLElement>();
 	private prependAnchor = new PrependAnchor();
 	private lastScrollTop = 0;
+	/** Where the controller last put the viewport; a scroll away from it is the reader's. */
+	private scrollTarget: number | null = null;
 	private spacerHeight = 0;
 	private frame: number | null = null;
 	private autoscrollTimer: ReturnType<typeof setTimeout> | null = null;
@@ -114,14 +116,20 @@ export class MessageScrollerController {
 		const viewport = this.viewport;
 		if (!viewport) return;
 		const scrolledUp = viewport.scrollTop < this.lastScrollTop - EPSILON;
+		// Scrollbar drags, find-in-page and focus moves send no wheel or key event; this catches them.
+		const movedAway = this.movedAwayFromTarget(viewport.scrollTop);
 		this.lastScrollTop = viewport.scrollTop;
 		const atEnd = !this.hasOverflowBelow();
 
 		this.capturePrependAnchor();
 		this.visibility.schedule();
+		if (movedAway) this.releaseToReader();
 		if (this.autoscrolling.value) return this.commitState();
 		if (this.mode === "following-bottom" && scrolledUp) this.mode = "free-scrolling";
-		else if (this.mode === "free-scrolling" && atEnd && this.options().autoScroll) this.mode = "following-bottom";
+		else if (this.mode === "free-scrolling" && atEnd && this.options().autoScroll) {
+			this.mode = "following-bottom";
+			this.scrollTarget = null;
+		}
 		this.trimSpacer();
 		this.commitState();
 	}
@@ -135,7 +143,15 @@ export class MessageScrollerController {
 	}
 
 	onKeydown(event: KeyboardEvent) {
+		if (isEditable(event.target)) return;
 		if (USER_SCROLL_KEYS.has(event.key)) this.releaseToReader();
+	}
+
+	/** A press on the viewport's own scrollbar starts a drag. */
+	onPointerDown(event: PointerEvent) {
+		const viewport = this.viewport;
+		if (!viewport || event.target !== viewport) return;
+		if (event.offsetX > viewport.clientWidth || event.offsetY > viewport.clientHeight) this.releaseToReader();
 	}
 
 	// --- reconciliation ---------------------------------------------------
@@ -190,6 +206,8 @@ export class MessageScrollerController {
 			this.scrollToEnd({ behavior: "auto" });
 			return;
 		}
+		// The anchored turn left the DOM (the chat changed, the row re-rendered): stop holding it.
+		if (this.mode === "anchored-to-message" && !this.anchor?.isConnected) this.releaseToReader();
 		if (this.mode === "anchored-to-message" && this.anchor?.isConnected) {
 			const previousSpacer = this.spacerHeight;
 			this.holdAnchor();
@@ -235,6 +253,7 @@ export class MessageScrollerController {
 	private holdAnchor(behavior: ScrollBehavior = "auto") {
 		const viewport = this.viewport;
 		if (!viewport || !this.anchor) return;
+		if (!this.anchor.isConnected) return void this.releaseToReader();
 		const peek = this.options().scrollPreviousItemPeek;
 		const target = Math.max(0, this.alignedTop(this.anchor, { align: "start" }) - peek);
 		const missing = target + viewport.clientHeight - this.contentBottom();
@@ -275,7 +294,22 @@ export class MessageScrollerController {
 	private releaseToReader() {
 		if (this.mode !== "free-scrolling") this.mode = "free-scrolling";
 		this.anchor = null;
+		this.scrollTarget = null;
 		this.setAutoscrolling(false);
+	}
+
+	/**
+	 * The viewport moved further from where the controller put it. A smooth scroll only
+	 * closes the distance, so a growing distance is the reader. While following, only a
+	 * move up counts: rows above settling can push the position down, toward the end anyway.
+	 */
+	private movedAwayFromTarget(top: number) {
+		const viewport = this.viewport;
+		if (!viewport || this.mode === "free-scrolling" || this.scrollTarget === null) return false;
+		// Content that shrank clamps the position; measure against the reachable target.
+		const target = Math.min(this.scrollTarget, Math.max(0, viewport.scrollHeight - viewport.clientHeight));
+		if (Math.abs(top - target) <= Math.abs(this.lastScrollTop - target) + EPSILON) return false;
+		return this.mode === "anchored-to-message" || top < this.lastScrollTop;
 	}
 
 	private commitState() {
@@ -330,6 +364,7 @@ export class MessageScrollerController {
 		if (behavior === "smooth") this.setAutoscrolling(true);
 		viewport.scrollTo({ top, behavior });
 		this.lastScrollTop = viewport.scrollTop;
+		this.scrollTarget = top;
 		this.commitState();
 	}
 
@@ -350,6 +385,12 @@ export class MessageScrollerController {
 
 function prefersReducedMotion() {
 	return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+}
+
+/** Keys typed in a field move its caret, not the transcript. */
+function isEditable(target: EventTarget | null) {
+	if (!(target instanceof HTMLElement)) return false;
+	return target.isContentEditable || target.matches("input, textarea, select");
 }
 
 function isScrollAnchor(element: HTMLElement) {

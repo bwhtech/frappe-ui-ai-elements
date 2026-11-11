@@ -2,7 +2,7 @@ import type { UIMessage } from "ai";
 import { ASK_USER_TOOL } from "../questionnaire/ask-user";
 import { PROPOSE_PLAN_TOOL, UPDATE_PLAN_TOOL } from "../plan/build-plan";
 import { SHOW_IN_DESK_TOOL } from "../desk-card/show-in-desk";
-import { getToolName, getToolStatus, type ToolMessagePart } from "./state";
+import { getToolName, getToolPhase, type ToolMessagePart } from "./state";
 
 type Part = UIMessage["parts"][number];
 
@@ -41,18 +41,37 @@ export function foldSteps(parts: Part[], custom: Set<string>): WorkItem[] {
 export function summarizeSteps(parts: Part[], streaming: boolean) {
 	const tools = parts.filter((part) => part.type !== "reasoning") as ToolMessagePart[];
 	const counts = { read: 0, write: 0, other: 0 };
-	for (const tool of tools) counts[actionOf(getToolName(tool))]++;
+	const phases = tools.map((tool) =>
+		getToolPhase(tool.state, {
+			streaming,
+			approved: tool.approval?.approved,
+			preliminary: tool.state === "output-available" && !!tool.preliminary,
+			failed: outputFailed(tool),
+		}),
+	);
+	// A call the person denied did nothing, so it is not counted as a change.
+	const denied = phases.filter((phase) => phase === "denied").length;
+	tools.forEach((tool, index) => {
+		if (phases[index] !== "denied") counts[actionOf(getToolName(tool))]++;
+	});
 	const labels = [
 		counts.read && `looked up ${plural(counts.read, "thing")}`,
 		counts.write && `made ${plural(counts.write, "change")}`,
 		counts.other && `took ${plural(counts.other, "other step")}`,
+		denied && `skipped ${plural(denied, "denied step")}`,
 	].filter(Boolean) as string[];
 	if (!tools.length) labels.push(parts.length === 1 ? "thought" : `thought (×${parts.length})`);
 
-	const statuses = tools.map((tool) => getToolStatus(tool.state, { streaming, approved: tool.approval?.approved }));
-	const failed = statuses.filter((status) => status === "error").length;
-	const running = statuses.includes("running") || (streaming && parts.some((part) => part.type === "reasoning" && part.state === "streaming"));
+	const failed = phases.filter((phase) => phase === "failed" || phase === "stopped").length;
+	const running = phases.some((phase) => phase === "preparing" || phase === "running") || (streaming && parts.some((part) => part.type === "reasoning" && part.state === "streaming"));
 	return { summary: capitalize(joinLabels(labels)), failed, running };
+}
+
+/** A call that ran but reports a failure in its output, as web_fetch and run_python do. */
+function outputFailed(tool: ToolMessagePart) {
+	if (tool.state !== "output-available") return false;
+	const output = tool.output as { error?: unknown; ok?: unknown } | null;
+	return typeof output === "object" && !!output && (!!output.error || output.ok === false);
 }
 
 function isFoldable(part: Part, custom: Set<string>) {

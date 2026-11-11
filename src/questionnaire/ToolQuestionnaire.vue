@@ -58,7 +58,7 @@ function submit(payload: QuestionnaireSubmitPayload) {
 			<QuestionnaireItem v-for="question in input.questions" :key="question.id" :name="question.id" :required="isRequired(question)" :multiple="question.kind === 'multiple'">
 				<div class="flex min-w-0 flex-col gap-1">
 					<p v-if="question.header" class="text-xs-medium text-ink-gray-5 [overflow-wrap:anywhere]">
-						{{ question.header }}<span v-if="!isRequired(question)" class="text-xs text-ink-gray-4"> · optional</span>
+						{{ question.header }}<span v-if="!isRequired(question)" class="text-xs text-ink-gray-5"> · optional</span>
 					</p>
 					<QuestionnaireTitle :title="question.question" />
 				</div>
