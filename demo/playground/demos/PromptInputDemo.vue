@@ -24,13 +24,25 @@ const model = ref("sonnet");
 const status = computed(() => props.v.status as ChatStatus);
 const files = computed(() =>
 	props.worst
-		? [{ name: `${w.name}.xlsx`, size: 9_812_331 }, { name: `${w.unbroken}.pdf`, mediaType: "application/pdf", state: "error" as const }]
-		: [{ name: "volunteers.xlsx", size: 48_213 }, { name: "poster.png", mediaType: "image/png", state: "uploading" as const }],
+		? [
+				{ name: `${w.name}.xlsx`, size: 9_812_331 },
+				{ name: `${w.unbroken}.pdf`, mediaType: "application/pdf", state: "error" as const },
+			]
+		: [
+				{ name: "volunteers.xlsx", size: 48_213 },
+				{ name: "poster.png", mediaType: "image/png", state: "uploading" as const },
+			],
 );
 </script>
 
 <template>
-	<PromptInput v-model="text" :status="status" :disabled="Boolean(v.disabled)" @submit="log('submit', { text: $event.text, files: $event.files.length })" @stop="log('stop')">
+	<PromptInput
+		v-model="text"
+		:status="status"
+		:disabled="Boolean(v.disabled)"
+		@submit="log('submit', { text: $event.text, files: $event.files.length })"
+		@stop="log('stop')"
+	>
 		<PromptInputHeader v-if="v.attachments">
 			<Attachment v-for="file in files" :key="file.name" v-bind="file" removable @remove="log('remove-attachment', file.name)" />
 		</PromptInputHeader>

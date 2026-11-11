@@ -15,13 +15,7 @@ export { default as QuestionnaireSubmit } from "./QuestionnaireSubmit.vue";
 export { default as QuestionnaireSummary } from "./QuestionnaireSummary.vue";
 export { default as ToolQuestionnaire } from "./ToolQuestionnaire.vue";
 export { useQuestionnaireItem } from "./context";
-export type {
-	QuestionnaireAnswers,
-	QuestionnaireItemStatus,
-	QuestionnaireShortcuts,
-	QuestionnaireSubmitPayload,
-	QuestionnaireValue,
-} from "./context";
+export type { QuestionnaireAnswers, QuestionnaireItemStatus, QuestionnaireShortcuts, QuestionnaireSubmitPayload, QuestionnaireValue } from "./context";
 export {
 	ASK_USER_TOOL,
 	formatAskUserAnswer,

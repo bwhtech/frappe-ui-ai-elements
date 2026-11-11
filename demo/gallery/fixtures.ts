@@ -17,7 +17,17 @@ const volunteerFields = {
 };
 
 const searchOutput = {
-	content: [{ type: "text", text: JSON.stringify({ results: [{ name: "Member", module: "Non Profit" }, { name: "Territory", module: "Selling" }] }) }],
+	content: [
+		{
+			type: "text",
+			text: JSON.stringify({
+				results: [
+					{ name: "Member", module: "Non Profit" },
+					{ name: "Territory", module: "Selling" },
+				],
+			}),
+		},
+	],
 };
 
 function tool(state: DynamicToolUIPart["state"], extra: Partial<DynamicToolUIPart> = {}): DynamicToolUIPart {
@@ -109,7 +119,11 @@ export const transcript: UIMessage[] = [
 		parts: [
 			{ type: "reasoning", text: reasoningText, state: "done" },
 			{ type: "dynamic-tool", toolName: "search_doctypes", toolCallId: "c1", state: "output-available", input: { query: "volunteer" }, output: searchOutput },
-			tool("output-available", { toolCallId: "c2", output: { content: [{ type: "text", text: '{"name":"Volunteer"}' }] }, approval: { id: "a", approved: true } }),
+			tool("output-available", {
+				toolCallId: "c2",
+				output: { content: [{ type: "text", text: '{"name":"Volunteer"}' }] },
+				approval: { id: "a", approved: true },
+			}),
 			{ type: "text", text: replyMarkdown, state: "done" },
 		],
 	},
@@ -119,7 +133,12 @@ export const transcript: UIMessage[] = [
 		role: "assistant",
 		parts: [
 			{ type: "text", text: "I will add 20 sample volunteers spread across your areas. Please approve the change." },
-			tool("approval-requested", { toolName: "insert_documents", toolCallId: "c3", input: { doctype: "Volunteer", count: 20 }, approval: { id: "approval-2" } }),
+			tool("approval-requested", {
+				toolName: "insert_documents",
+				toolCallId: "c3",
+				input: { doctype: "Volunteer", count: 20 },
+				approval: { id: "approval-2" },
+			}),
 		],
 	},
 ];
@@ -164,9 +183,24 @@ export const foodDrivePlan = {
 	items: [
 		{ id: "donor-table", kind: "table", title: "Donor table", detail: "Name, phone, email, address, notes." },
 		{ id: "donation-table", kind: "table", title: "Donation table", detail: "Date, donor, food item, quantity and unit, status pledged or collected." },
-		{ id: "coordinator-role", kind: "role", title: "Drive Coordinator role", detail: "Only coordinators and administrators can see or change donors and pledges." },
-		{ id: "pledge-form", kind: "web_form", title: "Public food pledge form", detail: "Open to anyone: name, phone, food item, quantity and the date they will bring it." },
-		{ id: "pledges-dashboard", kind: "studio_page", title: "Pledges per week dashboard", detail: "Pledges each week, totals pledged and collected, and the latest pledges." },
+		{
+			id: "coordinator-role",
+			kind: "role",
+			title: "Drive Coordinator role",
+			detail: "Only coordinators and administrators can see or change donors and pledges.",
+		},
+		{
+			id: "pledge-form",
+			kind: "web_form",
+			title: "Public food pledge form",
+			detail: "Open to anyone: name, phone, food item, quantity and the date they will bring it.",
+		},
+		{
+			id: "pledges-dashboard",
+			kind: "studio_page",
+			title: "Pledges per week dashboard",
+			detail: "Pledges each week, totals pledged and collected, and the latest pledges.",
+		},
 		{ id: "sample-records", kind: "records", title: "Sample donors and pledges", detail: "About 10 donors and 15 pledges, marked Sample." },
 	],
 } satisfies ProposePlanInput;

@@ -10,405 +10,392 @@
 /* A strong ease-out: fast at the start, where the eye is. The curve for things that enter,
    leave or open. :where() keeps it at zero specificity, so an app can set its own. */
 :where(:root) {
-  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+	--ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 @property --shimmer-angle {
-  syntax: '<angle>';
-  inherits: true;
-  initial-value: 20deg;
+	syntax: "<angle>";
+	inherits: true;
+	initial-value: 20deg;
 }
 
 @keyframes ai-shimmer {
-  from {
-    background-position: 100% 0;
-  }
-  to {
-    background-position: 0 0;
-  }
+	from {
+		background-position: 100% 0;
+	}
+	to {
+		background-position: 0 0;
+	}
 }
 
 @keyframes ai-scroll-fade-t {
-  from {
-    --scroll-fade-t: 0px;
-  }
-  to {
-    --scroll-fade-t: var(--scroll-fade-size, 40px);
-  }
+	from {
+		--scroll-fade-t: 0px;
+	}
+	to {
+		--scroll-fade-t: var(--scroll-fade-size, 40px);
+	}
 }
 
 @keyframes ai-scroll-fade-b {
-  from {
-    --scroll-fade-b: var(--scroll-fade-size, 40px);
-  }
-  to {
-    --scroll-fade-b: 0px;
-  }
+	from {
+		--scroll-fade-b: var(--scroll-fade-size, 40px);
+	}
+	to {
+		--scroll-fade-b: 0px;
+	}
 }
 
 @keyframes ai-scroll-fade-s {
-  from {
-    --scroll-fade-s: 0px;
-  }
-  to {
-    --scroll-fade-s: var(--scroll-fade-size, 40px);
-  }
+	from {
+		--scroll-fade-s: 0px;
+	}
+	to {
+		--scroll-fade-s: var(--scroll-fade-size, 40px);
+	}
 }
 
 @keyframes ai-scroll-fade-e {
-  from {
-    --scroll-fade-e: var(--scroll-fade-size, 40px);
-  }
-  to {
-    --scroll-fade-e: 0px;
-  }
+	from {
+		--scroll-fade-e: var(--scroll-fade-size, 40px);
+	}
+	to {
+		--scroll-fade-e: 0px;
+	}
 }
 
 @property --scroll-fade-t {
-  syntax: '<length-percentage>';
-  inherits: false;
-  initial-value: 0px;
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 0px;
 }
 @property --scroll-fade-b {
-  syntax: '<length-percentage>';
-  inherits: false;
-  initial-value: 0px;
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 0px;
 }
 @property --scroll-fade-s {
-  syntax: '<length-percentage>';
-  inherits: false;
-  initial-value: 0px;
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 0px;
 }
 @property --scroll-fade-e {
-  syntax: '<length-percentage>';
-  inherits: false;
-  initial-value: 0px;
+	syntax: "<length-percentage>";
+	inherits: false;
+	initial-value: 0px;
 }
 
 @layer utilities {
-  /* Text shimmer. The highlight derives from currentColor. */
-  .shimmer {
-    --_spread: var(--shimmer-spread, calc(3ch + 40px));
-    --_base: currentColor;
-    --_highlight: var(--shimmer-color, oklch(from currentColor l c h / calc(alpha * 0.2)));
-    background-image: var(
-      --shimmer-image,
-      linear-gradient(
-        calc(90deg + var(--shimmer-angle)),
-        var(--_base) calc(50% - var(--_spread)),
-        color-mix(in oklch, var(--_highlight), var(--_base) 50%) calc(50% - var(--_spread) * 0.5),
-        var(--_highlight) 50%,
-        color-mix(in oklch, var(--_highlight), var(--_base) 50%) calc(50% + var(--_spread) * 0.5),
-        var(--_base) calc(50% + var(--_spread))
-      )
-    );
-    background-repeat: no-repeat;
-    background-size: calc(200% + var(--_spread) * 2) 100%;
-    background-position: 0 0;
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: var(--shimmer-text-fill, transparent);
-    animation: ai-shimmer var(--shimmer-duration, 2s) linear infinite;
-  }
-  [data-theme='dark'] .shimmer {
-    --_highlight: var(
-      --shimmer-color,
-      oklch(from currentColor max(0.8, calc(l + 0.4)) c h / calc(alpha + 0.4))
-    );
-  }
-  .shimmer-once {
-    animation-iteration-count: 1;
-  }
-  .shimmer-none {
-    --shimmer-image: none;
-    --shimmer-text-fill: currentColor;
-  }
+	/* Text shimmer. The highlight derives from currentColor. */
+	.shimmer {
+		--_spread: var(--shimmer-spread, calc(3ch + 40px));
+		--_base: currentColor;
+		--_highlight: var(--shimmer-color, oklch(from currentColor l c h / calc(alpha * 0.2)));
+		background-image: var(
+			--shimmer-image,
+			linear-gradient(
+				calc(90deg + var(--shimmer-angle)),
+				var(--_base) calc(50% - var(--_spread)),
+				color-mix(in oklch, var(--_highlight), var(--_base) 50%) calc(50% - var(--_spread) * 0.5),
+				var(--_highlight) 50%,
+				color-mix(in oklch, var(--_highlight), var(--_base) 50%) calc(50% + var(--_spread) * 0.5),
+				var(--_base) calc(50% + var(--_spread))
+			)
+		);
+		background-repeat: no-repeat;
+		background-size: calc(200% + var(--_spread) * 2) 100%;
+		background-position: 0 0;
+		background-clip: text;
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: var(--shimmer-text-fill, transparent);
+		animation: ai-shimmer var(--shimmer-duration, 2s) linear infinite;
+	}
+	[data-theme="dark"] .shimmer {
+		--_highlight: var(--shimmer-color, oklch(from currentColor max(0.8, calc(l + 0.4)) c h / calc(alpha + 0.4)));
+	}
+	.shimmer-once {
+		animation-iteration-count: 1;
+	}
+	.shimmer-none {
+		--shimmer-image: none;
+		--shimmer-text-fill: currentColor;
+	}
 
-  /* Edge fades on scroll containers. The fade grows as content hides past an edge. */
-  .scroll-fade-y,
-  .scroll-fade-b {
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      transparent 0,
-      #000 var(--scroll-fade-t, 0px),
-      #000 calc(100% - var(--scroll-fade-b, 0px)),
-      transparent 100%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0,
-      #000 var(--scroll-fade-t, 0px),
-      #000 calc(100% - var(--scroll-fade-b, 0px)),
-      transparent 100%
-    );
-  }
-  .scroll-fade-x {
-    -webkit-mask-image: linear-gradient(
-      to right,
-      transparent 0,
-      #000 var(--scroll-fade-s, 0px),
-      #000 calc(100% - var(--scroll-fade-e, 0px)),
-      transparent 100%
-    );
-    mask-image: linear-gradient(
-      to right,
-      transparent 0,
-      #000 var(--scroll-fade-s, 0px),
-      #000 calc(100% - var(--scroll-fade-e, 0px)),
-      transparent 100%
-    );
-  }
-  .scrollbar-none {
-    scrollbar-width: none;
-  }
-  .scrollbar-none::-webkit-scrollbar {
-    display: none;
-  }
-  .scrollbar-thin {
-    scrollbar-width: thin;
-    scrollbar-color: var(--outline-gray-3, rgba(0, 0, 0, 0.2)) transparent;
-  }
+	/* Edge fades on scroll containers. The fade grows as content hides past an edge. */
+	.scroll-fade-y,
+	.scroll-fade-b {
+		-webkit-mask-image: linear-gradient(
+			to bottom,
+			transparent 0,
+			#000 var(--scroll-fade-t, 0px),
+			#000 calc(100% - var(--scroll-fade-b, 0px)),
+			transparent 100%
+		);
+		mask-image: linear-gradient(to bottom, transparent 0, #000 var(--scroll-fade-t, 0px), #000 calc(100% - var(--scroll-fade-b, 0px)), transparent 100%);
+	}
+	.scroll-fade-x {
+		-webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--scroll-fade-s, 0px), #000 calc(100% - var(--scroll-fade-e, 0px)), transparent 100%);
+		mask-image: linear-gradient(to right, transparent 0, #000 var(--scroll-fade-s, 0px), #000 calc(100% - var(--scroll-fade-e, 0px)), transparent 100%);
+	}
+	.scrollbar-none {
+		scrollbar-width: none;
+	}
+	.scrollbar-none::-webkit-scrollbar {
+		display: none;
+	}
+	.scrollbar-thin {
+		scrollbar-width: thin;
+		scrollbar-color: var(--outline-gray-3, rgba(0, 0, 0, 0.2)) transparent;
+	}
 
-  /* `ease-out-strong`, as a utility, so apps need no Tailwind theme entry for it. */
-  .ease-out-strong {
-    transition-timing-function: var(--ease-out-strong);
-  }
+	/* `ease-out-strong`, as a utility, so apps need no Tailwind theme entry for it. */
+	.ease-out-strong {
+		transition-timing-function: var(--ease-out-strong);
+	}
 }
 
 /* Touch: small controls reach about 44px to a finger with an invisible hit area, so what you
    see does not move. `.touch-target` opts a control in. */
 @media (pointer: coarse) {
-  .touch-target {
-    position: relative;
-  }
-  .touch-target::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: max(100% + 16px, 44px);
-    height: max(100% + 16px, 44px);
-    transform: translate(-50%, -50%);
-  }
-  /* Step rows stacked in an open fold or a run of steps sit 12px apart on touch. Their areas
+	.touch-target {
+		position: relative;
+	}
+	.touch-target::after {
+		content: "";
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: max(100% + 16px, 44px);
+		height: max(100% + 16px, 44px);
+		transform: translate(-50%, -50%);
+	}
+	/* Step rows stacked in an open fold or a run of steps sit 12px apart on touch. Their areas
      fill that gap and stop there, so a tap never lands on the neighbour. A step line on its
      own keeps the 44px area. Tool and reasoning rows rename the trigger's data-slot, so the
      rule finds it by data-trace-trigger. */
-  :is([data-slot='trace'], [data-slot='message-steps']:has(> :nth-child(2))) [data-trace-trigger]::after {
-    height: calc(100% + 12px);
-  }
-  a[data-slot='attachment']::after {
-    content: '';
-    position: absolute;
-    inset: -8px 0;
-  }
-  /* iOS zooms into a field under 16px on focus and does not zoom back. */
-  [data-slot='prompt-input'] textarea {
-    font-size: 16px !important;
-  }
+	:is([data-slot="trace"], [data-slot="message-steps"]:has(> :nth-child(2))) [data-trace-trigger]::after {
+		height: calc(100% + 12px);
+	}
+	a[data-slot="attachment"]::after {
+		content: "";
+		position: absolute;
+		inset: -8px 0;
+	}
+	/* iOS zooms into a field under 16px on focus and does not zoom back. */
+	[data-slot="prompt-input"] textarea {
+		font-size: 16px !important;
+	}
 }
 
 /* `--scroll-fade-range` is how far the content scrolls while a fade grows to full size. Match it to
    `--scroll-fade-size` for a fade that shows from the first scroll. */
 @supports (animation-timeline: scroll()) {
-  .scroll-fade-y {
-    animation: ai-scroll-fade-t 1ms ease-in-out, ai-scroll-fade-b 1ms ease-in-out;
-    animation-timeline: scroll(self y), scroll(self y);
-    animation-range: 0 var(--scroll-fade-range, 96px), calc(100% - var(--scroll-fade-range, 96px)) 100%;
-    animation-fill-mode: both;
-  }
-  .scroll-fade-b {
-    animation: ai-scroll-fade-b 1ms ease-in-out;
-    animation-timeline: scroll(self y);
-    animation-range: calc(100% - var(--scroll-fade-range, 96px)) 100%;
-    animation-fill-mode: both;
-  }
-  .scroll-fade-x {
-    animation: ai-scroll-fade-s 1ms ease-in-out, ai-scroll-fade-e 1ms ease-in-out;
-    animation-timeline: scroll(self inline), scroll(self inline);
-    animation-range: 0 var(--scroll-fade-range, 96px), calc(100% - var(--scroll-fade-range, 96px)) 100%;
-    animation-fill-mode: both;
-  }
+	.scroll-fade-y {
+		animation:
+			ai-scroll-fade-t 1ms ease-in-out,
+			ai-scroll-fade-b 1ms ease-in-out;
+		animation-timeline: scroll(self y), scroll(self y);
+		animation-range:
+			0 var(--scroll-fade-range, 96px),
+			calc(100% - var(--scroll-fade-range, 96px)) 100%;
+		animation-fill-mode: both;
+	}
+	.scroll-fade-b {
+		animation: ai-scroll-fade-b 1ms ease-in-out;
+		animation-timeline: scroll(self y);
+		animation-range: calc(100% - var(--scroll-fade-range, 96px)) 100%;
+		animation-fill-mode: both;
+	}
+	.scroll-fade-x {
+		animation:
+			ai-scroll-fade-s 1ms ease-in-out,
+			ai-scroll-fade-e 1ms ease-in-out;
+		animation-timeline: scroll(self inline), scroll(self inline);
+		animation-range:
+			0 var(--scroll-fade-range, 96px),
+			calc(100% - var(--scroll-fade-range, 96px)) 100%;
+		animation-fill-mode: both;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shimmer {
-    animation: none;
-    background-image: none;
-    -webkit-text-fill-color: currentColor;
-  }
+	.shimmer {
+		animation: none;
+		background-image: none;
+		-webkit-text-fill-color: currentColor;
+	}
 }
 
 /* Trace: a link or button that wraps a line hugs its content. */
-[data-slot='trace'] > :is(a, button):has(> [data-slot='trace-line']) {
-  display: flex;
-  width: fit-content;
-  max-width: 100%;
-  min-width: 0;
-  border-radius: 6px;
-  text-align: left;
+[data-slot="trace"] > :is(a, button):has(> [data-slot="trace-line"]) {
+	display: flex;
+	width: fit-content;
+	max-width: 100%;
+	min-width: 0;
+	border-radius: 6px;
+	text-align: left;
 }
-:is(a, button) > [data-slot='trace-line'] {
-  cursor: pointer;
+:is(a, button) > [data-slot="trace-line"] {
+	cursor: pointer;
 }
-:is(a, button):hover > [data-slot='trace-line'] {
-  color: var(--ink-gray-8);
+:is(a, button):hover > [data-slot="trace-line"] {
+	color: var(--ink-gray-8);
 }
 
 /* highlight.js tokens, GitHub light/dark — the theme frappe-ui's editor uses. */
-[data-slot='code-block'] {
-  --hl-keyword: #d73a49;
-  --hl-title: #6f42c1;
-  --hl-constant: #005cc5;
-  --hl-string: #032f62;
-  --hl-builtin: #e36209;
-  --hl-comment: #6a737d;
-  --hl-tag: #22863a;
+[data-slot="code-block"] {
+	--hl-keyword: #d73a49;
+	--hl-title: #6f42c1;
+	--hl-constant: #005cc5;
+	--hl-string: #032f62;
+	--hl-builtin: #e36209;
+	--hl-comment: #6a737d;
+	--hl-tag: #22863a;
 }
-[data-theme='dark'] [data-slot='code-block'] {
-  --hl-keyword: #ff7b72;
-  --hl-title: #d2a8ff;
-  --hl-constant: #79c0ff;
-  --hl-string: #a5d6ff;
-  --hl-builtin: #ffa657;
-  --hl-comment: #8b949e;
-  --hl-tag: #7ee787;
+[data-theme="dark"] [data-slot="code-block"] {
+	--hl-keyword: #ff7b72;
+	--hl-title: #d2a8ff;
+	--hl-constant: #79c0ff;
+	--hl-string: #a5d6ff;
+	--hl-builtin: #ffa657;
+	--hl-comment: #8b949e;
+	--hl-tag: #7ee787;
 }
-[data-slot='code-block'] :is(.hljs-doctag, .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type) {
-  color: var(--hl-keyword);
+[data-slot="code-block"] :is(.hljs-doctag, .hljs-keyword, .hljs-template-tag, .hljs-template-variable, .hljs-type) {
+	color: var(--hl-keyword);
 }
-[data-slot='code-block'] :is(.hljs-title, .hljs-title.function_, .hljs-title.class_) {
-  color: var(--hl-title);
+[data-slot="code-block"] :is(.hljs-title, .hljs-title.function_, .hljs-title.class_) {
+	color: var(--hl-title);
 }
-[data-slot='code-block']
-  :is(.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-class, .hljs-selector-id) {
-  color: var(--hl-constant);
+[data-slot="code-block"]
+	:is(.hljs-attr, .hljs-attribute, .hljs-literal, .hljs-meta, .hljs-number, .hljs-operator, .hljs-variable, .hljs-selector-class, .hljs-selector-id) {
+	color: var(--hl-constant);
 }
-[data-slot='code-block'] :is(.hljs-regexp, .hljs-string) {
-  color: var(--hl-string);
+[data-slot="code-block"] :is(.hljs-regexp, .hljs-string) {
+	color: var(--hl-string);
 }
-[data-slot='code-block'] :is(.hljs-built_in, .hljs-symbol) {
-  color: var(--hl-builtin);
+[data-slot="code-block"] :is(.hljs-built_in, .hljs-symbol) {
+	color: var(--hl-builtin);
 }
-[data-slot='code-block'] :is(.hljs-comment, .hljs-code, .hljs-formula) {
-  color: var(--hl-comment);
+[data-slot="code-block"] :is(.hljs-comment, .hljs-code, .hljs-formula) {
+	color: var(--hl-comment);
 }
-[data-slot='code-block'] :is(.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo) {
-  color: var(--hl-tag);
+[data-slot="code-block"] :is(.hljs-name, .hljs-quote, .hljs-selector-tag, .hljs-selector-pseudo) {
+	color: var(--hl-tag);
 }
-[data-slot='code-block'] .hljs-addition {
-  color: var(--hl-tag);
+[data-slot="code-block"] .hljs-addition {
+	color: var(--hl-tag);
 }
-[data-slot='code-block'] .hljs-deletion {
-  color: var(--hl-keyword);
+[data-slot="code-block"] .hljs-deletion {
+	color: var(--hl-keyword);
 }
 
 /* Numbered code lines draw their number from a CSS counter. */
-[data-slot='code-block-content'][data-numbered] [data-slot='code-block-line'] {
-  counter-increment: line;
+[data-slot="code-block-content"][data-numbered] [data-slot="code-block-line"] {
+	counter-increment: line;
 }
-[data-slot='code-block-content'][data-numbered] [data-slot='code-block-line']::before {
-  content: counter(line);
-  min-width: 1.5rem;
-  margin-right: 0.75rem;
-  display: inline-block;
-  text-align: right;
-  color: var(--ink-gray-4);
-  user-select: none;
+[data-slot="code-block-content"][data-numbered] [data-slot="code-block-line"]::before {
+	content: counter(line);
+	min-width: 1.5rem;
+	margin-right: 0.75rem;
+	display: inline-block;
+	text-align: right;
+	color: var(--ink-gray-4);
+	user-select: none;
 }
 
 /* Response: long unbroken strings (URLs, ids, inline code) wrap instead of widening the reply.
    Table cells keep normal wrapping; the table scrolls inside its own region. */
-[data-slot='response'] :is(p, li, blockquote, h1, h2, h3, h4, h5, h6) {
-  overflow-wrap: anywhere;
+[data-slot="response"] :is(p, li, blockquote, h1, h2, h3, h4, h5, h6) {
+	overflow-wrap: anywhere;
 }
-[data-slot='response-table'] {
-  max-width: 100%;
-  margin: 0.75rem 0;
-  overflow-x: auto;
-  border-radius: 6px;
+[data-slot="response-table"] {
+	max-width: 100%;
+	margin: 0.75rem 0;
+	overflow-x: auto;
+	border-radius: 6px;
 }
-[data-slot='response-table'] > table {
-  margin-top: 0;
-  margin-bottom: 0;
+[data-slot="response-table"] > table {
+	margin-top: 0;
+	margin-bottom: 0;
 }
-[data-slot='response-table'] th,
-[data-slot='response-table'] td {
-  min-width: 6rem;
+[data-slot="response-table"] th,
+[data-slot="response-table"] td {
+	min-width: 6rem;
 }
 
 /* Links in a reply, as frappe-ui's prose draws them: the text's own colour with a thin
    gray line under it, which darkens on hover. Citation chips (below) have no line. */
-[data-slot='response'] a:not([data-citation]) {
-  color: var(--ink-gray-9);
-  text-decoration: none;
-  border-bottom: 1px solid var(--ink-gray-4);
-  transition: border-color 80ms ease;
+[data-slot="response"] a:not([data-citation]) {
+	color: var(--ink-gray-9);
+	text-decoration: none;
+	border-bottom: 1px solid var(--ink-gray-4);
+	transition: border-color 80ms ease;
 }
-[data-slot='response'] a:not([data-citation]):hover {
-  border-bottom-color: var(--ink-gray-6);
+[data-slot="response"] a:not([data-citation]):hover {
+	border-bottom-color: var(--ink-gray-6);
 }
-[data-slot='response'] a:not([data-citation]):focus-visible {
-  outline: none;
-  border-radius: 2px;
-  box-shadow: 0 0 0 2px var(--outline-gray-3);
+[data-slot="response"] a:not([data-citation]):focus-visible {
+	outline: none;
+	border-radius: 2px;
+	box-shadow: 0 0 0 2px var(--outline-gray-3);
 }
 
 /* Citations: a link to a page that a search or a page read returned (Response) shows as a chip. */
-[data-slot='response'] a[data-citation] {
-  display: inline-block;
-  max-width: 14rem;
-  margin: 0 0.125rem;
-  padding: 0 0.4rem;
-  overflow: hidden;
-  border-radius: 9999px;
-  background: var(--surface-gray-2);
-  color: var(--ink-gray-7);
-  font-size: 0.75rem;
-  line-height: 1.25rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: 1px;
-  text-decoration: none;
-  transition: background-color 150ms var(--ease-out-strong);
+[data-slot="response"] a[data-citation] {
+	display: inline-block;
+	max-width: 14rem;
+	margin: 0 0.125rem;
+	padding: 0 0.4rem;
+	overflow: hidden;
+	border-radius: 9999px;
+	background: var(--surface-gray-2);
+	color: var(--ink-gray-7);
+	font-size: 0.75rem;
+	line-height: 1.25rem;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	vertical-align: 1px;
+	text-decoration: none;
+	transition: background-color 150ms var(--ease-out-strong);
 }
 @media (prefers-reduced-motion: reduce) {
-  [data-slot='response'] a[data-citation] {
-    transition: none;
-  }
+	[data-slot="response"] a[data-citation] {
+		transition: none;
+	}
 }
-[data-slot='response'] a[data-citation]:hover,
-[data-slot='response'] a[data-citation]:focus-visible {
-  background: var(--surface-gray-3);
-  color: var(--ink-gray-9);
-  text-decoration: none;
+[data-slot="response"] a[data-citation]:hover,
+[data-slot="response"] a[data-citation]:focus-visible {
+	background: var(--surface-gray-3);
+	color: var(--ink-gray-9);
+	text-decoration: none;
 }
 
 /* Maths (KaTeX): a wide formula scrolls on its own instead of widening the reply. */
-[data-slot='math-block'] {
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+[data-slot="math-block"] {
+	max-width: 100%;
+	overflow-x: auto;
+	overflow-y: hidden;
 }
-[data-slot='math-block'] > .katex-display {
-  margin: 0.75rem 0;
+[data-slot="math-block"] > .katex-display {
+	margin: 0.75rem 0;
 }
 
 /* DeskCard: when the card itself is narrow (a phone, a side panel), the button
    gets its own row under the text instead of squeezing it. */
 [data-slot="desk-card"] {
-  container-type: inline-size;
+	container-type: inline-size;
 }
 
 @container (max-width: 30rem) {
-  [data-slot="desk-card-body"] {
-    flex-wrap: wrap;
-  }
+	[data-slot="desk-card-body"] {
+		flex-wrap: wrap;
+	}
 
-  [data-slot="desk-card-actions"] {
-    flex-basis: 100%;
-    padding-left: 3rem;
-  }
+	[data-slot="desk-card-actions"] {
+		flex-basis: 100%;
+		padding-left: 3rem;
+	}
 }
 
 /* Mermaid diagrams, drawn by Pele (MermaidBlock). The same theme as Frappe Wiki
@@ -416,69 +403,69 @@
    variables, so diagrams follow light and dark without a redraw. `.pele` is on
    the SVG and on the error line and zoom bar beside it. */
 :where(.pele) {
-  --pele-bg: var(--surface-gray-1);
-  --pele-fg: var(--ink-gray-9);
-  --pele-muted: var(--ink-gray-5);
-  --pele-line: var(--ink-gray-5);
-  --pele-surface: var(--surface-gray-2);
-  --pele-surface-alt: var(--surface-gray-3);
-  --pele-border: var(--outline-gray-3);
-  /* Blue tokens give unreadable text on Gantt bars in dark mode. */
-  --pele-accent: var(--ink-gray-7);
-  --pele-critical: var(--ink-red-4);
-  --pele-error: var(--ink-red-5);
-  --pele-series-1: var(--chart-categorical-1);
-  --pele-series-2: var(--chart-categorical-2);
-  --pele-series-3: var(--chart-categorical-3);
-  --pele-series-4: var(--chart-categorical-4);
-  --pele-series-5: var(--chart-categorical-5);
-  --pele-series-6: var(--chart-categorical-6);
-  --pele-series-7: var(--chart-categorical-7);
-  --pele-series-8: var(--chart-categorical-8);
+	--pele-bg: var(--surface-gray-1);
+	--pele-fg: var(--ink-gray-9);
+	--pele-muted: var(--ink-gray-5);
+	--pele-line: var(--ink-gray-5);
+	--pele-surface: var(--surface-gray-2);
+	--pele-surface-alt: var(--surface-gray-3);
+	--pele-border: var(--outline-gray-3);
+	/* Blue tokens give unreadable text on Gantt bars in dark mode. */
+	--pele-accent: var(--ink-gray-7);
+	--pele-critical: var(--ink-red-4);
+	--pele-error: var(--ink-red-5);
+	--pele-series-1: var(--chart-categorical-1);
+	--pele-series-2: var(--chart-categorical-2);
+	--pele-series-3: var(--chart-categorical-3);
+	--pele-series-4: var(--chart-categorical-4);
+	--pele-series-5: var(--chart-categorical-5);
+	--pele-series-6: var(--chart-categorical-6);
+	--pele-series-7: var(--chart-categorical-7);
+	--pele-series-8: var(--chart-categorical-8);
 }
 /* Pele fits the diagram to this box, so it must not shrink to its content. */
-[data-slot='mermaid-diagram'] {
-  width: 100%;
+[data-slot="mermaid-diagram"] {
+	width: 100%;
 }
-[data-slot='mermaid-diagram'] svg {
-  margin-inline: auto;
+[data-slot="mermaid-diagram"] svg {
+	margin-inline: auto;
 }
 
 /* ER entities follow Frappe Insights' table cards: a raised card, a medium
    weight name, rows split by hairlines instead of zebra stripes. */
 .pele-er {
-  --pele-surface: var(--surface-base);
-  --pele-border: var(--outline-gray-2);
+	--pele-surface: var(--surface-base);
+	--pele-border: var(--outline-gray-2);
 }
-[data-theme='dark'] .pele-er {
-  --pele-surface: var(--surface-gray-2);
+[data-theme="dark"] .pele-er {
+	--pele-surface: var(--surface-gray-2);
 }
 .pele-er .pele-entity {
-  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.08));
+	filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.08));
 }
 .pele-er .pele-entity > .pele-label {
-  font-weight: 500;
+	font-weight: 500;
 }
 /* Stroking the striped (odd) rows draws a hairline at every row boundary. */
 .pele-er .pele-er-stripes rect {
-  fill: var(--pele-surface);
-  stroke: var(--pele-border);
+	fill: var(--pele-surface);
+	stroke: var(--pele-border);
 }
 /* With an odd row count the last stripe's bottom edge runs through the text. Drop it. */
 .pele-er .pele-entity:has(.pele-er-type:nth-last-child(1 of .pele-er-type):nth-child(odd of .pele-er-type)) .pele-er-stripes rect:last-child {
-  clip-path: inset(0 0 1px 0);
+	clip-path: inset(0 0 1px 0);
 }
 /* Relationship names sit in an outlined chip, like Insights' cardinality. */
 .pele-er .pele-edge-label rect {
-  fill: var(--pele-surface);
-  stroke: var(--pele-border);
-  rx: 6px;
+	fill: var(--pele-surface);
+	stroke: var(--pele-border);
+	rx: 6px;
 }
 
 /* A column the markdown or the number check (markdown.ts) aligned. Prose styles would override the HTML attribute. */
-[data-slot='response-table'] :is(th, td)[align='right'] {
-  text-align: right;
+[data-slot="response-table"] :is(th, td)[align="right"] {
+	text-align: right;
 }
-[data-slot='response-table'] :is(th, td)[align='center'] {
-  text-align: center;
+[data-slot="response-table"] :is(th, td)[align="center"] {
+	text-align: center;
 }

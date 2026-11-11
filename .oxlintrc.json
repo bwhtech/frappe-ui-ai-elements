@@ -1,0 +1,30 @@
+{
+	"$schema": "./node_modules/oxlint/configuration_schema.json",
+	"plugins": ["typescript", "unicorn", "oxc", "vue", "import"],
+	"categories": {
+		"correctness": "error",
+		"suspicious": "error"
+	},
+	"rules": {
+		"import/no-unassigned-import": [
+			"error",
+			{
+				"allow": ["**/*.css"]
+			}
+		]
+	},
+	"env": {
+		"browser": true,
+		"builtin": true
+	},
+	"ignorePatterns": ["dist", "demo-dist"],
+	"overrides": [
+		{
+			"files": ["scripts/vue-tsc.cjs"],
+			"rules": {
+				"no-underscore-dangle": "off",
+				"import/no-unassigned-import": "off"
+			}
+		}
+	]
+}

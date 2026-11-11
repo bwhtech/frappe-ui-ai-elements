@@ -43,6 +43,7 @@ const nav = [
 				<span class="hidden text-sm text-ink-gray-5 sm:inline">Vue on frappe-ui · fixture data, no model calls</span>
 				<div class="ml-auto flex items-center gap-1">
 					<Button variant="ghost" icon-left="lucide-flask-conical" label="Playground" @click="navigate('/playground.html')" />
+					<Button variant="ghost" icon-right="lucide-arrow-up-right" label="GitHub" href="https://github.com/bwhtech/frappe-ui-ai-elements" />
 					<Button
 						variant="ghost"
 						:icon="resolvedColorScheme === 'dark' ? 'lucide-sun' : 'lucide-moon'"

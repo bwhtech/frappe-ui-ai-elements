@@ -15,7 +15,10 @@ const PY_FRAME = /^File "(.+?)", line (\d+)(?:, in (.+))?$/;
 
 /** Splits a stack into the error line and its frames. Handles JS and Python traces. */
 export function parseStack(stack: string) {
-	const lines = stack.split("\n").map((line) => line.trim()).filter(Boolean);
+	const lines = stack
+		.split("\n")
+		.map((line) => line.trim())
+		.filter(Boolean);
 	const python = lines[0]?.startsWith("Traceback");
 	const error = (python ? lines[lines.length - 1] : lines[0]) ?? "";
 	const frameLines = python ? lines.slice(1, -1).filter((line) => line.startsWith("File ")) : lines.slice(1);

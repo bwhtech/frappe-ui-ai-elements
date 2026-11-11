@@ -8,5 +8,14 @@ const { root, last, status } = useQuestionnaireNav("QuestionnaireSubmit");
 </script>
 
 <template>
-	<Button v-if="last" data-slot="questionnaire-submit" :data-status="status" size="sm" variant="solid" type="submit" :label="label" :disabled="root.disabled.value" />
+	<Button
+		v-if="last"
+		data-slot="questionnaire-submit"
+		:data-status="status"
+		size="sm"
+		variant="solid"
+		type="submit"
+		:label="label"
+		:disabled="root.disabled.value"
+	/>
 </template>

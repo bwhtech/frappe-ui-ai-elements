@@ -17,7 +17,11 @@ watch(
 	() => [props.v.streaming, props.v.long, props.worst],
 	() => {
 		clearInterval(timer);
-		const all = props.worst ? [w.command, w.unbroken, w.hindi, ...lines] : props.v.long ? Array.from({ length: 80 }, (_, i) => `${lines[i % lines.length]} (${i})`) : lines;
+		const all = props.worst
+			? [w.command, w.unbroken, w.hindi, ...lines]
+			: props.v.long
+				? Array.from({ length: 80 }, (_, i) => `${lines[i % lines.length]} (${i})`)
+				: lines;
 		if (!props.v.streaming) return void (output.value = all.join("\n"));
 		output.value = "";
 		let i = 0;
@@ -42,47 +46,107 @@ const stacks = {
   File "/home/frappe/frappe-bench/apps/seva/seva/doctype/volunteer/volunteer.py", line 12, in validate
 frappe.exceptions.ValidationError: Phone number is not valid`,
 };
-const stack = computed(() => (props.worst ? `Error: ${w.unbroken} ${w.hindi}\n    at ${w.toolName} (/app/${w.unbroken}.ts:1:1)` : stacks[props.v.language as "js" | "python"]));
+const stack = computed(() =>
+	props.worst ? `Error: ${w.unbroken} ${w.hindi}\n    at ${w.toolName} (/app/${w.unbroken}.ts:1:1)` : stacks[props.v.language as "js" | "python"],
+);
 
 const suites = computed<TestSuite[]>(() => {
 	const failures = Number(props.v.failures);
 	return [
-		{ name: props.worst ? `${w.unbroken}.py` : "test_volunteer.py", tests: [{ name: "creates a volunteer", status: "passed", duration: 120 }, { name: props.worst ? w.hindi : "rejects a bad phone", status: failures > 1 ? "failed" : "passed", duration: 80, error: failures > 1 ? "AssertionError: ValidationError not raised" : undefined }] },
-		{ name: "test_signup_form.py", tests: [{ name: "renders the form", status: "passed", duration: 310 }, { name: "submits a sign-up", status: failures > 0 ? "failed" : "passed", duration: 1450, error: failures > 0 ? (props.worst ? w.unbroken : "AssertionError: Expected status 200, received 417") : undefined }, { name: "sends the coordinator email", status: props.v.streaming ? "running" : "skipped" }] },
+		{
+			name: props.worst ? `${w.unbroken}.py` : "test_volunteer.py",
+			tests: [
+				{ name: "creates a volunteer", status: "passed", duration: 120 },
+				{
+					name: props.worst ? w.hindi : "rejects a bad phone",
+					status: failures > 1 ? "failed" : "passed",
+					duration: 80,
+					error: failures > 1 ? "AssertionError: ValidationError not raised" : undefined,
+				},
+			],
+		},
+		{
+			name: "test_signup_form.py",
+			tests: [
+				{ name: "renders the form", status: "passed", duration: 310 },
+				{
+					name: "submits a sign-up",
+					status: failures > 0 ? "failed" : "passed",
+					duration: 1450,
+					error: failures > 0 ? (props.worst ? w.unbroken : "AssertionError: Expected status 200, received 417") : undefined,
+				},
+				{ name: "sends the coordinator email", status: props.v.streaming ? "running" : "skipped" },
+			],
+		},
 	];
 });
 
 const files = computed<FileTreeNode[]>(() => {
 	const change = (c: FileTreeNode["change"]) => (props.v.changes ? c : undefined);
-	return [{ path: "seva", name: "seva", children: [
-		{ path: "seva/doctype", name: "doctype", children: [
-			{ path: "seva/doctype/volunteer.json", name: props.worst ? `${w.unbroken}.json` : "volunteer.json", change: change("added") },
-			{ path: "seva/doctype/volunteer.py", name: "volunteer.py", change: change("added") },
-		] },
-		{ path: "seva/hooks.py", name: "hooks.py", change: change("modified") },
-		{ path: "seva/old_form.html", name: props.worst ? w.hindi : "old_form.html", change: change("deleted") },
-	] }];
+	return [
+		{
+			path: "seva",
+			name: "seva",
+			children: [
+				{
+					path: "seva/doctype",
+					name: "doctype",
+					children: [
+						{ path: "seva/doctype/volunteer.json", name: props.worst ? `${w.unbroken}.json` : "volunteer.json", change: change("added") },
+						{ path: "seva/doctype/volunteer.py", name: "volunteer.py", change: change("added") },
+					],
+				},
+				{ path: "seva/hooks.py", name: "hooks.py", change: change("modified") },
+				{ path: "seva/old_form.html", name: props.worst ? w.hindi : "old_form.html", change: change("deleted") },
+			],
+		},
+	];
 });
 const expanded = ref<(string | number)[]>(["seva", "seva/doctype"]);
 const selected = ref("seva/hooks.py");
-watch(() => props.v.expandAll, (all) => (expanded.value = all ? ["seva", "seva/doctype"] : []));
+watch(
+	() => props.v.expandAll,
+	(all) => (expanded.value = all ? ["seva", "seva/doctype"] : []),
+);
 
 const tools = computed(() =>
-	Array.from({ length: Number(props.v.tools) }, (_, i) => (props.worst && i === 0 ? w.toolName : ["get_doctype_schema", "search_doctypes", "list_documents"][i % 3])),
+	Array.from({ length: Number(props.v.tools) }, (_, i) =>
+		props.worst && i === 0 ? w.toolName : ["get_doctype_schema", "search_doctypes", "list_documents"][i % 3],
+	),
 );
-const toolCall = { type: "dynamic-tool", toolName: "get_doctype_schema", toolCallId: "c1", state: "output-available", input: { doctype: "Volunteer" }, output: '{"fields":4}' } as const;
+const toolCall = {
+	type: "dynamic-tool",
+	toolName: "get_doctype_schema",
+	toolCallId: "c1",
+	state: "output-available",
+	input: { doctype: "Volunteer" },
+	output: '{"fields":4}',
+} as const;
 </script>
 
 <template>
-	<Terminal v-if="kind === 'terminal'" :command="worst ? w.command : String(v.command)" :output="output" :is-streaming="Boolean(v.streaming)" :exit-code="v.streaming ? undefined : exitCode" @update:open="log('update:open', $event)" />
-	<StackTrace v-else-if="kind === 'stack'" :key="String(v.defaultOpen)" :trace="stack" :default-open="Boolean(v.defaultOpen)" @select="(path, line) => log('select', { path, line })" />
+	<Terminal
+		v-if="kind === 'terminal'"
+		:command="worst ? w.command : String(v.command)"
+		:output="output"
+		:is-streaming="Boolean(v.streaming)"
+		:exit-code="v.streaming ? undefined : exitCode"
+		@update:open="log('update:open', $event)"
+	/>
+	<StackTrace
+		v-else-if="kind === 'stack'"
+		:key="String(v.defaultOpen)"
+		:trace="stack"
+		:default-open="Boolean(v.defaultOpen)"
+		@select="(path, line) => log('select', { path, line })"
+	/>
 	<TestResults v-else-if="kind === 'tests'" :key="String(v.failures)" :suites="suites" :is-streaming="Boolean(v.streaming)" :duration="1960" />
 	<FileTree v-else-if="kind === 'files'" v-model:expanded="expanded" v-model:selected="selected" :nodes="files" @select="log('select', $event)" />
 	<Subagent
 		v-else
 		:key="String(v.status)"
 		:name="worst ? w.name : 'schema review'"
-		:status="(v.status as 'running' | 'done' | 'error')"
+		:status="v.status as 'running' | 'done' | 'error'"
 		:task="worst ? w.marathi : 'Check the Volunteer DocType for fields a food bank needs.'"
 		:model="v.model ? 'claude-haiku' : undefined"
 		:tools="tools"

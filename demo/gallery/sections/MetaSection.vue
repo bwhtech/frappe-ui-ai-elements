@@ -18,13 +18,19 @@ const restored = ref("");
 	</DemoBlock>
 	<DemoBlock id="inline-citation" title="Inline Citation" description="A source chip inside the sentence that opens on hover or focus.">
 		<p class="text-p-base text-ink-gray-8">
-			A DocType is the model and the form at once<InlineCitation :sources="[{ ...sources[0], quote: 'A DocType is the core building block of any application based on the Frappe Framework.' }]" />, and a
-			web form lets people outside your team fill it in<InlineCitation :sources="[sources[2], sources[1]]" />.
+			A DocType is the model and the form at once<InlineCitation
+				:sources="[{ ...sources[0], quote: 'A DocType is the core building block of any application based on the Frappe Framework.' }]"
+			/>, and a web form lets people outside your team fill it in<InlineCitation :sources="[sources[2], sources[1]]" />.
 		</p>
 	</DemoBlock>
 	<DemoBlock id="context" title="Context & Model Selector" description="Token usage of the thread, and the model menu.">
 		<div class="flex flex-wrap items-center gap-3">
-			<Context :used-tokens="12400" :max-tokens="200000" :usage="{ inputTokens: 10200, cachedInputTokens: 8000, outputTokens: 2200 }" model-id="anthropic/claude-sonnet-5.5" />
+			<Context
+				:used-tokens="12400"
+				:max-tokens="200000"
+				:usage="{ inputTokens: 10200, cachedInputTokens: 8000, outputTokens: 2200 }"
+				model-id="anthropic/claude-sonnet-5.5"
+			/>
 			<Context :used-tokens="182000" :max-tokens="200000" />
 			<ModelSelector
 				v-model="model"

@@ -1,7 +1,28 @@
 import type { AskUserInput, AskUserKind, AskUserQuestion } from "frappe-ui-ai-elements";
 import { worst as w } from "../worst";
 
-const areas = ["Jayanagar", "Koramangala", "Indiranagar", "Malleswaram", "Whitefield", "Yelahanka", "Banashankari", "Hebbal", "Rajajinagar", "Basavanagudi", "Marathahalli", "Electronic City", "BTM Layout", "HSR Layout", "Ulsoor", "Frazer Town", "RT Nagar", "Vijayanagar", "Kengeri", "JP Nagar"];
+const areas = [
+	"Jayanagar",
+	"Koramangala",
+	"Indiranagar",
+	"Malleswaram",
+	"Whitefield",
+	"Yelahanka",
+	"Banashankari",
+	"Hebbal",
+	"Rajajinagar",
+	"Basavanagudi",
+	"Marathahalli",
+	"Electronic City",
+	"BTM Layout",
+	"HSR Layout",
+	"Ulsoor",
+	"Frazer Town",
+	"RT Nagar",
+	"Vijayanagar",
+	"Kengeri",
+	"JP Nagar",
+];
 
 const base: Record<AskUserKind, Omit<AskUserQuestion, "id" | "kind">> = {
 	single: { header: "Sign-up", question: "How do volunteers sign up?", description: "You can change this later." },
@@ -23,12 +44,21 @@ function options(kind: AskUserKind, count: number, isWorst: boolean) {
 	return Array.from({ length: count }, (_, i) =>
 		isWorst
 			? { value: `v${i}`, label: i % 2 ? w.unbroken : `${w.hindi} ${i + 1}`, description: i % 3 ? w.marathi : undefined }
-			: { value: areas[i % areas.length].toLowerCase().replace(/\s+/g, "-") + (i >= areas.length ? `-${i}` : ""), label: areas[i % areas.length] + (i >= areas.length ? ` ${i}` : "") },
+			: {
+					value: areas[i % areas.length].toLowerCase().replace(/\s+/g, "-") + (i >= areas.length ? `-${i}` : ""),
+					label: areas[i % areas.length] + (i >= areas.length ? ` ${i}` : ""),
+				},
 	);
 }
 
 /** Builds the playground's ask_user input from its controls. */
-export function buildAskUserInput(settings: { kinds: AskUserKind[]; optionCount: number; allowOther: boolean; required: boolean; worst: boolean }): AskUserInput {
+export function buildAskUserInput(settings: {
+	kinds: AskUserKind[];
+	optionCount: number;
+	allowOther: boolean;
+	required: boolean;
+	worst: boolean;
+}): AskUserInput {
 	const questions = settings.kinds.map((kind, i): AskUserQuestion => {
 		const sample = base[kind];
 		const hasOptions = kind === "single" || kind === "multiple";

@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify";
-import katex from "katex";
+import { renderToString } from "katex";
 import "katex/dist/katex.min.css";
 import { Marked, type TokenizerAndRendererExtension, type Token, type Tokens, type TokensList } from "marked";
 
@@ -105,7 +105,7 @@ const marked = new Marked({ extensions: [blockMath, inlineMath] });
 
 /** KaTeX's HTML for the eye and MathML for screen readers. Maths that does not parse shows its source as plain text. */
 function tex(source: string, displayMode: boolean) {
-	return katex.renderToString(source, { displayMode, throwOnError: false, errorColor: "inherit", strict: "ignore", output: "htmlAndMathml" });
+	return renderToString(source, { displayMode, throwOnError: false, errorColor: "inherit", strict: "ignore", output: "htmlAndMathml" });
 }
 
 /**

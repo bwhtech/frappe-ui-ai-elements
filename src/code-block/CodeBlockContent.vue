@@ -6,10 +6,7 @@ import { highlightLines } from "./highlight";
  * The code itself. Pass `code` (and `language` to highlight it), or put
  * CodeBlockLine children in the default slot for per-line variants.
  */
-const props = withDefaults(
-	defineProps<{ code?: string; language?: string; wrap?: boolean; lineNumbers?: boolean; startLine?: number }>(),
-	{ startLine: 1 },
-);
+const props = withDefaults(defineProps<{ code?: string; language?: string; wrap?: boolean; lineNumbers?: boolean; startLine?: number }>(), { startLine: 1 });
 
 const lines = computed(() => (props.code === undefined ? null : highlightLines(props.code, props.language)));
 </script>

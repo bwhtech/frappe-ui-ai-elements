@@ -70,7 +70,13 @@ const efforts = [
 							</template>
 						</PromptInputTools>
 						<div class="flex items-center gap-1">
-							<Context v-if="status === 'ready'" :used-tokens="48200" :max-tokens="200000" :usage="{ inputTokens: 41000, outputTokens: 7200 }" model-id="anthropic/claude-sonnet-5.5" />
+							<Context
+								v-if="status === 'ready'"
+								:used-tokens="48200"
+								:max-tokens="200000"
+								:usage="{ inputTokens: 41000, outputTokens: 7200 }"
+								model-id="anthropic/claude-sonnet-5.5"
+							/>
 							<PromptInputSubmit />
 						</div>
 					</PromptInputFooter>
@@ -96,7 +102,12 @@ const efforts = [
 				<div>
 					<PromptInputQueue
 						:items="queued"
-						@steer="(id) => { steered = queued.find((item) => item.id === id)?.text ?? ''; queued = queued.filter((item) => item.id !== id) }"
+						@steer="
+							(id) => {
+								steered = queued.find((item) => item.id === id)?.text ?? '';
+								queued = queued.filter((item) => item.id !== id);
+							}
+						"
 						@remove="(id) => (queued = queued.filter((item) => item.id !== id))"
 						@update="(id, text) => (queued.find((item) => item.id === id)!.text = text)"
 						@reorder="reorder"

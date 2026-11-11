@@ -26,8 +26,7 @@ const summary = computed(() => {
 	return `Ran ${tests.value.length} tests${failed.value ? `, ${failed.value} failed` : ""}`;
 });
 const icon = { passed: "lucide-check", failed: "lucide-x", skipped: "lucide-circle-slash", running: "lucide-loader-circle" };
-const lineStatus = (test: TestCase) =>
-	({ failed: "error", running: "running", skipped: "pending", passed: undefined } as const)[test.status];
+const lineStatus = (test: TestCase) => ({ failed: "error", running: "running", skipped: "pending", passed: undefined } as const)[test.status];
 const seconds = (ms?: number) => (ms === undefined ? "" : ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`);
 </script>
 

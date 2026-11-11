@@ -1,0 +1,85 @@
+# Publishes to npm when a version tag is pushed. `npm run release` makes the tag (bumpp).
+#
+# npm trusted publishing gives the job a short-lived token through OIDC, so no npm token is
+# stored in GitHub. On npmjs.com, the package's trusted publisher names this file:
+# release.yml. See CONTRIBUTING.md.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the repo
+      id-token: write # for npm trusted publishing
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false # never use a cache in a release build
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check that the tag matches package.json
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::The tag is $GITHUB_REF_NAME, but package.json has version $version."
+            exit 1
+          fi
+
+      - name: Check format, lint and types
+        run: npm run check
+
+      - name: Build the library
+        run: npm run build
+
+      - name: Build the demo against dist/
+        run: npm run build:demo:dist
+
+      - name: Publish to npm
+        run: |
+          name="$(node -p 'require("./package.json").name')"
+          version="$(node -p 'require("./package.json").version')"
+          # A version that is on npm already (such as one published by hand) is not published again.
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is on npm already. Nothing to publish."
+            exit 0
+          fi
+          # A prerelease, such as 1.1.0-beta.0, goes to the "next" tag, so "latest" stays stable.
+          case "$version" in
+            *-*) npm publish --ignore-scripts --tag next ;;
+            *) npm publish --ignore-scripts ;;
+          esac
+
+  github-release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to create the GitHub release
+    steps:
+      - name: Create the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          prerelease=""
+          case "$GITHUB_REF_NAME" in *-*) prerelease="--prerelease" ;; esac
+          # GitHub writes the notes from the pull requests merged since the last release.
+          gh release create "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes $prerelease

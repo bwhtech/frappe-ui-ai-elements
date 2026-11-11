@@ -7,8 +7,17 @@ import { worst as w } from "../worst";
 
 const props = defineProps<{ v: Values; worst: boolean }>();
 const log = useLog();
-const pool = ["Track volunteers: name, phone, area and free days", "A sign-up form for our weekend food drive", "Add 20 sample records to Volunteer", "Show donations from last month", "Email volunteers free on Saturday", "Make a donor list"];
-const items = computed(() => Array.from({ length: Number(props.v.count) }, (_, i) => (props.worst ? [w.hindi, w.unbroken, w.emoji][i % 3] : pool[i % pool.length])));
+const pool = [
+	"Track volunteers: name, phone, area and free days",
+	"A sign-up form for our weekend food drive",
+	"Add 20 sample records to Volunteer",
+	"Show donations from last month",
+	"Email volunteers free on Saturday",
+	"Make a donor list",
+];
+const items = computed(() =>
+	Array.from({ length: Number(props.v.count) }, (_, i) => (props.worst ? [w.hindi, w.unbroken, w.emoji][i % 3] : pool[i % pool.length])),
+);
 </script>
 
 <template>

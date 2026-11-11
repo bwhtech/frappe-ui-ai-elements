@@ -26,14 +26,27 @@ import { worst as w } from "../worst";
 /** Task, Plan, Queue and Chain of Thought share one demo; `kind` picks which. */
 const props = defineProps<{ v: Values; worst: boolean; kind: "task" | "plan" | "queue" | "chain" }>();
 const log = useLog();
-const steps = ["Create the Volunteer DocType", "Add the Volunteer Day child table", "Create the web form", "Add an email notification", "Add 20 sample records", "Share the link", "Train the coordinators", "Import last year's list"];
+const steps = [
+	"Create the Volunteer DocType",
+	"Add the Volunteer Day child table",
+	"Create the web form",
+	"Add an email notification",
+	"Add 20 sample records",
+	"Share the link",
+	"Train the coordinators",
+	"Import last year's list",
+];
 const label = (i: number) => (props.worst ? [w.hindi, w.unbroken, w.name, w.emoji][i % 4] : steps[i % steps.length]);
 const count = computed(() => Number(props.v.count));
 const done = computed(() => Math.min(Number(props.v.done ?? 0), count.value));
 const streaming = computed(() => Boolean(props.v.streaming));
 const status = computed(() => (props.v.status === "none" ? undefined : (props.v.status as TraceStatus)));
 const stepStatus = (i: number) => (i < done.value ? "complete" : i === done.value ? "active" : "pending");
-const taskTitle = computed(() => ({ running: "Updating the Volunteer form", error: "Failed to update the Volunteer form", none: "Updated the Volunteer form" })[String(props.v.status)] ?? "");
+const taskTitle = computed(
+	() =>
+		({ running: "Updating the Volunteer form", error: "Failed to update the Volunteer form", none: "Updated the Volunteer form" })[String(props.v.status)] ??
+		"",
+);
 </script>
 
 <template>
@@ -52,7 +65,9 @@ const taskTitle = computed(() => ({ running: "Updating the Volunteer form", erro
 			<PlanDescription>{{ done }} of {{ count }} done</PlanDescription>
 		</PlanHeader>
 		<PlanContent>
-			<template v-if="v.description" #description>{{ worst ? w.marathi : "Build a public form that adds people to Volunteer, then email the coordinator." }}</template>
+			<template v-if="v.description" #description>{{
+				worst ? w.marathi : "Build a public form that adds people to Volunteer, then email the coordinator."
+			}}</template>
 			<PlanStep v-for="i in count" :key="i" :status="stepStatus(i - 1)">{{ label(i - 1) }}</PlanStep>
 		</PlanContent>
 	</Plan>
@@ -91,7 +106,10 @@ const taskTitle = computed(() => ({ running: "Updating the Volunteer form", erro
 			:icon="i % 2 ? 'lucide-search' : 'lucide-file-text'"
 			:description="v.error && i === 2 ? '403' : undefined"
 		>
-			<ChainOfThoughtSearchResults v-if="i === 1 && v.results" :urls="worst ? [`https://${w.unbroken}.org`, 'https://docs.frappe.io'] : ['https://docs.frappe.io/a', 'https://www.volunteermatch.org/b']" />
+			<ChainOfThoughtSearchResults
+				v-if="i === 1 && v.results"
+				:urls="worst ? [`https://${w.unbroken}.org`, 'https://docs.frappe.io'] : ['https://docs.frappe.io/a', 'https://www.volunteermatch.org/b']"
+			/>
 		</ChainOfThoughtStep>
 	</ChainOfThought>
 </template>

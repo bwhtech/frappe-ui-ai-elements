@@ -9,7 +9,9 @@ const item = useQuestionnaireItem("<QuestionnaireChoices>");
 
 function move(event: KeyboardEvent, step: number) {
 	const group = event.currentTarget as HTMLElement;
-	const targets = Array.from(group.querySelectorAll<HTMLElement>("[data-slot=questionnaire-choice]:not([aria-disabled=true]), [data-slot=questionnaire-input] input:not(:disabled)"));
+	const targets = Array.from(
+		group.querySelectorAll<HTMLElement>("[data-slot=questionnaire-choice]:not([aria-disabled=true]), [data-slot=questionnaire-input] input:not(:disabled)"),
+	);
 	const current = targets.findIndex((target) => target === event.target || target.contains(event.target as Node));
 	const input = event.target instanceof HTMLInputElement ? event.target : null;
 	// Inside the freeform text, arrows only leave it while it is empty.

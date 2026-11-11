@@ -17,6 +17,8 @@ const fromDist = [
 
 export default defineConfig({
 	root: "demo",
+	// GitHub Pages serves the demo under /<repo>/; the Pages workflow sets DEMO_BASE.
+	base: process.env.DEMO_BASE ?? "/",
 	plugins: [frappeui({ frappeProxy: false, jinjaBootData: false, buildConfig: false }), vuePlugin()],
 	css: { postcss: here },
 	resolve: { alias: process.env.DEMO_FROM_DIST ? fromDist : fromSource },

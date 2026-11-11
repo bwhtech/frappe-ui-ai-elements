@@ -45,6 +45,6 @@ onBeforeUnmount(() => clearInterval(timer));
 			<Button size="sm" icon-left="lucide-play" :label="streaming ? 'Streaming…' : 'Stream it'" :disabled="streaming" @click="stream" />
 			<span class="text-xs text-ink-gray-5">{{ shown.length }} / {{ source.length }} chars</span>
 		</div>
-		<Response :content="shown" :parse-incomplete="Boolean(v.parseIncomplete)" :size="(v.size as 'sm' | 'base')" />
+		<Response :content="shown" :parse-incomplete="Boolean(v.parseIncomplete)" :size="v.size as 'sm' | 'base'" />
 	</div>
 </template>

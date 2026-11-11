@@ -1,5 +1,7 @@
 # Changelog
 
+[GitHub releases](https://github.com/bwhtech/frappe-ui-ai-elements/releases) list every change in each version. This file lists the changes that you must act on, and the changes in 1.0.0.
+
 ## 1.0.0
 
 The first release on npm. It brings back the changes made while the components ran in Ponder Chat. From this version, the package follows semantic versioning: a breaking change gets a new major version.
@@ -11,7 +13,7 @@ The package now needs frappe-ui 1.1.0 or a later 1.x version.
 ### Added
 
 - `Response` renders LaTeX maths with KaTeX: `$$…$$`, `\[…\]`, `$…$` and `\(…\)`. A single `$` follows Pandoc's rules, so amounts of money stay text.
-- `Response` renders ```` ```mermaid ```` fences as diagrams with Pele. Pele loads only when a reply has a diagram.
+- `Response` renders ` ```mermaid ` fences as diagrams with Pele. Pele loads only when a reply has a diagram.
 - `Response` takes `citations`. A link to a cited page shows as a chip, with a card on hover or focus. `collectCitations(message)`, `citationKey(url)` and `CitationCard` are exported. `MessageParts` passes the citations itself.
 - `Response` aligns a table column to the right when all its cells are numbers.
 - `provideFileViewer(viewer)` and `useViewOnClick()` open files in the chat in the app's own viewer.

@@ -1,0 +1,64 @@
+# Builds the demo (the gallery and the playground) against dist/ and deploys it to GitHub Pages.
+# Settings > Pages > Build and deployment > Source must be "GitHub Actions".
+name: Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions: {}
+
+# One deploy at a time. A newer push waits; a deploy in progress is not cancelled.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # to check out the repo
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the library
+        run: npm run build
+
+      - name: Build the demo against dist/
+        run: npm run build:demo:dist
+        env:
+          # Pages serves the site under /<repo>/.
+          DEMO_BASE: /${{ github.event.repository.name }}/
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: demo-dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write # to deploy to Pages
+      id-token: write # to verify the deployment
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v5

@@ -49,7 +49,9 @@ const done = { ...part, toolCallId: "call-ask-2", state: "output-available", out
 			</QuestionnaireItem>
 			<QuestionnaireActions><QuestionnaireSubmit label="Send answer" /></QuestionnaireActions>
 		</Questionnaire>
-		<button v-if="picked" type="button" class="mt-2 text-sm text-ink-gray-5 underline underline-offset-2 hover:text-ink-gray-8" @click="picked = null">Ask again</button>
+		<button v-if="picked" type="button" class="mt-2 text-sm text-ink-gray-5 underline underline-offset-2 hover:text-ink-gray-8" @click="picked = null">
+			Ask again
+		</button>
 	</DemoBlock>
 
 	<DemoBlock

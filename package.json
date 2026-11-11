@@ -2,27 +2,26 @@
 	"name": "frappe-ui-ai-elements",
 	"version": "1.0.0",
 	"description": "AI chat and agent components for Vue 3, built on frappe-ui. A port of shadcn AI Elements.",
-	"type": "module",
+	"keywords": [
+		"ai",
+		"ai-elements",
+		"ai-sdk",
+		"chat",
+		"frappe-ui",
+		"katex",
+		"mermaid",
+		"vue"
+	],
+	"homepage": "https://github.com/bwhtech/frappe-ui-ai-elements#readme",
+	"bugs": {
+		"url": "https://github.com/bwhtech/frappe-ui-ai-elements/issues"
+	},
 	"license": "MIT",
 	"author": "Hussain Nagaria",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/bwhtech/frappe-ui-ai-elements.git"
 	},
-	"homepage": "https://github.com/bwhtech/frappe-ui-ai-elements#readme",
-	"bugs": {
-		"url": "https://github.com/bwhtech/frappe-ui-ai-elements/issues"
-	},
-	"keywords": [
-		"vue",
-		"frappe-ui",
-		"ai",
-		"chat",
-		"ai-sdk",
-		"ai-elements",
-		"katex",
-		"mermaid"
-	],
 	"files": [
 		"dist",
 		"src",
@@ -30,6 +29,7 @@
 		"NOTICE",
 		"CHANGELOG.md"
 	],
+	"type": "module",
 	"sideEffects": [
 		"**/*.css"
 	],
@@ -48,20 +48,14 @@
 		"dev": "vite",
 		"build": "vite build -c vite.lib.config.ts && node scripts/vue-tsc.cjs -p tsconfig.lib.json",
 		"build:demo": "vite build",
-		"typecheck": "node scripts/vue-tsc.cjs --noEmit -p tsconfig.json",
 		"build:demo:dist": "DEMO_FROM_DIST=1 vite build",
-		"prepare": "npm run build",
-		"prepublishOnly": "npm run typecheck"
-	},
-	"peerDependencies": {
-		"ai": ">=7.0.0",
-		"frappe-ui": "^1.1.0",
-		"vue": ">=3.5.0"
-	},
-	"peerDependenciesMeta": {
-		"ai": {
-			"optional": true
-		}
+		"typecheck": "node scripts/vue-tsc.cjs --noEmit -p tsconfig.json",
+		"lint": "oxlint",
+		"fmt": "oxfmt",
+		"fmt:check": "oxfmt --check",
+		"check": "npm run fmt:check && npm run lint && npm run typecheck",
+		"prepublishOnly": "npm run check && npm run build",
+		"release": "npm run check && bumpp --commit \"Release v%s\" --tag \"v%s\""
 	},
 	"dependencies": {
 		"dompurify": "^3.4.17",
@@ -74,7 +68,10 @@
 		"@vitejs/plugin-vue": "^6.0.10",
 		"ai": "^7.0.150",
 		"autoprefixer": "^10.6.1",
+		"bumpp": "^12.3.0",
 		"frappe-ui": "^1.1.0",
+		"oxfmt": "^0.78.0",
+		"oxlint": "^1.93.0",
 		"postcss": "^8.5.31",
 		"tailwindcss": "^3.4.19",
 		"typescript": "^7.0.2",
@@ -82,5 +79,15 @@
 		"vue": "^3.5.44",
 		"vue-router": "^4.6.4",
 		"vue-tsc": "^3.3.13"
+	},
+	"peerDependencies": {
+		"ai": ">=7.0.0",
+		"frappe-ui": "^1.1.0",
+		"vue": ">=3.5.0"
+	},
+	"peerDependenciesMeta": {
+		"ai": {
+			"optional": true
+		}
 	}
 }

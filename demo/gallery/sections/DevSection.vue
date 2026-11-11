@@ -5,7 +5,13 @@ import { FileTree, StackTrace, Subagent, Terminal, TestResults, ToolPart, type F
 import DemoBlock from "../DemoBlock.vue";
 import { toolStates } from "../fixtures";
 
-const buildLog = ["$ bench build --app seva", "Building seva...", "  ✔ dist/js/seva.bundle.js  42.1 KB", "  ✔ dist/css/seva.bundle.css  8.3 KB", "Done in 4.2s"];
+const buildLog = [
+	"$ bench build --app seva",
+	"Building seva...",
+	"  ✔ dist/js/seva.bundle.js  42.1 KB",
+	"  ✔ dist/css/seva.bundle.css  8.3 KB",
+	"Done in 4.2s",
+];
 const output = ref("");
 const running = ref(false);
 let timer: ReturnType<typeof setInterval> | undefined;
@@ -31,12 +37,23 @@ const stack = `TypeError: Cannot read properties of undefined (reading 'fieldnam
     at flushJobs (/app/node_modules/@vue/runtime-core/dist/runtime-core.cjs.js:408:7)`;
 
 const suites: TestSuite[] = [
-	{ name: "test_volunteer.py", tests: [{ name: "creates a volunteer", status: "passed", duration: 120 }, { name: "rejects a bad phone", status: "passed", duration: 80 }] },
+	{
+		name: "test_volunteer.py",
+		tests: [
+			{ name: "creates a volunteer", status: "passed", duration: 120 },
+			{ name: "rejects a bad phone", status: "passed", duration: 80 },
+		],
+	},
 	{
 		name: "test_signup_form.py",
 		tests: [
 			{ name: "renders the form", status: "passed", duration: 310 },
-			{ name: "submits a sign-up", status: "failed", duration: 1450, error: "AssertionError: Expected status 200, received 417\n  File \"test_signup_form.py\", line 33" },
+			{
+				name: "submits a sign-up",
+				status: "failed",
+				duration: 1450,
+				error: 'AssertionError: Expected status 200, received 417\n  File "test_signup_form.py", line 33',
+			},
 			{ name: "sends the coordinator email", status: "skipped" },
 		],
 	},
@@ -47,10 +64,14 @@ const files: FileTreeNode[] = [
 		path: "seva",
 		name: "seva",
 		children: [
-			{ path: "seva/doctype", name: "doctype", children: [
-				{ path: "seva/doctype/volunteer.json", name: "volunteer.json", change: "added" },
-				{ path: "seva/doctype/volunteer.py", name: "volunteer.py", change: "added" },
-			] },
+			{
+				path: "seva/doctype",
+				name: "doctype",
+				children: [
+					{ path: "seva/doctype/volunteer.json", name: "volunteer.json", change: "added" },
+					{ path: "seva/doctype/volunteer.py", name: "volunteer.py", change: "added" },
+				],
+			},
 			{ path: "seva/hooks.py", name: "hooks.py", change: "modified" },
 			{ path: "seva/old_form.html", name: "old_form.html", change: "deleted" },
 		],

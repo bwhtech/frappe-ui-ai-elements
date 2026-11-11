@@ -59,9 +59,36 @@ function toNumber(value: string | number) {
 		<QuestionnaireInput v-if="question.allowOther" :placeholder="question.placeholder || 'Other…'" />
 	</QuestionnaireChoices>
 	<div v-else-if="control === 'select' || control === 'combobox' || control === 'multiselect'" ref="pickers" class="flex min-w-0 flex-col gap-2">
-		<Select v-if="control === 'select'" class="w-full" v-model="picked" :options="options" :disabled="disabled" placeholder="Choose one" :aria-labelledby="item.ids.title" @update:open="keepFocus" />
-		<Combobox v-else-if="control === 'combobox'" class="w-full" v-model="picked" :options="options" :disabled="disabled" placeholder="Search or choose" :aria-labelledby="item.ids.title" @update:open="keepFocus" />
-		<MultiSelect v-else class="w-full" v-model="pickedMany" :options="options" :disabled="disabled" placeholder="Choose any" :aria-labelledby="item.ids.title" @update:open="keepFocus" />
+		<Select
+			v-if="control === 'select'"
+			class="w-full"
+			v-model="picked"
+			:options="options"
+			:disabled="disabled"
+			placeholder="Choose one"
+			:aria-labelledby="item.ids.title"
+			@update:open="keepFocus"
+		/>
+		<Combobox
+			v-else-if="control === 'combobox'"
+			class="w-full"
+			v-model="picked"
+			:options="options"
+			:disabled="disabled"
+			placeholder="Search or choose"
+			:aria-labelledby="item.ids.title"
+			@update:open="keepFocus"
+		/>
+		<MultiSelect
+			v-else
+			class="w-full"
+			v-model="pickedMany"
+			:options="options"
+			:disabled="disabled"
+			placeholder="Choose any"
+			:aria-labelledby="item.ids.title"
+			@update:open="keepFocus"
+		/>
 		<QuestionnaireChoices v-if="question.allowOther">
 			<QuestionnaireInput :placeholder="question.placeholder || 'Other…'" />
 		</QuestionnaireChoices>

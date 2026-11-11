@@ -14,10 +14,7 @@ provideInBubble(() => role.value === "user" && !props.bare);
 </script>
 
 <template>
-	<div
-		data-slot="message-content"
-		class="flex w-full min-w-0 flex-col gap-2.5 break-words group-data-[align=end]/message:items-end"
-	>
+	<div data-slot="message-content" class="flex w-full min-w-0 flex-col gap-2.5 break-words group-data-[align=end]/message:items-end">
 		<Bubble v-if="role === 'user' && !bare" align="end" variant="muted">
 			<BubbleContent class="whitespace-pre-wrap"><slot /></BubbleContent>
 		</Bubble>

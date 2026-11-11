@@ -11,7 +11,13 @@ const log = useLog();
 
 const kinds = computed(() => [props.v.kind1, props.v.kind2, props.v.kind3, props.v.kind4].slice(0, Number(props.v.count)) as AskUserKind[]);
 const input = computed(() =>
-	buildAskUserInput({ kinds: kinds.value, optionCount: Number(props.v.options), allowOther: Boolean(props.v.allowOther), required: Boolean(props.v.required), worst: props.worst }),
+	buildAskUserInput({
+		kinds: kinds.value,
+		optionCount: Number(props.v.options),
+		allowOther: Boolean(props.v.allowOther),
+		required: Boolean(props.v.required),
+		worst: props.worst,
+	}),
 );
 const output = ref<AskUserOutput | null>(null);
 const dismissed = ref(false);
@@ -50,6 +56,17 @@ function answer(event: { toolCallId: string; output: AskUserOutput }) {
 <template>
 	<div class="flex flex-col gap-3">
 		<ToolPart :key="part.toolCallId" :part="part" :streaming="Boolean(v.streaming)" @answer="answer" @dismiss="dismiss" />
-		<button v-if="output || dismissed" type="button" class="w-fit text-sm text-ink-gray-5 underline underline-offset-2 hover:text-ink-gray-8" @click="output = null; dismissed = false; callId++">Ask again</button>
+		<button
+			v-if="output || dismissed"
+			type="button"
+			class="w-fit text-sm text-ink-gray-5 underline underline-offset-2 hover:text-ink-gray-8"
+			@click="
+				output = null;
+				dismissed = false;
+				callId++;
+			"
+		>
+			Ask again
+		</button>
 	</div>
 </template>

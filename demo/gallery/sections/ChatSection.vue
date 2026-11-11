@@ -53,18 +53,10 @@ function toggleHistory() {
 				/>
 				<Conversation v-else>
 					<ConversationContent class="mx-auto w-full max-w-[720px] px-4 py-5">
-						<ConversationItem
-							v-for="message in chat.messages.value"
-							:key="message.id"
-							:message-id="message.id"
-							:scroll-anchor="message.role === 'user'"
-						>
+						<ConversationItem v-for="message in chat.messages.value" :key="message.id" :message-id="message.id" :scroll-anchor="message.role === 'user'">
 							<Message :from="message.role">
 								<MessageContent :bare="message.role === 'user'">
-									<MessageParts
-										:message="message"
-										:streaming="chat.status.value === 'streaming' && message === chat.messages.value.at(-1)"
-									/>
+									<MessageParts :message="message" :streaming="chat.status.value === 'streaming' && message === chat.messages.value.at(-1)" />
 								</MessageContent>
 							</Message>
 						</ConversationItem>

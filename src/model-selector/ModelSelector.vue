@@ -15,8 +15,8 @@ const props = withDefaults(defineProps<{ models: ModelOption[]; label?: string }
 const model = defineModel<string>();
 
 const current = computed(() => props.models.find((option) => option.id === model.value));
+const toOption = (option: ModelOption) => ({ label: option.name, value: option.id, description: option.description });
 const options = computed(() => {
-	const toOption = (option: ModelOption) => ({ label: option.name, value: option.id, description: option.description });
 	const providers = [...new Set(props.models.map((option) => option.provider))];
 	if (providers.length <= 1) return props.models.map(toOption);
 	return providers.map((provider) => ({
@@ -40,7 +40,13 @@ const touch = matchMedia("(pointer: coarse)").matches;
 		@update:model-value="(value) => value != null && (model = String(value))"
 	>
 		<template #trigger>
-			<Button variant="ghost" size="sm" icon-right="lucide-chevron-down" :aria-label="`${label}: ${current?.name ?? 'none'}`" class="min-w-0 max-w-full !text-ink-gray-6 hover:!text-ink-gray-8 relative after:absolute after:inset-0 after:content-[''] [@media(pointer:coarse)]:after:-inset-y-2">
+			<Button
+				variant="ghost"
+				size="sm"
+				icon-right="lucide-chevron-down"
+				:aria-label="`${label}: ${current?.name ?? 'none'}`"
+				class="min-w-0 max-w-full !text-ink-gray-6 hover:!text-ink-gray-8 relative after:absolute after:inset-0 after:content-[''] [@media(pointer:coarse)]:after:-inset-y-2"
+			>
 				{{ current?.name ?? label }}
 			</Button>
 		</template>

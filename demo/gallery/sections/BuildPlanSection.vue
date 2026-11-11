@@ -21,8 +21,21 @@ const built = planWith(["done", "done", "done", "done", "skipped", "done"], { "p
 // With the thread's plan provided, MessageParts puts each item's steps under one line.
 provideBuildPlan(ref(building));
 let callId = 0;
-const update = (updates: { id: string; status: string }[]) => ({ type: "tool-update_plan", toolCallId: `u${++callId}`, state: "output-available", input: { updates }, output: "" });
-const write = (toolName: string, name: string) => ({ type: "dynamic-tool", toolName, toolCallId: `w${++callId}`, state: "output-available", input: { doctype: "DocType", name }, output: { name } });
+const update = (updates: { id: string; status: string }[]) => ({
+	type: "tool-update_plan",
+	toolCallId: `u${++callId}`,
+	state: "output-available",
+	input: { updates },
+	output: "",
+});
+const write = (toolName: string, name: string) => ({
+	type: "dynamic-tool",
+	toolName,
+	toolCallId: `w${++callId}`,
+	state: "output-available",
+	input: { doctype: "DocType", name },
+	output: { name },
+});
 const buildMessage = {
 	id: "build",
 	role: "assistant",
@@ -31,10 +44,16 @@ const buildMessage = {
 		write("get_doctype_schema", "Donor"),
 		write("create_document", "Donor"),
 		write("update_document", "Donor"),
-		update([{ id: "donor-table", status: "done" }, { id: "donation-table", status: "in_progress" }]),
+		update([
+			{ id: "donor-table", status: "done" },
+			{ id: "donation-table", status: "in_progress" },
+		]),
 		write("create_document", "Donation"),
 		write("update_document", "Donation"),
-		update([{ id: "donation-table", status: "done" }, { id: "coordinator-role", status: "in_progress" }]),
+		update([
+			{ id: "donation-table", status: "done" },
+			{ id: "coordinator-role", status: "in_progress" },
+		]),
 		write("create_document", "Drive Coordinator"),
 	],
 } as unknown as UIMessage;

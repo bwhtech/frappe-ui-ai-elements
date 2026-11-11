@@ -7,7 +7,8 @@ export const worst = {
 	hindi: "हमें स्वयंसेवकों का नाम, फ़ोन नंबर, क्षेत्र और खाली दिन ट्रैक करने हैं। क्या आप यह बना सकते हैं? 🙂",
 	marathi: "आम्हाला स्वयंसेवकांची नावे, फोन, भाग आणि मोकळे दिवस नोंदवायचे आहेत. कृपया एक यादी तयार करा. ✅",
 	emoji: "🎉🧑‍🤝‍🧑📋✅❌🔥🍞🥫🚚📞🗓️",
-	command: "bench --site food-bank.localhost execute frappe.core.doctype.data_import.data_import.import_file --kwargs '{\"doctype\":\"Volunteer\",\"file_path\":\"/home/frappe/volunteers-2026-final-FINAL-v3.csv\"}'",
+	command:
+		'bench --site food-bank.localhost execute frappe.core.doctype.data_import.data_import.import_file --kwargs \'{"doctype":"Volunteer","file_path":"/home/frappe/volunteers-2026-final-FINAL-v3.csv"}\'',
 };
 
 export function hugeJson(rows = 60) {

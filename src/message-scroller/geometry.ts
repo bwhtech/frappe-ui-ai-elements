@@ -1,9 +1,7 @@
 // Layout measurements for MessageScroller. All tops are in viewport scroll coordinates.
 
 export function scrollItems(content: HTMLElement, spacer: HTMLElement | null) {
-	return Array.from(content.children).filter(
-		(child): child is HTMLElement => child instanceof HTMLElement && child !== spacer,
-	);
+	return Array.from(content.children).filter((child): child is HTMLElement => child instanceof HTMLElement && child !== spacer);
 }
 
 export function elementTop(element: HTMLElement, viewport: HTMLElement) {

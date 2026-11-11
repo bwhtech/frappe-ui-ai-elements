@@ -18,7 +18,11 @@ const sources = computed(() =>
 	Array.from({ length: Number(props.v.count) }, (_, i) => {
 		const source = pool[i % pool.length];
 		if (props.worst) return { url: `https://${w.unbroken.slice(0, 40)}.example.org/${i}`, title: i % 2 ? w.hindi : undefined };
-		return { url: source.url, title: props.v.titles ? source.title : undefined, quote: props.v.quote ? "A DocType is the core building block of any Frappe application." : undefined };
+		return {
+			url: source.url,
+			title: props.v.titles ? source.title : undefined,
+			quote: props.v.quote ? "A DocType is the core building block of any Frappe application." : undefined,
+		};
 	}),
 );
 const model = ref("sonnet");
@@ -36,13 +40,22 @@ const restored = ref(false);
 <template>
 	<Sources v-if="kind === 'sources'" :key="String(v.count)" :sources="sources" default-open />
 	<p v-else-if="kind === 'citation'" class="text-p-base text-ink-gray-8">
-		{{ worst ? w.hindi : "A DocType is the model and the form at once" }}<InlineCitation :sources="sources" />, and a web form lets people outside your team fill it in.
+		{{ worst ? w.hindi : "A DocType is the model and the form at once" }}<InlineCitation :sources="sources" />, and a web form lets people outside your team
+		fill it in.
 	</p>
 	<div v-else-if="kind === 'context'" class="flex items-center gap-3">
 		<Context
 			:used-tokens="Number(v.used)"
 			:max-tokens="Number(v.max)"
-			:usage="v.breakdown ? { inputTokens: Math.round(Number(v.used) * 0.8), cachedInputTokens: Math.round(Number(v.used) * 0.5), outputTokens: Math.round(Number(v.used) * 0.2) } : undefined"
+			:usage="
+				v.breakdown
+					? {
+							inputTokens: Math.round(Number(v.used) * 0.8),
+							cachedInputTokens: Math.round(Number(v.used) * 0.5),
+							outputTokens: Math.round(Number(v.used) * 0.2),
+						}
+					: undefined
+			"
 			:model-id="worst ? w.toolName : 'anthropic/claude-sonnet-5.5'"
 		/>
 		<span class="text-sm text-ink-gray-5">Hover or focus the ring</span>
@@ -52,7 +65,13 @@ const restored = ref(false);
 		<Checkpoint>
 			<CheckpointIcon />
 			{{ worst ? w.unbroken : String(v.label) }}
-			<CheckpointTrigger :tooltip="String(v.tooltip) || undefined" @click="restored = true; log('restore')" />
+			<CheckpointTrigger
+				:tooltip="String(v.tooltip) || undefined"
+				@click="
+					restored = true;
+					log('restore');
+				"
+			/>
 		</Checkpoint>
 		<p v-if="restored" class="text-sm text-ink-gray-5">Restored. Later turns would be removed.</p>
 	</div>

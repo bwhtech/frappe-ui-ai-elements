@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { computed, type Component } from "vue";
 import ToolConfirmation from "../confirmation/ToolConfirmation.vue";
-import { parseProposePlanInput, parseProposePlanOutput, PROPOSE_PLAN_TOOL, UPDATE_PLAN_TOOL, type ProposePlanOutput, type UpdatePlanInput } from "../plan/build-plan";
+import {
+	parseProposePlanInput,
+	parseProposePlanOutput,
+	PROPOSE_PLAN_TOOL,
+	UPDATE_PLAN_TOOL,
+	type ProposePlanOutput,
+	type UpdatePlanInput,
+} from "../plan/build-plan";
 import { useBuildPlan } from "../plan/context";
 import ToolPlan from "../plan/ToolPlan.vue";
 import { TraceIcon, TraceLine, TraceTitle } from "../trace";
@@ -74,10 +81,10 @@ const proposed = computed(() => {
 // update_plan: what each update did, named by the plan's item titles.
 const UPDATE_LABELS = { in_progress: "Started", done: "Done", skipped: "Skipped" } as const;
 const UPDATE_ICONS = { in_progress: "lucide-circle-dot", done: "lucide-circle-check", skipped: "lucide-circle-slash" } as const;
+const titleOf = (id: string) => buildPlan?.value?.items.find((item) => item.id === id)?.title ?? id;
 const planUpdates = computed(() => {
 	if (name.value !== UPDATE_PLAN_TOOL || props.part.state !== "output-available") return null;
 	const updates = (props.part.input as UpdatePlanInput | undefined)?.updates ?? [];
-	const titleOf = (id: string) => buildPlan?.value?.items.find((item) => item.id === id)?.title ?? id;
 	return updates.map((update) => ({ ...update, title: titleOf(update.id) }));
 });
 const answers = computed(() => (props.part.state === "output-available" ? (parseAskUserOutput(props.part.output) ?? undefined) : undefined));

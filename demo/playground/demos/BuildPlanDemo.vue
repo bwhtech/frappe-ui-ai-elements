@@ -40,7 +40,12 @@ function reset(stage: Stage, done: number) {
 	callId.value++;
 	const count = input.value.items.length;
 	unanswered.value = stage === "unanswered";
-	output.value = stage === "building" || stage === "built" ? { approved: true } : stage === "changes" ? { approved: false, feedback: "Leave out the dashboard for now." } : null;
+	output.value =
+		stage === "building" || stage === "built"
+			? { approved: true }
+			: stage === "changes"
+				? { approved: false, feedback: "Leave out the dashboard for now." }
+				: null;
 	statuses.value = input.value.items.map((_, index) => {
 		if (stage === "built" || index < Math.min(done, count)) return "done";
 		return stage === "building" && index === done ? "in_progress" : "pending";
@@ -61,7 +66,12 @@ const part = computed(
 
 const plan = computed<BuildPlan | null>(() =>
 	output.value?.approved
-		? { ...input.value, toolCallId: part.value.toolCallId, decision: "approved", items: input.value.items.map((item, index) => ({ ...item, status: statuses.value[index] ?? "pending" })) }
+		? {
+				...input.value,
+				toolCallId: part.value.toolCallId,
+				decision: "approved",
+				items: input.value.items.map((item, index) => ({ ...item, status: statuses.value[index] ?? "pending" })),
+			}
 		: null,
 );
 provideBuildPlan(plan);

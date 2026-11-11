@@ -29,7 +29,7 @@ export function createQuestionnaire(options: RootOptions) {
 	const skipped = ref(new Set<string>());
 	const invalidName = ref<string | null>(null);
 
-	const items = computed(() => registered.filter((item) => !item.disabled()).sort(byDocumentOrder));
+	const items = computed(() => registered.filter((item) => !item.disabled()).toSorted(byDocumentOrder));
 	const activeName = computed(() => {
 		const wanted = options.item.value;
 		return items.value.some((item) => item.name === wanted) ? wanted : items.value[0]?.name;
@@ -74,7 +74,7 @@ export function createQuestionnaire(options: RootOptions) {
 	function next() {
 		const item = active();
 		if (!item || options.disabled()) return false;
-		if (!isValid(item)) return showInvalid(item), false;
+		if (!isValid(item)) return (showInvalid(item), false);
 		invalidName.value = null;
 		goTo(items.value[activeIndex.value + 1]);
 		return true;
@@ -102,7 +102,7 @@ export function createQuestionnaire(options: RootOptions) {
 	function submit() {
 		if (options.disabled()) return false;
 		const invalid = items.value.find((item) => !isValid(item));
-		if (invalid) return showInvalid(invalid), false;
+		if (invalid) return (showInvalid(invalid), false);
 		invalidName.value = null;
 		const answered = items.value.filter((item) => statusOf(item.name) === "answered");
 		options.onSubmit({

@@ -8,7 +8,10 @@ import { hugeJson, worst as w } from "../worst";
 const props = defineProps<{ v: Values; worst: boolean }>();
 const log = useLog();
 const samples: Record<string, [string, string]> = {
-	python: ["volunteer.py", 'import frappe\n\ndef free_volunteers(day: str) -> list[dict]:\n    """Volunteers free on a day."""\n    return frappe.get_all("Volunteer", filters={"available_days": ["like", f"%{day}%"]})\n'],
+	python: [
+		"volunteer.py",
+		'import frappe\n\ndef free_volunteers(day: str) -> list[dict]:\n    """Volunteers free on a day."""\n    return frappe.get_all("Volunteer", filters={"available_days": ["like", f"%{day}%"]})\n',
+	],
 	json: ["volunteer.json", JSON.stringify({ doctype: "Volunteer", fields: [{ fieldname: "full_name", reqd: 1 }] }, null, 2)],
 	typescript: ["form.ts", 'import { useList } from "frappe-ui";\n\nconst volunteers = useList({ doctype: "Volunteer", fields: ["full_name", "phone"] });\n'],
 	bash: ["terminal", "bench --site food-bank.localhost migrate\nbench build --app seva"],
@@ -24,7 +27,7 @@ const code = computed(() => {
 </script>
 
 <template>
-	<CodeBlock :size="(v.size as 'default' | 'sm')" :variant="(v.variant as 'default' | 'destructive')">
+	<CodeBlock :size="v.size as 'default' | 'sm'" :variant="v.variant as 'default' | 'destructive'">
 		<CodeBlockHeader v-if="v.header">
 			<CodeBlockTitle icon="lucide-file-code">{{ worst ? w.name : sample[0] }}</CodeBlockTitle>
 			<CodeBlockActions><CodeBlockCopyButton :value="code" @copy="log('copy', `${$event.length} chars`)" /></CodeBlockActions>
