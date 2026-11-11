@@ -6,7 +6,11 @@ defineProps<{ title?: string; questions: AskUserQuestion[]; answers: Record<stri
 </script>
 
 <template>
-	<section data-slot="questionnaire-summary" class="min-w-0 rounded-6 border border-outline-gray-2 bg-surface-base px-3 py-2.5" :aria-label="title || 'Your answers'">
+	<section
+		data-slot="questionnaire-summary"
+		class="min-w-0 rounded-6 border border-outline-gray-2 bg-surface-base px-3 py-2.5"
+		:aria-label="title || 'Your answers'"
+	>
 		<div class="flex min-w-0 items-center gap-2">
 			<span class="lucide-circle-check size-4 shrink-0 text-ink-green-6" aria-hidden="true" />
 			<p class="min-w-0 flex-1 truncate text-sm-medium text-ink-gray-8">{{ title || "You answered" }}</p>

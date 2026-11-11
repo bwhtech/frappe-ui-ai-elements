@@ -3,9 +3,7 @@ import { computed } from "vue";
 import { injectMessageScroller } from "./context";
 
 const controller = injectMessageScroller();
-const scrollable = computed(() =>
-	[controller.scrollable.start && "start", controller.scrollable.end && "end"].filter(Boolean).join(" ") || undefined,
-);
+const scrollable = computed(() => [controller.scrollable.start && "start", controller.scrollable.end && "end"].filter(Boolean).join(" ") || undefined);
 </script>
 
 <template>

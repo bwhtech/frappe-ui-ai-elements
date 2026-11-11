@@ -91,11 +91,12 @@ export function volunteerDoctype(output: AskUserOutput) {
 export function describeAnswers(output: AskUserOutput, asked: boolean) {
 	const { fields, areas, signup, reminder } = read(output);
 	const count = fields.length + 2;
-	const signupLine = {
-		form: "Next I'll make a public sign-up form, so volunteers can add themselves.",
-		staff: "Your team adds volunteers from the Desk; there is no public form.",
-		both: "Your team can add volunteers, and I'll also make a public sign-up form.",
-	}[signup] ?? "";
+	const signupLine =
+		{
+			form: "Next I'll make a public sign-up form, so volunteers can add themselves.",
+			staff: "Your team adds volunteers from the Desk; there is no public form.",
+			both: "Your team can add volunteers, and I'll also make a public sign-up form.",
+		}[signup] ?? "";
 	const reminderLine = reminder ? `I'll set up a reminder that goes out every **${reminder}**.` : asked ? "No reminders, as you asked." : "";
 	return {
 		intro: `${asked ? "Thanks. I'll" : "There is no Volunteer list yet, so I'll"} create a **Volunteer** list with ${count} fields and areas ${areas.map((area) => `**${area}**`).join(", ")}. Please approve the change.`,
@@ -116,8 +117,9 @@ function typeLabel(def: { fieldtype: string; options?: string } | undefined) {
 	return def?.fieldtype === "Small Text" ? "Short text" : "Text";
 }
 
+const list = (value: unknown) => (Array.isArray(value) ? value.map(String) : []);
+
 function read(output: AskUserOutput) {
-	const list = (value: unknown) => (Array.isArray(value) ? value.map(String) : []);
 	const areas = list(output.answers.areas);
 	return {
 		fields: list(output.answers.fields),
@@ -128,5 +130,10 @@ function read(output: AskUserOutput) {
 }
 
 function fieldname(label: string) {
-	return label.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "custom_field";
+	return (
+		label
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "_")
+			.replace(/^_|_$/g, "") || "custom_field"
+	);
 }

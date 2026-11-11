@@ -26,10 +26,7 @@ hljs.registerAliases(["md"], { languageName: "markdown" });
 /** Highlights `code` and returns one HTML string per line. Unknown languages are escaped only. */
 export function highlightLines(code: string, language?: string): string[] {
 	const source = code.replace(/\n$/, "");
-	const html =
-		language && hljs.getLanguage(language)
-			? hljs.highlight(source, { language, ignoreIllegals: true }).value
-			: escapeHtml(source);
+	const html = language && hljs.getLanguage(language) ? hljs.highlight(source, { language, ignoreIllegals: true }).value : escapeHtml(source);
 	return splitHtmlLines(html);
 }
 

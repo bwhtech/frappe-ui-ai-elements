@@ -13,10 +13,10 @@ const text = computed(() => (props.worst ? `${w.unbroken} ${w.hindi}` : String(p
 
 <template>
 	<div class="flex flex-col gap-5">
-		<Bubble :variant="(v.variant as BubbleVariant)" :align="(v.align as 'start' | 'end')">
+		<Bubble :variant="v.variant as BubbleVariant" :align="v.align as 'start' | 'end'">
 			<BubbleContent>{{ text }}</BubbleContent>
 		</Bubble>
-		<Marker :variant="(v.marker as 'default' | 'separator' | 'border')">
+		<Marker :variant="v.marker as 'default' | 'separator' | 'border'">
 			<MarkerIcon v-if="v.marker === 'default'" icon="lucide-info" />
 			<MarkerContent>{{ worst ? w.marathi : "Thread started from the Volunteer list" }}</MarkerContent>
 		</Marker>
@@ -24,7 +24,7 @@ const text = computed(() => (props.worst ? `${w.unbroken} ${w.hindi}` : String(p
 			:name="worst ? `${w.unbroken}.xlsx` : 'volunteers-2026.xlsx'"
 			:size="48213"
 			:media-type="String(v.mediaType)"
-			:state="(v.state as 'idle' | 'uploading' | 'done' | 'error')"
+			:state="v.state as 'idle' | 'uploading' | 'done' | 'error'"
 			:removable="Boolean(v.removable)"
 			@remove="log('remove')"
 		/>

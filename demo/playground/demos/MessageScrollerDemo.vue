@@ -40,7 +40,8 @@ const hasOlder = computed(() => shown.value < TOTAL);
 function turn(i: number): Turn {
 	const role = i % 2 ? "assistant" : "user";
 	if (props.worst) return { id: `m${i}`, role, text: i % 2 ? `${w.marathi}\n\n\`${w.unbroken}\`` : `${w.hindi} ${w.emoji}` };
-	const text = role === "user" ? `Question ${i}: which volunteers are free on day ${i}?` : `Answer ${i}: ${"Asha, Ravi and Meena are free. ".repeat(1 + (i % 4))}`;
+	const text =
+		role === "user" ? `Question ${i}: which volunteers are free on day ${i}?` : `Answer ${i}: ${"Asha, Ravi and Meena are free. ".repeat(1 + (i % 4))}`;
 	return { id: `m${i}`, role, text };
 }
 

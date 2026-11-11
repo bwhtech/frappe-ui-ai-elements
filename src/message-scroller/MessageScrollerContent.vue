@@ -14,13 +14,7 @@ onBeforeUnmount(() => controller.setContent(null));
 </script>
 
 <template>
-	<div
-		ref="content"
-		data-slot="message-scroller-content"
-		role="log"
-		aria-relevant="additions"
-		class="flex h-max min-h-full flex-col gap-8"
-	>
+	<div ref="content" data-slot="message-scroller-content" role="log" aria-relevant="additions" class="flex h-max min-h-full flex-col gap-8">
 		<slot />
 		<!-- Tail spacer: lets a short new turn scroll up to the top. -->
 		<div ref="spacer" aria-hidden="true" class="pointer-events-none hidden shrink-0" />

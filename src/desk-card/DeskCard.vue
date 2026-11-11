@@ -85,13 +85,7 @@ const meta = computed(() => {
 				<slot name="actions">
 					<Button v-if="sample" variant="ghost" label="PDF" icon-left="lucide-file-down" :href="sample.pdfUrl" />
 					<Button v-if="url && editUrl" variant="ghost" :label="KIND[kind].edit ?? 'Edit'" :href="editUrl" />
-					<Button
-						v-if="url"
-						variant="subtle"
-						:label="label ?? KIND[kind].action"
-						icon-right="lucide-external-link"
-						:href="url"
-					/>
+					<Button v-if="url" variant="subtle" :label="label ?? KIND[kind].action" icon-right="lucide-external-link" :href="url" />
 					<Button v-else variant="subtle" :label="label ?? KIND[kind].action" loading disabled />
 				</slot>
 			</div>

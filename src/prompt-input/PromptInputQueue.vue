@@ -95,7 +95,11 @@ function onDrop(target: string) {
 					<span class="lucide-list-ordered size-4" aria-hidden="true" />
 					<span class="flex-1 text-left">Queued</span>
 					<span class="tabular-nums">{{ items.length }}</span>
-					<span class="lucide-chevron-down size-4 transition-transform duration-200 ease-out-strong motion-reduce:transition-none" :class="!open && '-rotate-90'" aria-hidden="true" />
+					<span
+						class="lucide-chevron-down size-4 transition-transform duration-200 ease-out-strong motion-reduce:transition-none"
+						:class="!open && '-rotate-90'"
+						aria-hidden="true"
+					/>
 				</button>
 				<CollapseTransition>
 					<div v-show="open">

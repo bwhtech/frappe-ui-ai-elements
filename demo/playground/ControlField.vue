@@ -26,11 +26,24 @@ const selected = computed({ get: () => String(model.value), set: (value: string 
 				<span class="text-sm text-ink-gray-6">{{ control.label }}</span>
 				<span v-if="control.type === 'range'" class="text-xs tabular-nums text-ink-gray-5">{{ model }}{{ control.unit ?? "" }}</span>
 			</div>
-			<Select v-if="control.type === 'select' || (control.type === 'segment' && !fits)" v-model="selected" :options="options" :aria-label="control.label" class="w-full" />
+			<Select
+				v-if="control.type === 'select' || (control.type === 'segment' && !fits)"
+				v-model="selected"
+				:options="options"
+				:aria-label="control.label"
+				class="w-full"
+			/>
 			<TabButtons v-else-if="control.type === 'segment'" v-model="selected" :options="options" fluid />
 			<TextInput v-else-if="control.type === 'text'" v-model="text" :aria-label="control.label" />
 			<Textarea v-else-if="control.type === 'textarea'" v-model="text" :rows="3" :aria-label="control.label" />
-			<Slider v-else-if="control.type === 'range'" v-model="range" :min="control.min" :max="control.max" :step="control.step ?? 1" :aria-label="control.label" />
+			<Slider
+				v-else-if="control.type === 'range'"
+				v-model="range"
+				:min="control.min"
+				:max="control.max"
+				:step="control.step ?? 1"
+				:aria-label="control.label"
+			/>
 		</template>
 	</div>
 </template>

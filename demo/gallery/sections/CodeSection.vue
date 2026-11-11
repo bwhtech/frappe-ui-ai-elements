@@ -26,7 +26,11 @@ const json = `{"doctype": "Volunteer", "fields": [{"fieldname": "full_name", "fi
 </script>
 
 <template>
-	<DemoBlock id="code-block" title="Code Block" description="highlight.js tokens with frappe-ui's GitHub theme, copy, line numbers, diff lines and an error variant.">
+	<DemoBlock
+		id="code-block"
+		title="Code Block"
+		description="highlight.js tokens with frappe-ui's GitHub theme, copy, line numbers, diff lines and an error variant."
+	>
 		<div class="flex flex-col gap-4">
 			<CodeBlock>
 				<CodeBlockHeader>
@@ -43,9 +47,9 @@ const json = `{"doctype": "Volunteer", "fields": [{"fieldname": "full_name", "fi
 				<CodeBlockHeader><CodeBlockTitle icon="lucide-git-compare">volunteer.json</CodeBlockTitle></CodeBlockHeader>
 				<CodeBlockContent>
 					<CodeBlockLine>"fields": [</CodeBlockLine>
-					<CodeBlockLine variant="removed">  { "fieldname": "phone", "fieldtype": "Data" },</CodeBlockLine>
-					<CodeBlockLine variant="added">  { "fieldname": "phone", "fieldtype": "Data", "options": "Phone" },</CodeBlockLine>
-					<CodeBlockLine variant="highlighted">  { "fieldname": "area", "fieldtype": "Link" }</CodeBlockLine>
+					<CodeBlockLine variant="removed"> { "fieldname": "phone", "fieldtype": "Data" },</CodeBlockLine>
+					<CodeBlockLine variant="added"> { "fieldname": "phone", "fieldtype": "Data", "options": "Phone" },</CodeBlockLine>
+					<CodeBlockLine variant="highlighted"> { "fieldname": "area", "fieldtype": "Link" }</CodeBlockLine>
 					<CodeBlockLine>]</CodeBlockLine>
 				</CodeBlockContent>
 				<CodeBlockFooter class="text-xs">1 removed, 1 added</CodeBlockFooter>

@@ -11,10 +11,10 @@ import { providePromptInput } from "./context";
  * also be dropped on it or pasted into it; `accept` filters all three ways.
  * `ready` says the page holds something else worth sending with no text, such as a chosen skill.
  */
-const props = withDefaults(
-	defineProps<{ status?: ChatStatus; disabled?: boolean; accept?: string; multiple?: boolean; queue?: boolean; ready?: boolean }>(),
-	{ status: "ready", multiple: true },
-);
+const props = withDefaults(defineProps<{ status?: ChatStatus; disabled?: boolean; accept?: string; multiple?: boolean; queue?: boolean; ready?: boolean }>(), {
+	status: "ready",
+	multiple: true,
+});
 const emit = defineEmits<{ submit: [message: { text: string; files: File[] }]; stop: [] }>();
 
 const text = defineModel<string>({ default: "" });

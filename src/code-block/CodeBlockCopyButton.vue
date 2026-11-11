@@ -13,16 +13,16 @@ async function onClick() {
 
 <template>
 	<span class="contents">
-	<Button
-		data-slot="code-block-copy-button"
-		variant="ghost"
-		size="xs"
-		:icon="copied ? 'lucide-check' : 'lucide-copy'"
-		:aria-label="copied ? 'Copied' : 'Copy'"
-		:data-copied="copied || undefined"
-		class="[[data-slot=code-block]>[data-slot=code-block-actions]_&]:bg-surface-base [[data-slot=code-block]>[data-slot=code-block-actions]_&]:shadow-sm"
-		@click="onClick"
-	/>
-	<span aria-live="polite" class="sr-only">{{ copied ? "Copied" : "" }}</span>
+		<Button
+			data-slot="code-block-copy-button"
+			variant="ghost"
+			size="xs"
+			:icon="copied ? 'lucide-check' : 'lucide-copy'"
+			:aria-label="copied ? 'Copied' : 'Copy'"
+			:data-copied="copied || undefined"
+			class="[[data-slot=code-block]>[data-slot=code-block-actions]_&]:bg-surface-base [[data-slot=code-block]>[data-slot=code-block-actions]_&]:shadow-sm"
+			@click="onClick"
+		/>
+		<span aria-live="polite" class="sr-only">{{ copied ? "Copied" : "" }}</span>
 	</span>
 </template>

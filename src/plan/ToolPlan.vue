@@ -84,10 +84,7 @@ function sendChanges() {
 			<span class="lucide-list-checks mt-px size-4 shrink-0 text-ink-gray-5" aria-hidden="true" />
 			<div class="flex min-w-0 flex-1 flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
 				<p class="min-w-0 grow basis-60 text-sm-medium text-ink-gray-8 [overflow-wrap:anywhere]">{{ input.title }}</p>
-				<span
-					class="shrink-0 text-xs tabular-nums"
-					:class="waiting ? 'text-ink-amber-6' : finished ? 'text-ink-green-6' : 'text-ink-gray-5'"
-				>
+				<span class="shrink-0 text-xs tabular-nums" :class="waiting ? 'text-ink-amber-6' : finished ? 'text-ink-green-6' : 'text-ink-gray-5'">
 					{{ status }}
 				</span>
 			</div>

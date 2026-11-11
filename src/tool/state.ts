@@ -22,7 +22,11 @@ export function getToolName(part: ToolMessagePart) {
 
 /** "get_doctype_schema" -> "get doctype schema". */
 export function humanizeToolName(name: string) {
-	return name.replace(/[_-]+/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2").toLowerCase().trim();
+	return name
+		.replace(/[_-]+/g, " ")
+		.replace(/([a-z])([A-Z])/g, "$1 $2")
+		.toLowerCase()
+		.trim();
 }
 
 /** A lucide icon for a tool, guessed from its name; the wrench is the fallback. */
@@ -155,9 +159,7 @@ export function summarizeToolInput(input: unknown): string {
 		const what = types.length === 1 ? `${types[0]} records` : "records";
 		return `${batch.length} ${batch.length === 1 ? what.replace(/s$/, "") : what}`;
 	}
-	const nested = [record.data, record.doc].find((value) => value && typeof value === "object" && !Array.isArray(value)) as
-		| Record<string, unknown>
-		| undefined;
+	const nested = [record.data, record.doc].find((value) => value && typeof value === "object" && !Array.isArray(value)) as Record<string, unknown> | undefined;
 	const scopes = [record, nested ?? {}];
 	const pick = (keys: string[]) =>
 		scopes.flatMap((scope) => keys.map((key) => scope[key])).find((value): value is string => typeof value === "string" && value.trim() !== "");
@@ -181,6 +183,6 @@ function docsOf(value: unknown): unknown[] | undefined {
 }
 
 function firstNameLike(scope: Record<string, unknown>) {
-	const key = Object.keys(scope).find((key) => /(^|_)(name|title)$/.test(key) && typeof scope[key] === "string");
+	const key = Object.keys(scope).find((candidate) => /(^|_)(name|title)$/.test(candidate) && typeof scope[candidate] === "string");
 	return key ? (scope[key] as string) : undefined;
 }

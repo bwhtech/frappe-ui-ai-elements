@@ -9,7 +9,10 @@ export function provideMessageRole(role: () => MessageRole) {
 }
 
 export function useMessageRole() {
-	return inject(key, computed(() => "assistant" as MessageRole));
+	return inject(
+		key,
+		computed(() => "assistant" as MessageRole),
+	);
 }
 
 const bubbleKey: InjectionKey<ComputedRef<boolean>> = Symbol("MessageBubble");
@@ -20,5 +23,8 @@ export function provideInBubble(inBubble: () => boolean) {
 }
 
 export function useInBubble() {
-	return inject(bubbleKey, computed(() => false));
+	return inject(
+		bubbleKey,
+		computed(() => false),
+	);
 }

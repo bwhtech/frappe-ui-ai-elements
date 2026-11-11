@@ -18,7 +18,10 @@ import { hugeJson, worst as w } from "../worst";
 const props = defineProps<{ v: Values; worst: boolean }>();
 const log = useLog();
 const answer = ref<boolean | null>(null);
-watch(() => props.v.variant, () => (answer.value = null));
+watch(
+	() => props.v.variant,
+	() => (answer.value = null),
+);
 
 const state = computed<ToolState>(() => (answer.value === null ? "approval-requested" : answer.value ? "output-available" : "output-denied"));
 const title = computed(() => (props.worst ? `${w.hindi} ${w.unbroken}?` : String(props.v.title)));
@@ -56,7 +59,12 @@ function respond(approved: boolean) {
 				<ConfirmationAction label="Approve" variant="solid" @click="respond(true)" />
 			</ConfirmationActions>
 		</Confirmation>
-		<button v-if="answer !== null" type="button" class="w-fit text-sm text-ink-gray-5 underline underline-offset-2 hover:text-ink-gray-8" @click="answer = null">
+		<button
+			v-if="answer !== null"
+			type="button"
+			class="w-fit text-sm text-ink-gray-5 underline underline-offset-2 hover:text-ink-gray-8"
+			@click="answer = null"
+		>
 			Ask again
 		</button>
 	</div>

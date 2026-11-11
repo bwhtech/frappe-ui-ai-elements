@@ -20,7 +20,12 @@ const longWord = "Pneumonoultramicroscopicsilicovolcanoconiosis-and-a-very-long-
 </script>
 
 <template>
-	<DemoBlock id="message" title="Message & Response" part="text" description="The person's turn is a muted bubble at the end. The agent's turn is markdown with actions under it: tables, code, LaTeX maths, Mermaid diagrams and citation chips.">
+	<DemoBlock
+		id="message"
+		title="Message & Response"
+		part="text"
+		description="The person's turn is a muted bubble at the end. The agent's turn is markdown with actions under it: tables, code, LaTeX maths, Mermaid diagrams and citation chips."
+	>
 		<div class="flex flex-col gap-8">
 			<Message from="user">
 				<MessageContent>We need to track volunteers: name, phone, area and which days they are free.</MessageContent>

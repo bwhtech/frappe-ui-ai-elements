@@ -71,7 +71,12 @@ onBeforeUnmount(() => player.dispose());
 		</div>
 		<div class="flex h-[560px] flex-col overflow-hidden rounded-6 border border-outline-gray-1 bg-surface-base">
 			<div class="relative min-h-0 flex-1">
-				<ConversationEmptyState v-if="!messages.length" icon="lucide-play" title="Press Play" description="A scripted Seva turn streams through the real components. No model, no network." />
+				<ConversationEmptyState
+					v-if="!messages.length"
+					icon="lucide-play"
+					title="Press Play"
+					description="A scripted Seva turn streams through the real components. No model, no network."
+				/>
 				<Conversation v-else>
 					<ConversationContent class="mx-auto w-full max-w-[720px] px-4 py-5">
 						<ConversationItem v-for="message in messages" :key="message.id" :message-id="message.id" :scroll-anchor="message.role === 'user'">
@@ -96,7 +101,14 @@ onBeforeUnmount(() => player.dispose());
 				<Suggestions v-if="finished">
 					<Suggestion v-for="s in scenarioSuggestions" :key="s" :suggestion="s" @select="log('suggestion', $event)" />
 				</Suggestions>
-				<PromptInput :status="status" @submit="log('submit', $event.text)" @stop="log('stop'); player.pause()">
+				<PromptInput
+					:status="status"
+					@submit="log('submit', $event.text)"
+					@stop="
+						log('stop');
+						player.pause();
+					"
+				>
 					<PromptInputTextarea placeholder="The script drives this thread. Typing only logs." />
 					<PromptInputFooter><span /><PromptInputSubmit /></PromptInputFooter>
 				</PromptInput>

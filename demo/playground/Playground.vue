@@ -47,7 +47,11 @@ async function copyLink() {
 	toast.success("Link copied");
 }
 
-watch(() => globals.theme, (theme) => setColorScheme(theme), { immediate: true });
+watch(
+	() => globals.theme,
+	(theme) => setColorScheme(theme),
+	{ immediate: true },
+);
 watch([globals, values], () => writeUrl(globals, entry.value, values.value), { deep: true, immediate: true });
 </script>
 
@@ -106,7 +110,13 @@ watch([globals, values], () => writeUrl(globals, entry.value, values.value), { d
 				</nav>
 
 				<div class="border-b border-outline-gray-1 p-3 lg:hidden">
-					<Select class="w-full" :model-value="globals.component" :options="pickerOptions" aria-label="Component" @update:model-value="choose(String($event))" />
+					<Select
+						class="w-full"
+						:model-value="globals.component"
+						:options="pickerOptions"
+						aria-label="Component"
+						@update:model-value="choose(String($event))"
+					/>
 				</div>
 
 				<main class="flex min-w-0 flex-1 flex-col gap-3 bg-surface-gray-1 p-3 sm:p-5 lg:overflow-y-auto">

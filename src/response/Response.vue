@@ -21,7 +21,9 @@ const props = withDefaults(defineProps<{ content: string; parseIncomplete?: bool
 
 const renderer = new MarkdownRenderer();
 const blocks = computed(() =>
-	renderer.render(props.content, props.parseIncomplete).map((block) => (block.kind === "html" && props.citations?.size ? { ...block, html: markCitations(block.html) } : block)),
+	renderer
+		.render(props.content, props.parseIncomplete)
+		.map((block) => (block.kind === "html" && props.citations?.size ? { ...block, html: markCitations(block.html) } : block)),
 );
 
 /** Tags each link to a cited page with its key. DOMPurify writes href first, quoted, with & as &amp;. */

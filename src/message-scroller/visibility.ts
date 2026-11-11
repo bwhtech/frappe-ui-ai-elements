@@ -148,17 +148,19 @@ export class MessageScrollerVisibility {
 		return ids
 			.map((id) => [id, this.elements.get(id)] as const)
 			.filter((pair): pair is readonly [string, HTMLElement] => !!pair[1])
-			.sort(([, a], [, b]) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+			.toSorted(([, a], [, b]) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
 			.map(([id]) => id);
 	}
 
 	/** Fallback where IntersectionObserver is missing. */
 	private visibleByLayout(viewport: HTMLElement, lineTop: number) {
 		const bottom = viewport.getBoundingClientRect().bottom;
-		return [...this.elements].filter(([, element]) => {
-			const rect = element.getBoundingClientRect();
-			return rect.bottom > lineTop && rect.top < bottom;
-		}).map(([id]) => id);
+		return [...this.elements]
+			.filter(([, element]) => {
+				const rect = element.getBoundingClientRect();
+				return rect.bottom > lineTop && rect.top < bottom;
+			})
+			.map(([id]) => id);
 	}
 }
 

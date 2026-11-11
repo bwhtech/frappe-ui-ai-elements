@@ -34,7 +34,9 @@ const iconName = computed(() => {
 	>
 		<div
 			class="flex size-8 shrink-0 items-center justify-center rounded-full"
-			:class="pending ? 'bg-surface-amber-2 text-ink-amber-6' : approval?.approved ? 'bg-surface-green-2 text-ink-green-6' : 'bg-surface-gray-2 text-ink-gray-5'"
+			:class="
+				pending ? 'bg-surface-amber-2 text-ink-amber-6' : approval?.approved ? 'bg-surface-green-2 text-ink-green-6' : 'bg-surface-gray-2 text-ink-gray-5'
+			"
 		>
 			<Icon :icon="iconName" class="size-4" />
 		</div>

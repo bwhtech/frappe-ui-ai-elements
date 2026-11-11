@@ -20,7 +20,11 @@ const ids = { title: `${id}-title`, description: `${id}-description`, error: `${
 
 const active = computed(() => root.activeName.value === props.name);
 const invalid = computed(() => root.invalidName.value === props.name);
-const answer = useItemAnswer(root, () => props.name, () => props.multiple);
+const answer = useItemAnswer(
+	root,
+	() => props.name,
+	() => props.multiple,
+);
 
 const context = {
 	name: props.name,

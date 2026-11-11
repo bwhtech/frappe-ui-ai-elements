@@ -41,7 +41,11 @@ const folded = ["output-available", "output-error", "input-available"].map((labe
 		</div>
 	</DemoBlock>
 
-	<DemoBlock id="tool-group" title="Tool group" description="Two or more plain steps in a row fold under one summary line. Cards and calls that wait on the person never fold.">
+	<DemoBlock
+		id="tool-group"
+		title="Tool group"
+		description="Two or more plain steps in a row fold under one summary line. Cards and calls that wait on the person never fold."
+	>
 		<ToolGroup v-bind="summarizeSteps(folded, true)">
 			<ToolPart v-for="part in folded" :key="part.toolCallId" :part="part" />
 		</ToolGroup>

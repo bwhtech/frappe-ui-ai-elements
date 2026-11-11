@@ -63,7 +63,9 @@ export function summarizeSteps(parts: Part[], streaming: boolean) {
 	if (!tools.length) labels.push(parts.length === 1 ? "thought" : `thought (×${parts.length})`);
 
 	const failed = phases.filter((phase) => phase === "failed" || phase === "stopped").length;
-	const running = phases.some((phase) => phase === "preparing" || phase === "running") || (streaming && parts.some((part) => part.type === "reasoning" && part.state === "streaming"));
+	const running =
+		phases.some((phase) => phase === "preparing" || phase === "running") ||
+		(streaming && parts.some((part) => part.type === "reasoning" && part.state === "streaming"));
 	return { summary: capitalize(joinLabels(labels)), failed, running };
 }
 

@@ -69,7 +69,9 @@ const pendingApprovals = computed(() =>
 		.map((part) => (part as Extract<ToolMessagePart, { state: "approval-requested" }>).approval.id),
 );
 const firstPendingGroup = computed(() =>
-	groups.value.findIndex((group) => isStepsGroup(group) && group.parts.some((part) => isStep(part) && part.type !== "reasoning" && asTool(part).state === "approval-requested")),
+	groups.value.findIndex(
+		(group) => isStepsGroup(group) && group.parts.some((part) => isStep(part) && part.type !== "reasoning" && asTool(part).state === "approval-requested"),
+	),
 );
 const lastTextIndex = computed(() => props.message.parts.map((part) => part.type).lastIndexOf("text"));
 
@@ -78,12 +80,12 @@ function isStep(part: Part) {
 }
 
 function groupParts(parts: Part[]): Group[] {
-	const groups: Group[] = [];
+	const result: Group[] = [];
 	const grouping = buildPlan?.value?.decision === "approved";
 	// The plan item the agent is working on: its steps go in its section.
 	let current: string | null = null;
 	for (const part of parts) {
-		const last = groups[groups.length - 1];
+		const last = result[result.length - 1];
 		if (grouping && part.type === `tool-${UPDATE_PLAN_TOOL}` && asTool(part).state === "output-available") {
 			for (const update of (asTool(part).input as UpdatePlanInput | undefined)?.updates ?? []) {
 				if (update.status === "in_progress") current = update.id;
@@ -92,14 +94,14 @@ function groupParts(parts: Part[]): Group[] {
 			continue;
 		}
 		if (isStep(part) && current && last?.kind === "plan-item" && last.id === current) last.parts.push(part);
-		else if (isStep(part) && current) groups.push({ kind: "plan-item", id: current, parts: [part] });
+		else if (isStep(part) && current) result.push({ kind: "plan-item", id: current, parts: [part] });
 		else if (isStep(part) && last?.kind === "steps") last.parts.push(part);
-		else if (isStep(part)) groups.push({ kind: "steps", parts: [part] });
+		else if (isStep(part)) result.push({ kind: "steps", parts: [part] });
 		else if (part.type === "file" && last?.kind === "files") last.parts.push(part);
-		else if (part.type === "file") groups.push({ kind: "files", parts: [part] });
-		else if (part.type === "text") groups.push({ kind: "part", part });
+		else if (part.type === "file") result.push({ kind: "files", parts: [part] });
+		else if (part.type === "text") result.push({ kind: "part", part });
 	}
-	return groups;
+	return result;
 }
 
 function isStepsGroup(group: Group): group is Extract<Group, { kind: "steps" | "plan-item" }> {
@@ -124,7 +126,11 @@ function answerAll(approved: boolean) {
 
 /** A plan item's steps go under its line (PlanItemSteps); other steps sit in a plain column. */
 function stepsAttrs(group: Extract<Group, { kind: "steps" | "plan-item" }>) {
-	if (group.kind === "steps") return { "data-slot": "message-steps", class: "flex min-w-0 flex-col gap-1 [@media(pointer:coarse)]:gap-3 [&:not(:first-child)]:mt-1.5 [&:not(:last-child)]:mb-1.5" };
+	if (group.kind === "steps")
+		return {
+			"data-slot": "message-steps",
+			class: "flex min-w-0 flex-col gap-1 [@media(pointer:coarse)]:gap-3 [&:not(:first-child)]:mt-1.5 [&:not(:last-child)]:mb-1.5",
+		};
 	const item = buildPlan?.value?.items.find((candidate) => candidate.id === group.id);
 	return {
 		title: item?.title ?? group.id,
@@ -205,11 +211,7 @@ function isStreamingText(part: Part) {
 			</Bubble>
 			<Response v-else :content="group.part.text" :parse-incomplete="isStreamingText(group.part)" :citations="citations" />
 		</template>
-		<div
-			v-else-if="group.kind === 'files'"
-			data-slot="message-files"
-			class="flex max-w-[85%] flex-wrap gap-2 group-data-[align=end]/message:justify-end"
-		>
+		<div v-else-if="group.kind === 'files'" data-slot="message-files" class="flex max-w-[85%] flex-wrap gap-2 group-data-[align=end]/message:justify-end">
 			<template v-for="file in group.parts" :key="partKey(file)">
 				<a
 					v-if="isImage(file)"
