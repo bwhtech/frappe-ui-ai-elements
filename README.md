@@ -1,5 +1,7 @@
 # frappe-ui AI Elements
 
+<a href="https://bwh.tech"><img src=".github/assets/built-at-bwh.svg" height="28" alt="Built at BWH"></a>
+
 [![npm](https://img.shields.io/npm/v/frappe-ui-ai-elements)](https://www.npmjs.com/package/frappe-ui-ai-elements)
 [![CI](https://github.com/bwhtech/frappe-ui-ai-elements/actions/workflows/ci.yml/badge.svg)](https://github.com/bwhtech/frappe-ui-ai-elements/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
