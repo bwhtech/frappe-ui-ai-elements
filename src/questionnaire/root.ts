@@ -29,7 +29,7 @@ export function createQuestionnaire(options: RootOptions) {
 	const skipped = ref(new Set<string>());
 	const invalidName = ref<string | null>(null);
 
-	const items = computed(() => registered.filter((item) => !item.disabled()).toSorted(byDocumentOrder));
+	const items = computed(() => registered.filter((item) => !item.disabled()).sort(byDocumentOrder));
 	const activeName = computed(() => {
 		const wanted = options.item.value;
 		return items.value.some((item) => item.name === wanted) ? wanted : items.value[0]?.name;

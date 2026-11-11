@@ -148,7 +148,7 @@ export class MessageScrollerVisibility {
 		return ids
 			.map((id) => [id, this.elements.get(id)] as const)
 			.filter((pair): pair is readonly [string, HTMLElement] => !!pair[1])
-			.toSorted(([, a], [, b]) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
+			.sort(([, a], [, b]) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1))
 			.map(([id]) => id);
 	}
 
