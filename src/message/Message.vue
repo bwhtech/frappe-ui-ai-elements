@@ -14,7 +14,7 @@ const alignment = computed(() => props.align ?? (props.from === "user" ? "end" :
 		data-slot="message"
 		:data-align="alignment"
 		:data-role="from"
-		class="group/message relative flex w-full min-w-0 gap-2 text-p-base data-[align=end]:flex-row-reverse"
+		class="group/message relative flex w-full min-w-0 gap-2 text-p-md data-[align=end]:flex-row-reverse"
 	>
 		<slot />
 	</div>

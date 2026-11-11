@@ -11,3 +11,14 @@ export function provideMessageRole(role: () => MessageRole) {
 export function useMessageRole() {
 	return inject(key, computed(() => "assistant" as MessageRole));
 }
+
+const bubbleKey: InjectionKey<ComputedRef<boolean>> = Symbol("MessageBubble");
+
+/** MessageContent says whether it already draws the person's bubble, so MessageParts does not draw a second. */
+export function provideInBubble(inBubble: () => boolean) {
+	provide(bubbleKey, computed(inBubble));
+}
+
+export function useInBubble() {
+	return inject(bubbleKey, computed(() => false));
+}

@@ -16,7 +16,7 @@ withDefaults(defineProps<{ title?: string; description?: string; icon?: string |
 			</div>
 			<div class="space-y-1.5">
 				<p class="text-lg-semibold text-ink-gray-8">{{ title }}</p>
-				<p class="text-p-base text-ink-gray-5">{{ description }}</p>
+				<p class="text-p-base text-ink-gray-6">{{ description }}</p>
 			</div>
 			<slot name="actions" />
 		</slot>

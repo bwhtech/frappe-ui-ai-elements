@@ -23,7 +23,7 @@ function scroll() {
 		data-slot="message-scroller-button"
 		:data-direction="direction"
 		:data-active="active"
-		class="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 opacity-0 transition-[opacity,transform] duration-200 data-[direction=end]:bottom-3 data-[direction=start]:top-3 data-[active=true]:pointer-events-auto data-[active=true]:translate-y-0 data-[active=true]:opacity-100 data-[direction=end]:data-[active=false]:translate-y-2 data-[direction=start]:data-[active=false]:-translate-y-2"
+		class="pointer-events-none absolute left-1/2 z-10 -translate-x-1/2 opacity-0 transition-[opacity,transform] duration-200 ease-out-strong motion-reduce:transition-opacity motion-reduce:!translate-y-0 data-[direction=end]:bottom-3 data-[direction=start]:top-3 data-[active=true]:pointer-events-auto data-[active=true]:translate-y-0 data-[active=true]:opacity-100 data-[direction=end]:data-[active=false]:translate-y-2 data-[direction=start]:data-[active=false]:-translate-y-2"
 	>
 		<slot :active="active" :scroll="scroll">
 			<Button

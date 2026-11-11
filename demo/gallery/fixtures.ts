@@ -170,3 +170,37 @@ export const foodDrivePlan = {
 		{ id: "sample-records", kind: "records", title: "Sample donors and pledges", detail: "About 10 donors and 15 pledges, marked Sample." },
 	],
 } satisfies ProposePlanInput;
+
+/** Maths, a Mermaid diagram, a number column and a cited link, as Response draws them. */
+export const richReplyMarkdown = `Each volunteer's share of the hours is $s_i = h_i / \\sum_j h_j$, so the shares add up to 1:
+
+$$
+\\sum_{i=1}^{n} s_i = \\frac{\\sum_i h_i}{\\sum_j h_j} = 1
+$$
+
+| Area | Volunteers | Hours |
+| --- | --- | --- |
+| Jayanagar | 12 | 340.5 |
+| Indiranagar | 7 | 1,205 |
+| Malleshwaram | 3 | 18 |
+
+\`\`\`mermaid
+flowchart LR
+  A[Sign-up form] --> B{Approved?}
+  B -- Yes --> C[Volunteer]
+  B -- No --> D[Follow up]
+\`\`\`
+
+The [Frappe docs](https://docs.frappe.io/framework/user/en/basics/doctypes) explain DocTypes in more detail.`;
+
+/** The page the reply above cites: hover its chip to see the card. */
+export const richReplyCitations = new Map([
+	[
+		"docs.frappe.io/framework/user/en/basics/doctypes",
+		{
+			url: "https://docs.frappe.io/framework/user/en/basics/doctypes",
+			title: "DocTypes",
+			description: "A DocType is the core building block of any application based on the Frappe Framework. It describes the model and the view of your data.",
+		},
+	],
+]);

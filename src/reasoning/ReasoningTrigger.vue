@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Spinner } from "frappe-ui";
 import { computed } from "vue";
 import { TraceCollapsibleTrigger, TraceIcon, TraceLine, TraceTitle } from "../trace";
 import { useReasoning } from "./context";
@@ -17,10 +16,7 @@ const title = computed(() => {
 <template>
 	<TraceCollapsibleTrigger data-slot="reasoning-trigger">
 		<TraceLine :status="isStreaming ? 'running' : undefined">
-			<TraceIcon>
-				<Spinner v-if="isStreaming" class="size-3.5" />
-				<span v-else class="lucide-brain size-4" />
-			</TraceIcon>
+			<TraceIcon icon="lucide-brain" />
 			<TraceTitle><slot :is-streaming="isStreaming" :duration="duration">{{ title }}</slot></TraceTitle>
 		</TraceLine>
 	</TraceCollapsibleTrigger>

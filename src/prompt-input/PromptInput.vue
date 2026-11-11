@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ChatStatus } from "ai";
-import { computed, ref, toRef } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, toRef } from "vue";
 import { providePromptInput } from "./context";
 
 /**
@@ -9,9 +9,10 @@ import { providePromptInput } from "./context";
  * clears both. While the chat is busy, the submit button emits `stop`; with `queue`,
  * Enter still submits, so the page can queue the message. Files can
  * also be dropped on it or pasted into it; `accept` filters all three ways.
+ * `ready` says the page holds something else worth sending with no text, such as a chosen skill.
  */
 const props = withDefaults(
-	defineProps<{ status?: ChatStatus; disabled?: boolean; accept?: string; multiple?: boolean; queue?: boolean }>(),
+	defineProps<{ status?: ChatStatus; disabled?: boolean; accept?: string; multiple?: boolean; queue?: boolean; ready?: boolean }>(),
 	{ status: "ready", multiple: true },
 );
 const emit = defineEmits<{ submit: [message: { text: string; files: File[] }]; stop: [] }>();
@@ -22,7 +23,7 @@ const fileInput = ref<HTMLInputElement | null>(null);
 const dragging = ref(false);
 
 const busy = computed(() => props.status === "submitted" || props.status === "streaming");
-const canSubmit = computed(() => !props.disabled && (props.queue || !busy.value) && (text.value.trim() !== "" || files.value.length > 0));
+const canSubmit = computed(() => !props.disabled && (props.queue || !busy.value) && (text.value.trim() !== "" || files.value.length > 0 || props.ready));
 
 function submit() {
 	if (!canSubmit.value) return;
@@ -30,6 +31,9 @@ function submit() {
 	text.value = "";
 	files.value = [];
 }
+
+/** Sends what the field holds, as the send button does; used by Cmd+Enter in a quote's comment. */
+defineExpose({ submit });
 
 function addFiles(event: Event) {
 	const input = event.target as HTMLInputElement;
@@ -43,10 +47,53 @@ function attach(added: File[]) {
 	files.value = props.multiple ? [...files.value, ...accepted] : accepted.slice(0, 1);
 }
 
-function onDrop(event: DragEvent) {
+/**
+ * Only a drag that carries files lights the field up; dragging selected text does not.
+ * Enter and leave pair up as the pointer crosses children, so a depth count reaches 0
+ * only when the drag leaves the field (or Esc ends it). A drop anywhere also resets it.
+ */
+let dragDepth = 0;
+
+function hasFiles(event: DragEvent) {
+	return Array.from(event.dataTransfer?.types ?? []).includes("Files");
+}
+
+function onDragEnter(event: DragEvent) {
+	if (!hasFiles(event)) return;
+	dragDepth++;
+	dragging.value = !props.disabled;
+}
+
+function onDragOver(event: DragEvent) {
+	if (hasFiles(event)) event.preventDefault();
+}
+
+function onDragLeave(event: DragEvent) {
+	if (!hasFiles(event)) return;
+	dragDepth = Math.max(0, dragDepth - 1);
+	if (dragDepth === 0) dragging.value = false;
+}
+
+function endDrag() {
+	dragDepth = 0;
 	dragging.value = false;
+}
+
+function onDrop(event: DragEvent) {
+	endDrag();
+	if (!hasFiles(event)) return;
+	event.preventDefault();
 	attach(Array.from(event.dataTransfer?.files ?? []));
 }
+
+onMounted(() => {
+	window.addEventListener("drop", endDrag);
+	window.addEventListener("dragend", endDrag);
+});
+onBeforeUnmount(() => {
+	window.removeEventListener("drop", endDrag);
+	window.removeEventListener("dragend", endDrag);
+});
 
 /** Pasted files are attached; pasted text goes into the textarea as usual. */
 function onPaste(event: ClipboardEvent) {
@@ -87,11 +134,12 @@ providePromptInput({
 		data-slot="prompt-input"
 		:data-status="status"
 		:data-dragging="dragging || undefined"
-		class="flex w-full min-w-0 flex-col rounded-7 border border-outline-gray-2 bg-surface-base shadow-sm transition-[border-color,box-shadow] focus-within:border-outline-gray-3 focus-within:shadow-md data-[dragging]:border-outline-gray-4 data-[dragging]:bg-surface-gray-1"
+		class="flex w-full min-w-0 flex-col rounded-7 border border-outline-gray-2 bg-surface-base shadow-sm transition-[border-color,box-shadow] duration-150 ease-out-strong focus-within:border-outline-gray-3 dark:bg-surface-gray-1 data-[dragging]:border-outline-gray-4 data-[dragging]:bg-surface-gray-1"
 		@submit.prevent="submit"
-		@dragover.prevent="dragging = !disabled"
-		@dragleave.self="dragging = false"
-		@drop.prevent="onDrop"
+		@dragenter="onDragEnter"
+		@dragover="onDragOver"
+		@dragleave="onDragLeave"
+		@drop="onDrop"
 		@paste="onPaste"
 	>
 		<slot />

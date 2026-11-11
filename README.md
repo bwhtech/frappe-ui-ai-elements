@@ -4,7 +4,7 @@ AI chat and agent components for Vue 3, built on [frappe-ui](https://github.com/
 
 The components read the [Vercel AI SDK](https://ai-sdk.dev) message format (`UIMessage` and its parts). `MessageParts` renders a whole message, and `ToolPart` renders one tool call in any of its seven states.
 
-> Status: 0.x. The package is not on npm yet, and the API can change between minor versions.
+> Status: 0.x. The API can change between minor versions. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
@@ -12,7 +12,7 @@ The components read the [Vercel AI SDK](https://ai-sdk.dev) message format (`UIM
 npm install @bwhtech/frappe-ui-ai-elements frappe-ui vue ai
 ```
 
-Until the package is on npm, install it from GitHub: `npm install github:bwhtech/frappe-ui-ai-elements`. npm then runs the `prepare` script, which builds `dist/`.
+The package also installs [KaTeX](https://katex.org) for maths in replies and [Pele](https://pele.run) for Mermaid diagrams. Pele loads only when a reply has a diagram.
 
 ## Set up
 
@@ -29,7 +29,7 @@ Until the package is on npm, install it from GitHub: `npm install github:bwhtech
    };
    ```
 
-2. Import the styles after frappe-ui's. The second file holds the `shimmer` and `scroll-fade-*` utilities, the code highlighting theme and a few Trace selectors. It uses `@layer utilities`, so import it from a CSS file that Tailwind processes:
+2. Import the styles after frappe-ui's. The second file holds the `shimmer`, `scroll-fade-*` and `ease-out-strong` utilities, the code highlighting theme, the touch targets and a few Trace selectors. It uses `@layer utilities`, so import it from a CSS file that Tailwind processes:
 
    ```css
    @import "frappe-ui/style.css";
@@ -37,6 +37,12 @@ Until the package is on npm, install it from GitHub: `npm install github:bwhtech
    ```
 
 3. Wrap the app in frappe-ui's `<FrappeUIProvider>`.
+
+`Response` imports KaTeX's stylesheet from its module. Vite and other bundlers that handle CSS imports need no more setup.
+
+The easing curve is the CSS variable `--ease-out-strong`. To use a different curve, set the variable on `:root`.
+
+On touch screens (`pointer: coarse`), small controls get an invisible hit area of about 44px. To give your own control this hit area, add the `touch-target` class.
 
 ## Use
 
@@ -55,7 +61,7 @@ const input = ref("");
 		<ConversationContent>
 			<ConversationItem v-for="message in messages" :key="message.id" :message-id="message.id" :scroll-anchor="message.role === 'user'">
 				<Message :from="message.role">
-					<MessageContent>
+					<MessageContent :bare="message.role === 'user'">
 						<MessageParts
 							:message="message"
 							@approve="(id) => addToolApprovalResponse({ id, approved: true })"
@@ -86,7 +92,7 @@ const input = ref("");
 | --- | --- |
 | `npm run dev` | Starts the demo app. |
 | `npm run typecheck` | Type-checks the library and the demo with vue-tsc. |
-| `npm run build` | Builds the library into `dist/`: one ES module per source file, and type declarations in `dist/types/`. `vue`, `frappe-ui`, `ai`, `marked`, `dompurify` and `highlight.js` stay external. |
+| `npm run build` | Builds the library into `dist/`: one ES module per source file, and type declarations in `dist/types/`. `vue`, `frappe-ui`, `ai`, `marked`, `dompurify`, `highlight.js`, `katex` and `pele` stay external. |
 | `npm run build:demo` | Builds the demo app into `demo-dist/`. |
 | `npm run build:demo:dist` | Builds the demo against `dist/`, to check the built package works in an app. |
 
@@ -125,28 +131,30 @@ The structure follows shadcn. Most elements are built on a few building blocks (
 | `CodeBlockCopyButton` | `value` | emits `copy` | |
 | `Marker`, `MarkerIcon (icon)`, `MarkerContent` | `variant: default \| separator \| border` | default | |
 | `Shimmer` | `as`, `duration` (s), `spread` (px) | default | You can also use the `shimmer` class directly. |
-| `Attachment` | `name`, `size`, `mediaType`, `url`, `state: idle \| uploading \| done \| error`, `removable` | emits `remove` | |
+| `Attachment` | `name`, `size`, `mediaType`, `url`, `state: idle \| uploading \| done \| error`, `removable` | emits `remove` | A one-line chip: an icon coloured by file type, the name and the size. With a `url` and no `removable`, the chip is a link. |
+| `provideFileViewer(viewer)` | `viewer: (file: { name, url, mediaType }) => boolean` | — | Opens files in the chat (attachment chips and image thumbnails) in the app's own viewer, such as a side panel. Return `true` when the viewer opened the file. Return `false` to open it as a link. A click with a modifier key always opens the link. `useViewOnClick()` gives the click handler for your own file links. |
 
 ### Elements
 
 | Element | Parts and API | Renders (`UIMessage` part) |
 | --- | --- | --- |
 | **Chat** | `Conversation (autoScroll = true, defaultScrollPosition)`, `ConversationContent` (attrs go to the column), `ConversationItem (messageId, scrollAnchor)`, `ConversationScrollButton`, `ConversationEmptyState (title, description, icon; #actions)` | The message list |
-| **Message** | `Message (from: user \| assistant \| system, align?)`, `MessageContent (bare)` puts the person's text in a muted bubble, `MessageAvatar (name, src)`, `MessageHeader`, `MessageActions` / `MessageFooter`, `MessageAction (label, icon, pressed; @click)`, `MessageCopyAction (value)` | `role` |
-| **MessageParts** | `message`, `streaming`. Emits `approve(id)`, `deny(id)`, `answer({ toolCallId, output })` and `dismiss(toolCallId)`. This is the AI SDK adapter for a whole message. Two or more plain steps in a row (thoughts and tool lines) fold under one ToolGroup line. Approvals, questions, plans, Desk cards and tools the app draws itself never fold. | `text`, `reasoning`, `dynamic-tool`, `tool-*`, `file`, `source-url` |
-| **Response** (`MessageResponse`) | `content`, `parseIncomplete = true`, `size: sm \| base` | `text`. Uses marked and DOMPurify. While the text streams, it closes open fences, bold, inline code and links. Fenced code renders as a `CodeBlock`. Finished blocks are cached. A table scrolls sideways in its own focusable region, `[data-slot=response-table]`. Long unbroken text (URLs, ids, inline code) wraps. |
-| **PromptInput** | `PromptInput (v-model text, status: ready \| submitted \| streaming \| error, disabled, accept, multiple, queue)` emits `submit({ text, files })` and `stop`. With `queue`, Enter still submits while busy, so the page can queue the message. Files come from the attach button, a drop on the field, or a paste; `accept` filters all three. Parts: `PromptInputTextarea (placeholder, maxRows, autofocus)`, `PromptInputHeader`, `PromptInputFooter` / `Toolbar`, `PromptInputTools`, `PromptInputButton (label, icon, iconLeft)`, `PromptInputAttachButton`, `PromptInputSubmit` | Enter sends. Shift+Enter adds a new line. IME composition does not send. `PromptInputSubmit` shows Send, a spinner while submitted, and Stop while streaming. With `queue`, it shows Queue while busy and the field has text, and Stop again once the field is empty. |
-| **PromptInputQueue** | `PromptInputQueue (items: { id, text, files? }[], v-model:open)` emits `steer(id)`, `remove(id)`, `update(id, text)` and `reorder(ids)`. Put it right above the PromptInput. | Messages written while the agent works. Rows can be dragged into a new order, edited in place (Enter saves, Escape cancels) and removed. Steer means "stop the reply and send this now"; the page does both. The page owns the list and sends the first item when the agent is free. |
-| **Tool** | `Tool (v-model:open, defaultOpen)`, `ToolHeader (state, toolName, title, icon, streaming, approved, preliminary, showBadge)`, `ToolContent`, `ToolInput (input)`, `ToolOutput (output, errorText)`. Helpers: `getToolStatus`, `getToolTitle`, `getStatusBadge`, `formatToolOutput` (unwraps MCP `content[].text`), `getToolName`, `humanizeToolName` | `dynamic-tool`, `tool-*`, in every state |
-| **ToolGroup** | `ToolGroup (summary, failed, running, v-model:open)`, closed by default, with the steps in its slot. Helpers: `foldSteps(parts, customTools)` splits steps into single parts and folds, and `summarizeSteps(parts, streaming)` gives the line, such as "Looked up 4 things and made 2 changes", with the failed count and whether a step runs. | A run of `reasoning`, `dynamic-tool` and `tool-*` parts |
+| **Message** | `Message (from: user \| assistant \| system, align?)`, `MessageContent (bare)` puts the person's text in a muted bubble (set `bare` on the person's turns around `MessageParts`), `MessageAvatar (name, src)`, `MessageHeader`, `MessageActions` / `MessageFooter`, `MessageAction (label, icon, pressed; @click)`, `MessageCopyAction (value)` | `role` |
+| **MessageParts** | `message`, `streaming`. Emits `approve(id)`, `deny(id)`, `answer({ toolCallId, output })` and `dismiss(toolCallId)`. This is the AI SDK adapter for a whole message. Two or more plain steps in a row (thoughts and tool lines) fold under one ToolGroup line. Approvals, questions, plans, Desk cards and tools the app draws itself never fold. The person's text goes in a muted bubble. Their files go in a row under it: images as thumbnails, other files as Attachment chips. Links in the reply to pages that its tools returned show as citation chips (`collectCitations`). Rows are keyed by tool call id, so a card keeps its state when an approval folds into the steps before it. | `text`, `reasoning`, `dynamic-tool`, `tool-*`, `file`, `source-url` |
+| **Response** (`MessageResponse`) | `content`, `parseIncomplete = true`, `size: sm \| base`, `citations` (a `CitationIndex` from `collectCitations(message)`) | `text`. Uses marked and DOMPurify. While the text streams, it closes open fences, bold, inline code and links. Fenced code renders as a `CodeBlock`. Finished blocks are cached. A table scrolls sideways in its own focusable region, `[data-slot=response-table]`. A table column whose cells are all numbers aligns right, unless the markdown sets an alignment. Long unbroken text (URLs, ids, inline code) wraps. LaTeX maths renders with KaTeX: `$$…$$` and `\[…\]` as a block, `$…$` and `\(…\)` inline. A single `$` follows Pandoc's rules, so "$5 and $10" stays text. A ```` ```mermaid ```` fence renders as a diagram when the fence is complete, with a button to show the code. A diagram that does not parse shows its code and the reason. With `citations`, a link to a cited page shows as a chip, and a card with the title and an excerpt opens on hover or focus. |
+| **PromptInput** | `PromptInput (v-model text, status: ready \| submitted \| streaming \| error, disabled, accept, multiple, queue, ready)` emits `submit({ text, files })` and `stop`. With `queue`, Enter still submits while busy, so the page can queue the message. Set `ready` when the page holds something to send with no text, such as a chosen skill. Files come from the attach button, a drop on the field, or a paste; `accept` filters all three. Only a drag that carries files highlights the field. The component exposes `submit()`. Parts: `PromptInputTextarea (placeholder, maxRows, autofocus)` (on touch screens `autofocus` does nothing, so the keyboard does not cover the chat), `PromptInputHeader`, `PromptInputFooter` / `Toolbar`, `PromptInputTools`, `PromptInputButton (label, icon, iconLeft)`, `PromptInputAttachButton`, `PromptInputSubmit` | Enter sends. Shift+Enter adds a new line. IME composition does not send. `PromptInputSubmit` shows Send, a spinner while submitted, and Stop while streaming. With `queue`, it shows Queue while busy and the field has text, and Stop again once the field is empty. |
+| **PromptInputQueue** | `PromptInputQueue (items: { id, text, files? }[], v-model:open, v-model:editing)` emits `steer(id)`, `remove(id)`, `update(id, text)` and `reorder(ids)`. Put it right above the PromptInput. | Messages written while the agent works. Rows can be dragged into a new order, edited in place (Enter saves, Escape cancels) and removed. Steer means "stop the reply and send this now"; the page does both. The page owns the list and sends the first item when the agent is free. `editing` is the id of the row being edited: do not send that row until the edit ends. The panel opens and closes with a height animation. |
+| **Tool** | `Tool (v-model:open, defaultOpen)`, `ToolHeader (state, toolName, title, icon, streaming, approved, preliminary, failed, showBadge)`, `ToolContent`, `ToolInput (input)`, `ToolOutput (output, errorText)`. Set `failed` when the output itself reports a failure, such as `{ ok: false }`. The badge does not show for Done and Error, because the title and icon already say it. Helpers: `getToolPhase` (`preparing`, `running`, `needs-approval`, `approved`, `denied`, `stopped`, `failed` or `done`), `getToolStatus`, `getToolTitle`, `getStatusBadge`, `formatToolOutput` (unwraps MCP `content[].text`), `getToolName`, `humanizeToolName` | `dynamic-tool`, `tool-*`, in every state |
+| **ToolGroup** | `ToolGroup (summary, failed, running, v-model:open)`, closed by default, with the steps in its slot. Helpers: `foldSteps(parts, customTools)` splits steps into single parts and folds, and `summarizeSteps(parts, streaming)` gives the line, such as "Looked up 4 things and made 2 changes", with the failed count and whether a step runs. A denied call counts as "skipped", not as a change. An output with `error` or `ok: false` counts as failed. The failed count shows in gray, because the reply continues without those steps. | A run of `reasoning`, `dynamic-tool` and `tool-*` parts |
 | **ToolPart** | `part`, `streaming`, `icon`. Emits `approve(id)`, `deny(id)`, `answer({ toolCallId, output })`, `dismiss(toolCallId)` and `decide({ toolCallId, output })`. | AI SDK adapter. `approval-requested` renders as a Confirmation. A `tool-ask_user` part renders as a Questionnaire, then as a summary of the answers. A `tool-propose_plan` part renders as a ToolPlan, and a `tool-update_plan` part as one line per item it changed. A tool the app draws itself (`provideToolRenderers`) renders with its component. Other states render as a Tool line. |
-| **provideToolRenderers** | `provideToolRenderers({ [toolName]: Component })`; `useToolRenderers()` reads them. | Lets an app draw one of its own tools in its own way, such as a card the model wrote. ToolPart passes the component `part` and `streaming`. A call that waits for approval still shows the Confirmation first. |
-| **Confirmation** | `Confirmation (approval, state, icon)`, `ConfirmationTitle (title, description; #description)`, `ConfirmationRequest`, `ConfirmationAccepted`, `ConfirmationRejected`, `ConfirmationActions`, `ConfirmationAction (label, variant, theme; @click)`. Ready-made: `ToolConfirmation (toolName, input, reason; @approve @deny)`, which shows a one-line summary of what the call acts on (`summarizeToolInput`: the doctype and a name, or "20 Student Feedback records" for a bulk `docs` call). `ConfirmationBatch (count, disabled; @approve @deny)`: the "Approve all / Deny all" bar; `MessageParts` shows it above the first pending card when two or more approvals wait in one message | `approval-requested`, `approval-responded`, `output-denied` |
+| **provideToolRenderers** | `provideToolRenderers({ [toolName]: Component }, { foldable?: string[] })`; `useToolRenderers()` reads them. | Lets an app draw one of its own tools in its own way, such as a card the model wrote. ToolPart passes the component `part` and `streaming`. A call that waits for approval still shows the Confirmation first. A tool drawn this way does not fold into a ToolGroup. Name it in `foldable` when its drawing is one plain line, so it folds with the steps around it. |
+| **provideToolLabels** | `provideToolLabels((toolName) => ({ title, question?, alwaysAllow? }) \| undefined)`; `useToolLabels()` reads it. | The app's own name for a tool, such as "Linear · Create issue" for `linear__create_issue`. ToolPart shows `title` in place of the humanized name, and `question` as the approval question. With `alwaysAllow`, the approval card also shows "Always allow": it runs `alwaysAllow` (for example, to save a rule), then approves the call. |
+| **Confirmation** | `Confirmation (approval, state, icon)`, `ConfirmationTitle (title, description; #description)`, `ConfirmationRequest`, `ConfirmationAccepted`, `ConfirmationRejected`, `ConfirmationActions`, `ConfirmationAction (label, variant, theme; @click)`. Ready-made: `ToolConfirmation (toolName, input, reason, question, approvalId, alwaysAllow; @approve @deny)`, which shows a one-line summary of what the call acts on (`summarizeToolInput`: the doctype and a name, or "20 Student Feedback records" for a bulk `docs` call). `ConfirmationBatch (count, disabled; @approve @deny)`: the "Approve all / Deny all" bar; `MessageParts` shows it above the first pending card when two or more approvals wait in one message | `approval-requested`, `approval-responded`, `output-denied` |
 | **DeskCard** | `DeskCard (title, summary, kind: list \| form \| doctype \| new \| page \| studio \| print, doctype, name, count, url, editUrl, sample, icon, label; #actions)`. Without `url` it shows as loading. With `editUrl` it adds a second button: "Edit in Studio" for a Studio page, "Edit layout" for a print format. A print card with a `sample` (`{ pdfUrl, imageUrl?, pages? }`) shows the record's first printed page above the card and opens the PDF. When the card is narrower than 30rem, the button moves under the text. `parseShowInDeskInput` and `parseShowInDeskOutput` are exported. | `tool-show_in_desk`: `ToolPart` shows the call as a DeskCard, using the input for the title and summary and the output for `url`, `count`, `editUrl` and `sample`. |
 | **ToolPlan** | `input`, `output`, `plan`, `unanswered`, `streaming`. Emits `decide(output)`. `provideBuildPlan(ref)` gives the cards the thread's live plan; `currentPlan(messages)` builds it. | `tool-propose_plan`: items grouped by kind, with Approve and build and Request changes. Items tick off from the `update_plan` calls after it. |
 | **Questionnaire** | `Questionnaire (v-model answers, v-model:item, disabled, shortcuts: numbers \| letters \| none)` emits `submit({ answers, skipped })`. Parts: `QuestionnaireProgress` (slot `{ current, total, first, last }`), `QuestionnaireItem (name, required, multiple, disabled)`, `QuestionnaireTitle (title)`, `QuestionnaireDescription (description)`, `QuestionnaireChoices`, `QuestionnaireChoice (value, label, description, disabled)`, `QuestionnaireInput (placeholder, label)` for "Other…", `QuestionnaireError (message)`, `QuestionnaireActions`, `QuestionnairePrevious`, `QuestionnaireSkip`, `QuestionnaireNext`, `QuestionnaireSubmit` (each takes `label`). `useQuestionnaireItem()` binds your own control to an item. Ready-made: `ToolQuestionnaire (input, output, disabled; @answer @dismiss)`, with a "Not now" button, `QuestionnaireSummary (title, questions, answers)` | `tool-ask_user`. One question at a time. Number keys pick answer N, arrow keys move between answers (and select, in a radio group), Enter goes to the next question and submits on the last, Mod+Enter works from any field. Escape never skips or leaves a question; in the "Other…" field it moves focus back to the answers. A required item must have an answer before Next. Skip leaves an optional item out and moves on (on the last item, it submits). `disabled` while the reply streams. |
 | **Reasoning** | `Reasoning (isStreaming, v-model:open, defaultOpen, duration)`, `ReasoningTrigger` (slot `{ isStreaming, duration }`), `ReasoningContent (content)`, `ReasoningPart (text, streaming, duration)`, `useReasoning()` | `reasoning`. It stays closed, also while the model thinks, until the person opens it or `defaultOpen` is set. The title reads "Thought for Ns", timed on the client when the server does not send a duration. |
-| **Loader** | `text` | Spinner and shimmering status text |
+| **Loader** | `text = "Thinking"`, `icon = "lucide-brain"` | A shimmering status line with no spinner. It has the same look and height as the reasoning line, so the line does not move when the model starts to think. |
 | **Suggestion** | `Suggestions (wrap)`, `Suggestion (suggestion, icon; @select)` | Send the label with `sendMessage({ text })` |
 | **Task** | `Task (v-model:open, defaultOpen = true)`, `TaskTrigger (title, status, icon)`, `TaskContent`, `TaskItem (status, icon)`, `TaskItemFile (icon)` | `data-task` |
 | **Plan** | `Plan (isStreaming, v-model:open, defaultOpen)`, `PlanHeader (icon; #actions)`, `PlanTitle`, `PlanDescription`, `PlanContent (#description, #footer)`, `PlanStep (status: complete \| active \| pending)` | `data-plan` |
@@ -155,8 +163,8 @@ The structure follows shadcn. Most elements are built on a few building blocks (
 | **Checkpoint** | `Checkpoint`, `CheckpointIcon (icon)`, `CheckpointTrigger (label, tooltip; @click)` | `data-checkpoint` |
 | **Context** | `usedTokens`, `maxTokens`, `usage { inputTokens, outputTokens, reasoningTokens, cachedInputTokens }`, `modelId`. Default slot goes in the card. | `message.metadata.usage` |
 | **Sources** | `Sources (sources, defaultOpen)` or `SourcesTrigger (count)` + `SourcesContent` + `Source (href, title)` | `source-url`, deduped by URL |
-| **InlineCitation** | `sources: { url, title?, description?, quote? }[]`. Default slot holds the cited text. | `source-url` |
-| **ModelSelector** | `models: { id, name, provider?, description? }[]`, `label`, `v-model` (id) | Use one for the model and one for the effort |
+| **InlineCitation** | `sources: { url, title?, description?, quote? }[]`. Default slot holds the cited text. Helpers: `collectCitations(message)` gives the pages a reply can cite, from `source-url` parts and from tool outputs shaped `{ results: [{ url, title, text }] }` or `{ url, title }`. `citationKey(url)` ignores the scheme, `www.`, a trailing slash, the fragment and tracking parameters. | `source-url` |
+| **ModelSelector** | `models: { id, name, provider?, description? }[]`, `label`, `v-model` (id) | A Combobox grouped by provider. The list scrolls in a fixed height. It has a search field, except on touch screens, where the keyboard would cover the list. |
 | **FileTree** | `nodes: { path, name, children?, change? }[]`, `v-model:expanded`, `v-model:selected`. Emits `select(path)`. Built on frappe-ui `Tree`. | Files the agent changed |
 | **Terminal** | `command`, `output`, `isStreaming`, `exitCode`, `v-model:open`, `#actions` | A command tool, or `data-terminal` |
 | **StackTrace** | `trace`, `defaultOpen`. Emits `select(path, line, column)` when a frame with a file is picked. Also exports `parseStack()` (JS and Python stacks). | The stack in `output-error` text |
@@ -236,7 +244,7 @@ With an approved plan provided, `MessageParts` puts the steps for each plan item
 - MessageScroller is fully ported, with follow, anchor, release, the tail spacer, prepend preservation and visibility tracking. Three additions: `MessageScrollerViewport` emits `reach-start` (shadcn has no start-edge event), `useMessageScrollerVisibility()` also returns `firstVisibleMessageId` and `lastVisibleMessageId`, and `preserveScrollOnPrepend = false` also sets `overflow-anchor: none`. The visibility state is a read-only reactive object, not a snapshot.
 - Questionnaire keeps shadcn's parts and validation rules. It is not a native form post: answers are a `v-model` object, and `submit` gives `{ answers, skipped }`, not `FormData`. Answer rows are `role="radio"` / `role="checkbox"` elements, not native inputs. Number keys are on by default. Skip on the last item submits.
 - InlineCitation shows all sources in one hover card, not in a carousel.
-- ModelSelector is a menu without search, as in the current shadcn pattern.
+- ModelSelector is a Combobox with search, so a long list of models stays usable.
 - Tool keeps a status badge next to the line, because frappe apps use badges for status.
 
 ### Layout changes

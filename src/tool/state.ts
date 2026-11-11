@@ -12,6 +12,8 @@ export interface ToolStateContext {
 	approved?: boolean;
 	/** For output-available: the output is a preliminary (streamed) result. */
 	preliminary?: boolean;
+	/** For output-available: the output itself reports a failure, such as `{ ok: false }`. */
+	failed?: boolean;
 }
 
 export function getToolName(part: ToolMessagePart) {
@@ -38,40 +40,73 @@ export function getToolIcon(name: string) {
 	return rules.find(([pattern]) => pattern.test(name.toLowerCase()))?.[1] ?? "lucide-wrench";
 }
 
-function isRunning(state: ToolState, context: ToolStateContext) {
-	if (state === "input-streaming" || state === "input-available") return true;
-	if (state === "approval-responded") return context.approved !== false;
-	return state === "output-available" && !!context.preliminary;
+/**
+ * Where a tool call stands, from its part state alone. Every part state maps here, so none
+ * falls into a wrong default. `approved` is a call the person allowed that has not run
+ * yet: with two approvals in one message the stream waits until both are answered.
+ */
+export type ToolPhase = "preparing" | "running" | "needs-approval" | "approved" | "denied" | "stopped" | "failed" | "done";
+
+export function getToolPhase(state: ToolState, context: ToolStateContext = {}): ToolPhase {
+	const streaming = context.streaming ?? true;
+	switch (state) {
+		case "input-streaming":
+			return streaming ? "preparing" : "stopped";
+		case "input-available":
+			return streaming ? "running" : "stopped";
+		case "approval-requested":
+			return "needs-approval";
+		case "approval-responded":
+			if (context.approved === false) return "denied";
+			return streaming ? "running" : "approved";
+		case "output-available":
+			if (context.failed) return "failed";
+			if (context.preliminary) return streaming ? "running" : "stopped";
+			return "done";
+		case "output-error":
+			return "failed";
+		case "output-denied":
+			return "denied";
+		default:
+			return state satisfies never;
+	}
 }
 
 /** The Trace line status for a tool state, as in shadcn's Tool states table. */
 export function getToolStatus(state: ToolState, context: ToolStateContext = {}): TraceStatus | undefined {
-	const streaming = context.streaming ?? true;
-	if (state === "output-error") return "error";
-	if (isRunning(state, context)) return streaming ? "running" : "error";
+	const phase = getToolPhase(state, context);
+	if (phase === "failed" || phase === "stopped") return "error";
+	if (phase === "preparing" || phase === "running") return "running";
+	if (phase === "approved") return "pending";
 	return undefined;
 }
 
 export function getToolTitle(state: ToolState, name: string, context: ToolStateContext = {}) {
-	const streaming = context.streaming ?? true;
-	if (state === "output-denied" || (state === "approval-responded" && context.approved === false)) return `Denied ${name}`;
-	if (state === "approval-requested") return `Waiting for approval to ${name}`;
-	if (state === "output-error") return `Failed to ${name}`;
-	if (isRunning(state, context)) return streaming ? `Running ${name}` : `Failed to ${name}`;
-	return `Ran ${name}`;
+	const titles: Record<ToolPhase, string> = {
+		preparing: `Running ${name}`,
+		running: `Running ${name}`,
+		"needs-approval": `Waiting for approval to ${name}`,
+		approved: `Approved ${name}, waiting to run`,
+		denied: `Denied ${name}`,
+		stopped: `Failed to ${name}`,
+		failed: `Failed to ${name}`,
+		done: `Ran ${name}`,
+	};
+	return titles[getToolPhase(state, context)];
 }
 
 export function getStatusBadge(state: ToolState, context: ToolStateContext = {}): { label: string; theme: BadgeTheme } {
-	const streaming = context.streaming ?? true;
-	if (state === "output-error") return { label: "Error", theme: "red" };
-	if (state === "output-denied" || (state === "approval-responded" && context.approved === false)) {
-		return { label: "Denied", theme: "gray" };
-	}
-	if (state === "approval-requested") return { label: "Needs approval", theme: "amber" };
-	if (isRunning(state, context) && !streaming) return { label: "Stopped", theme: "red" };
-	if (state === "input-streaming") return { label: "Preparing", theme: "gray" };
-	if (isRunning(state, context)) return { label: "Running", theme: "blue" };
-	return { label: "Done", theme: "green" };
+	const badges: Record<ToolPhase, { label: string; theme: BadgeTheme }> = {
+		preparing: { label: "Preparing", theme: "gray" },
+		running: { label: "Running", theme: "blue" },
+		"needs-approval": { label: "Needs approval", theme: "amber" },
+		approved: { label: "Approved", theme: "gray" },
+		denied: { label: "Denied", theme: "gray" },
+		stopped: { label: "Stopped", theme: "gray" },
+		failed: { label: "Error", theme: "red" },
+		done: { label: "Done", theme: "green" },
+	};
+	return badges[getToolPhase(state, context)];
 }
 
 /** Pulls readable text out of a tool output; MCP results arrive as `{ content: [{ type: "text", text }] }`. */

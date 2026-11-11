@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount } from "vue";
+import { onBeforeUnmount, watch } from "vue";
 import Attachment from "../attachment/Attachment.vue";
 import { usePromptInput } from "./context";
 
@@ -21,11 +21,20 @@ function remove(file: File) {
 	removeFile(file);
 }
 
+// Files can leave without remove(): a submit clears them all, a single-file field replaces one.
+watch(files, (current) => {
+	for (const [file, url] of previews) {
+		if (current.includes(file)) continue;
+		URL.revokeObjectURL(url);
+		previews.delete(file);
+	}
+});
+
 onBeforeUnmount(() => previews.forEach((url) => URL.revokeObjectURL(url)));
 </script>
 
 <template>
-	<div v-if="$slots.default || files.length" data-slot="prompt-input-header" class="flex flex-wrap gap-2 px-2.5 pt-2.5">
+	<div v-if="$slots.default || files.length" data-slot="prompt-input-header" class="flex flex-wrap gap-2 px-2.5 pt-2.5 [@media(pointer:coarse)]:gap-y-3">
 		<slot>
 			<Attachment
 				v-for="file in files"

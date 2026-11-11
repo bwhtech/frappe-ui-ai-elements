@@ -7,6 +7,12 @@
  * `data-[status=running]:shimmer`.
  */
 
+/* A strong ease-out: fast at the start, where the eye is. The curve for things that enter,
+   leave or open. :where() keeps it at zero specificity, so an app can set its own. */
+:where(:root) {
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
 @property --shimmer-angle {
   syntax: '<angle>';
   inherits: true;
@@ -162,25 +168,65 @@
     scrollbar-width: thin;
     scrollbar-color: var(--outline-gray-3, rgba(0, 0, 0, 0.2)) transparent;
   }
+
+  /* `ease-out-strong`, as a utility, so apps need no Tailwind theme entry for it. */
+  .ease-out-strong {
+    transition-timing-function: var(--ease-out-strong);
+  }
 }
 
+/* Touch: small controls reach about 44px to a finger with an invisible hit area, so what you
+   see does not move. `.touch-target` opts a control in. */
+@media (pointer: coarse) {
+  .touch-target {
+    position: relative;
+  }
+  .touch-target::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100% + 16px, 44px);
+    height: max(100% + 16px, 44px);
+    transform: translate(-50%, -50%);
+  }
+  /* Step rows stacked in an open fold or a run of steps sit 12px apart on touch. Their areas
+     fill that gap and stop there, so a tap never lands on the neighbour. A step line on its
+     own keeps the 44px area. Tool and reasoning rows rename the trigger's data-slot, so the
+     rule finds it by data-trace-trigger. */
+  :is([data-slot='trace'], [data-slot='message-steps']:has(> :nth-child(2))) [data-trace-trigger]::after {
+    height: calc(100% + 12px);
+  }
+  a[data-slot='attachment']::after {
+    content: '';
+    position: absolute;
+    inset: -8px 0;
+  }
+  /* iOS zooms into a field under 16px on focus and does not zoom back. */
+  [data-slot='prompt-input'] textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* `--scroll-fade-range` is how far the content scrolls while a fade grows to full size. Match it to
+   `--scroll-fade-size` for a fade that shows from the first scroll. */
 @supports (animation-timeline: scroll()) {
   .scroll-fade-y {
     animation: ai-scroll-fade-t 1ms ease-in-out, ai-scroll-fade-b 1ms ease-in-out;
     animation-timeline: scroll(self y), scroll(self y);
-    animation-range: 0 96px, calc(100% - 96px) 100%;
+    animation-range: 0 var(--scroll-fade-range, 96px), calc(100% - var(--scroll-fade-range, 96px)) 100%;
     animation-fill-mode: both;
   }
   .scroll-fade-b {
     animation: ai-scroll-fade-b 1ms ease-in-out;
     animation-timeline: scroll(self y);
-    animation-range: calc(100% - 96px) 100%;
+    animation-range: calc(100% - var(--scroll-fade-range, 96px)) 100%;
     animation-fill-mode: both;
   }
   .scroll-fade-x {
     animation: ai-scroll-fade-s 1ms ease-in-out, ai-scroll-fade-e 1ms ease-in-out;
     animation-timeline: scroll(self inline), scroll(self inline);
-    animation-range: 0 96px, calc(100% - 96px) 100%;
+    animation-range: 0 var(--scroll-fade-range, 96px), calc(100% - var(--scroll-fade-range, 96px)) 100%;
     animation-fill-mode: both;
   }
 }
@@ -205,7 +251,7 @@
 :is(a, button) > [data-slot='trace-line'] {
   cursor: pointer;
 }
-:is(a, button):hover > [data-slot='trace-line']:not([data-status='error']) {
+:is(a, button):hover > [data-slot='trace-line'] {
   color: var(--ink-gray-8);
 }
 
@@ -291,6 +337,63 @@
   min-width: 6rem;
 }
 
+/* Links in a reply, as frappe-ui's prose draws them: the text's own colour with a thin
+   gray line under it, which darkens on hover. Citation chips (below) have no line. */
+[data-slot='response'] a:not([data-citation]) {
+  color: var(--ink-gray-9);
+  text-decoration: none;
+  border-bottom: 1px solid var(--ink-gray-4);
+  transition: border-color 80ms ease;
+}
+[data-slot='response'] a:not([data-citation]):hover {
+  border-bottom-color: var(--ink-gray-6);
+}
+[data-slot='response'] a:not([data-citation]):focus-visible {
+  outline: none;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px var(--outline-gray-3);
+}
+
+/* Citations: a link to a page that a search or a page read returned (Response) shows as a chip. */
+[data-slot='response'] a[data-citation] {
+  display: inline-block;
+  max-width: 14rem;
+  margin: 0 0.125rem;
+  padding: 0 0.4rem;
+  overflow: hidden;
+  border-radius: 9999px;
+  background: var(--surface-gray-2);
+  color: var(--ink-gray-7);
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: 1px;
+  text-decoration: none;
+  transition: background-color 150ms var(--ease-out-strong);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='response'] a[data-citation] {
+    transition: none;
+  }
+}
+[data-slot='response'] a[data-citation]:hover,
+[data-slot='response'] a[data-citation]:focus-visible {
+  background: var(--surface-gray-3);
+  color: var(--ink-gray-9);
+  text-decoration: none;
+}
+
+/* Maths (KaTeX): a wide formula scrolls on its own instead of widening the reply. */
+[data-slot='math-block'] {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+[data-slot='math-block'] > .katex-display {
+  margin: 0.75rem 0;
+}
+
 /* DeskCard: when the card itself is narrow (a phone, a side panel), the button
    gets its own row under the text instead of squeezing it. */
 [data-slot="desk-card"] {
@@ -306,4 +409,76 @@
     flex-basis: 100%;
     padding-left: 3rem;
   }
+}
+
+/* Mermaid diagrams, drawn by Pele (MermaidBlock). The same theme as Frappe Wiki
+   (wiki/public/css/diagrams.css): Pele colours everything through these
+   variables, so diagrams follow light and dark without a redraw. `.pele` is on
+   the SVG and on the error line and zoom bar beside it. */
+:where(.pele) {
+  --pele-bg: var(--surface-gray-1);
+  --pele-fg: var(--ink-gray-9);
+  --pele-muted: var(--ink-gray-5);
+  --pele-line: var(--ink-gray-5);
+  --pele-surface: var(--surface-gray-2);
+  --pele-surface-alt: var(--surface-gray-3);
+  --pele-border: var(--outline-gray-3);
+  /* Blue tokens give unreadable text on Gantt bars in dark mode. */
+  --pele-accent: var(--ink-gray-7);
+  --pele-critical: var(--ink-red-4);
+  --pele-error: var(--ink-red-5);
+  --pele-series-1: var(--chart-categorical-1);
+  --pele-series-2: var(--chart-categorical-2);
+  --pele-series-3: var(--chart-categorical-3);
+  --pele-series-4: var(--chart-categorical-4);
+  --pele-series-5: var(--chart-categorical-5);
+  --pele-series-6: var(--chart-categorical-6);
+  --pele-series-7: var(--chart-categorical-7);
+  --pele-series-8: var(--chart-categorical-8);
+}
+/* Pele fits the diagram to this box, so it must not shrink to its content. */
+[data-slot='mermaid-diagram'] {
+  width: 100%;
+}
+[data-slot='mermaid-diagram'] svg {
+  margin-inline: auto;
+}
+
+/* ER entities follow Frappe Insights' table cards: a raised card, a medium
+   weight name, rows split by hairlines instead of zebra stripes. */
+.pele-er {
+  --pele-surface: var(--surface-base);
+  --pele-border: var(--outline-gray-2);
+}
+[data-theme='dark'] .pele-er {
+  --pele-surface: var(--surface-gray-2);
+}
+.pele-er .pele-entity {
+  filter: drop-shadow(0 1px 2px rgb(0 0 0 / 0.08));
+}
+.pele-er .pele-entity > .pele-label {
+  font-weight: 500;
+}
+/* Stroking the striped (odd) rows draws a hairline at every row boundary. */
+.pele-er .pele-er-stripes rect {
+  fill: var(--pele-surface);
+  stroke: var(--pele-border);
+}
+/* With an odd row count the last stripe's bottom edge runs through the text. Drop it. */
+.pele-er .pele-entity:has(.pele-er-type:nth-last-child(1 of .pele-er-type):nth-child(odd of .pele-er-type)) .pele-er-stripes rect:last-child {
+  clip-path: inset(0 0 1px 0);
+}
+/* Relationship names sit in an outlined chip, like Insights' cardinality. */
+.pele-er .pele-edge-label rect {
+  fill: var(--pele-surface);
+  stroke: var(--pele-border);
+  rx: 6px;
+}
+
+/* A column the markdown or the number check (markdown.ts) aligned. Prose styles would override the HTML attribute. */
+[data-slot='response-table'] :is(th, td)[align='right'] {
+  text-align: right;
+}
+[data-slot='response-table'] :is(th, td)[align='center'] {
+  text-align: center;
 }

@@ -38,7 +38,7 @@ function onClick(event: MouseEvent) {
 			:icon="icon"
 			:disabled="!stopping && !canSubmit"
 			:aria-label="label"
-			class="rounded-full [&_.lucide-square]:size-3 [&_.lucide-square]:bg-current"
+			class="relative rounded-full after:absolute after:-inset-1.5 after:content-[''] transition-[color,background-color,border-color,box-shadow,transform] duration-150 ease-out-strong active:scale-[0.96] motion-reduce:transform-none [&_.lucide-square]:size-3 [&_.lucide-square]:bg-current"
 			@click="onClick"
 		/>
 	</Tooltip>

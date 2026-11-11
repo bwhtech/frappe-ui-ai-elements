@@ -8,7 +8,7 @@ defineProps<{ icon?: string | Component; spin?: boolean }>();
 <template>
 	<span data-slot="trace-icon" aria-hidden="true" class="flex size-4 shrink-0 items-center justify-center">
 		<slot>
-			<Icon v-if="icon" :icon="icon" :class="['size-4', spin && 'animate-spin']" />
+			<Icon v-if="icon" :icon="icon" :class="['size-4', spin && 'animate-spin motion-reduce:animate-none']" />
 		</slot>
 	</span>
 </template>
