@@ -12,6 +12,14 @@ const props = withDefaults(defineProps<{ placeholder?: string; maxRows?: number;
 const { text, disabled, submit } = usePromptInput("PromptInputTextarea");
 const wrapper = ref<HTMLElement | null>(null);
 
+// An app can disable the field when a message goes out, such as while its files upload.
+// Disabling a focused field blurs it, and the blur fires `change` with the text that is
+// still in the field. frappe-ui's Textarea then puts that text back in the v-model, so the
+// sent message comes back. The field turns disabled one render later, after the cleared
+// text is in the DOM.
+const fieldDisabled = ref(disabled.value);
+watch(disabled, (value) => (fieldDisabled.value = value), { flush: "post" });
+
 function textarea() {
 	return wrapper.value?.querySelector("textarea") ?? null;
 }
@@ -51,7 +59,7 @@ defineExpose({ focus: () => textarea()?.focus() });
 			size="md"
 			:rows="1"
 			:placeholder="placeholder"
-			:disabled="disabled"
+			:disabled="fieldDisabled"
 			aria-label="Message"
 			enterkeyhint="send"
 			class="!min-h-12 w-full resize-none !border-0 !bg-transparent !px-3.5 !pt-3 !text-p-md !tracking-normal !shadow-none !ring-0 focus-visible:!outline-none"
