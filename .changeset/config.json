@@ -1,9 +1,0 @@
-{
-	"$schema": "../node_modules/@changesets/config/schema.json",
-	"baseBranch": "main",
-	"access": "public",
-	"changelog": "@changesets/cli/changelog",
-	"format": "oxfmt",
-	"commit": false,
-	"changedFilePatterns": ["src/**", "tailwind.js", "package.json"]
-}

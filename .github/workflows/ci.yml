@@ -1,0 +1,46 @@
+# Checks every pull request and every push to main: format, lint, types, the library
+# build, the demo built against dist/, and the package contents.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check format, lint and types
+        run: npm run check
+
+      - name: Build the library
+        run: npm run build
+
+      - name: Build the demo against dist/
+        run: npm run build:demo:dist
+
+      - name: Check the package contents
+        run: npm pack --dry-run

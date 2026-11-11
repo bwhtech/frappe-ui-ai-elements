@@ -54,8 +54,8 @@
 		"fmt": "oxfmt",
 		"fmt:check": "oxfmt --check",
 		"check": "npm run fmt:check && npm run lint && npm run typecheck",
-		"changeset": "changeset",
-		"prepublishOnly": "npm run check && npm run build"
+		"prepublishOnly": "npm run check && npm run build",
+		"release": "npm run check && bumpp --commit \"Release v%s\" --tag \"v%s\""
 	},
 	"dependencies": {
 		"dompurify": "^3.4.17",
@@ -65,10 +65,10 @@
 		"pele": "^1.13.0"
 	},
 	"devDependencies": {
-		"@changesets/cli": "^3.0.3",
 		"@vitejs/plugin-vue": "^6.0.10",
 		"ai": "^7.0.150",
 		"autoprefixer": "^10.6.1",
+		"bumpp": "^12.3.0",
 		"frappe-ui": "^1.1.0",
 		"oxfmt": "^0.78.0",
 		"oxlint": "^1.93.0",
