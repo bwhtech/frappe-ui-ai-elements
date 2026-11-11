@@ -16,7 +16,7 @@ import {
 	ToolOutput,
 	ToolPart,
 	summarizeSteps,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { longJsonOutput, toolStates } from "../fixtures";
 

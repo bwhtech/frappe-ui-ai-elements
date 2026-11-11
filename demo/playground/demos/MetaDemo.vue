@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { Checkpoint, CheckpointIcon, CheckpointTrigger, Context, InlineCitation, ModelSelector, Sources } from "@bwhtech/frappe-ui-ai-elements";
+import { Checkpoint, CheckpointIcon, CheckpointTrigger, Context, InlineCitation, ModelSelector, Sources } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { worst as w } from "../worst";

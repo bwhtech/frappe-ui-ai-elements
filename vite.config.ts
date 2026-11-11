@@ -9,10 +9,10 @@ const path = (to: string) => fileURLToPath(new URL(to, import.meta.url));
 
 // The demo imports the package by name. By default that is the source; with
 // DEMO_FROM_DIST=1 it is the built package, to check `dist/` works for an app.
-const fromSource = [{ find: /^@bwhtech\/frappe-ui-ai-elements/, replacement: path("src") }];
+const fromSource = [{ find: /^frappe-ui-ai-elements/, replacement: path("src") }];
 const fromDist = [
-	{ find: /^@bwhtech\/frappe-ui-ai-elements\/styles\.css$/, replacement: path("src/styles.css") },
-	{ find: /^@bwhtech\/frappe-ui-ai-elements$/, replacement: path("dist/index.js") },
+	{ find: /^frappe-ui-ai-elements\/styles\.css$/, replacement: path("src/styles.css") },
+	{ find: /^frappe-ui-ai-elements$/, replacement: path("dist/index.js") },
 ];
 
 export default defineConfig({

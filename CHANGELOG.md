@@ -4,6 +4,8 @@
 
 The first release on npm. It brings back the changes made while the components ran in Ponder Chat.
 
+The package name is now `frappe-ui-ai-elements`. Before, it was `@bwhtech/frappe-ui-ai-elements`. Change your imports and your Tailwind config.
+
 ### Added
 
 - `Response` renders LaTeX maths with KaTeX: `$$…$$`, `\[…\]`, `$…$` and `\(…\)`. A single `$` follows Pandoc's rules, so amounts of money stay text.

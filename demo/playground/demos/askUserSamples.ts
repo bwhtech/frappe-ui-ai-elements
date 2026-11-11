@@ -1,4 +1,4 @@
-import type { AskUserInput, AskUserKind, AskUserQuestion } from "@bwhtech/frappe-ui-ai-elements";
+import type { AskUserInput, AskUserKind, AskUserQuestion } from "frappe-ui-ai-elements";
 import { worst as w } from "../worst";
 
 const areas = ["Jayanagar", "Koramangala", "Indiranagar", "Malleswaram", "Whitefield", "Yelahanka", "Banashankari", "Hebbal", "Rajajinagar", "Basavanagudi", "Marathahalli", "Electronic City", "BTM Layout", "HSR Layout", "Ulsoor", "Frazer Town", "RT Nagar", "Vijayanagar", "Kengeri", "JP Nagar"];

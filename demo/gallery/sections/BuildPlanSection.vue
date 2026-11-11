@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { UIMessage } from "ai";
 import { ref } from "vue";
-import { Message, MessageContent, MessageParts, provideBuildPlan, ToolPlan, type BuildPlan, type BuildPlanStatus } from "@bwhtech/frappe-ui-ai-elements";
+import { Message, MessageContent, MessageParts, provideBuildPlan, ToolPlan, type BuildPlan, type BuildPlanStatus } from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { foodDrivePlan } from "../fixtures";
 

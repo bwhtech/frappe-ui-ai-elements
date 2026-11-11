@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { Checkpoint, CheckpointIcon, CheckpointTrigger, Context, InlineCitation, ModelSelector, Sources } from "@bwhtech/frappe-ui-ai-elements";
+import { Checkpoint, CheckpointIcon, CheckpointTrigger, Context, InlineCitation, ModelSelector, Sources } from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 
 const sources = [

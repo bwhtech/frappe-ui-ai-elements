@@ -17,7 +17,7 @@ import {
 	TaskItem,
 	TaskItemFile,
 	TaskTrigger,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import { Button } from "frappe-ui";
 import DemoBlock from "../DemoBlock.vue";
 </script>

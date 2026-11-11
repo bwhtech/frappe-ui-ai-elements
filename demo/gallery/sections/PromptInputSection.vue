@@ -14,7 +14,7 @@ import {
 	PromptInputTools,
 	Context,
 	Attachment,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 
 const queued = ref([

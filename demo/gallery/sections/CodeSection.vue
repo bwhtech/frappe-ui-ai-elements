@@ -8,7 +8,7 @@ import {
 	CodeBlockHeader,
 	CodeBlockLine,
 	CodeBlockTitle,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 
 const python = `import frappe

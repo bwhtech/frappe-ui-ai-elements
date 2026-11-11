@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ToolUIPart } from "ai";
 import { computed, ref, watch } from "vue";
-import { ToolPart, type AskUserKind, type AskUserOutput } from "@bwhtech/frappe-ui-ai-elements";
+import { ToolPart, type AskUserKind, type AskUserOutput } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { buildAskUserInput } from "./askUserSamples";

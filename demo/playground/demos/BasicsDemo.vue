@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Attachment, Bubble, BubbleContent, Marker, MarkerContent, MarkerIcon, type BubbleVariant } from "@bwhtech/frappe-ui-ai-elements";
+import { Attachment, Bubble, BubbleContent, Marker, MarkerContent, MarkerIcon, type BubbleVariant } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { worst as w } from "../worst";

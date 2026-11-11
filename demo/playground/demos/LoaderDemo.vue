@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Loader, Shimmer } from "@bwhtech/frappe-ui-ai-elements";
+import { Loader, Shimmer } from "frappe-ui-ai-elements";
 import type { Values } from "../types";
 import { worst as w } from "../worst";
 

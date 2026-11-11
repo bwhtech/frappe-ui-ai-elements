@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from "frappe-ui";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { Response } from "@bwhtech/frappe-ui-ai-elements";
+import { Response } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { hugeJson, worst as w } from "../worst";

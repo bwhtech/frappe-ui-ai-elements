@@ -18,7 +18,7 @@ import {
 	Suggestion,
 	Suggestions,
 	type AskUserOutput,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import type { ScenarioAsk } from "../scenario/ask";

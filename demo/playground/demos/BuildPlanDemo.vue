@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ToolUIPart } from "ai";
 import { computed, onBeforeUnmount, ref, watch } from "vue";
-import { provideBuildPlan, ToolPart, type BuildPlan, type BuildPlanStatus, type ProposePlanInput, type ProposePlanOutput } from "@bwhtech/frappe-ui-ai-elements";
+import { provideBuildPlan, ToolPart, type BuildPlan, type BuildPlanStatus, type ProposePlanInput, type ProposePlanOutput } from "frappe-ui-ai-elements";
 import { foodDrivePlan } from "../../gallery/fixtures";
 import { useLog } from "../log";
 import type { Values } from "../types";

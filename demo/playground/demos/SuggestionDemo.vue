@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Suggestion, Suggestions } from "@bwhtech/frappe-ui-ai-elements";
+import { Suggestion, Suggestions } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { worst as w } from "../worst";
