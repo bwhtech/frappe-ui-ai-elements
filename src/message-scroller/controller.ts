@@ -235,7 +235,7 @@ export class MessageScrollerController {
 	}
 
 	private openAtLastAnchor(items: HTMLElement[]) {
-		const anchor = items.toReversed().find(isScrollAnchor);
+		const anchor = [...items].reverse().find(isScrollAnchor);
 		const viewport = this.viewport!;
 		const lastTurnFits = anchor && this.contentBottom() - elementTop(anchor, viewport) <= viewport.clientHeight;
 		if (!anchor || lastTurnFits) this.scrollToEnd({ behavior: "auto" });
