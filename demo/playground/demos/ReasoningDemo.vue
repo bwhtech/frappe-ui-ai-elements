@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Reasoning, ReasoningContent, ReasoningTrigger } from "@bwhtech/frappe-ui-ai-elements";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { worst as w } from "../worst";

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useMessageScroller, useMessageScrollerVisibility } from "@bwhtech/frappe-ui-ai-elements";
+import { useMessageScroller, useMessageScrollerVisibility } from "frappe-ui-ai-elements";
 
 /** Shows what useMessageScrollerVisibility reports. Must sit inside the MessageScrollerProvider. */
 const visibility = useMessageScrollerVisibility();

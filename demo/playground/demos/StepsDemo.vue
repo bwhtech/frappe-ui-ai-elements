@@ -18,7 +18,7 @@ import {
 	TaskItem,
 	TaskTrigger,
 	type TraceStatus,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { worst as w } from "../worst";

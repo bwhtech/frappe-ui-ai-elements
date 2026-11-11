@@ -11,7 +11,7 @@ import {
 	MessageCopyAction,
 	MessageHeader,
 	Response,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { replyMarkdown, richReplyCitations, richReplyMarkdown } from "../fixtures";
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from "frappe-ui";
 import { ref } from "vue";
-import { Reasoning, ReasoningContent, ReasoningTrigger } from "@bwhtech/frappe-ui-ai-elements";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { reasoningText } from "../fixtures";
 

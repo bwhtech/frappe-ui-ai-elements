@@ -1,5 +1,5 @@
 import type { DynamicToolUIPart, UIMessage } from "ai";
-import type { ProposePlanInput } from "@bwhtech/frappe-ui-ai-elements";
+import type { ProposePlanInput } from "frappe-ui-ai-elements";
 
 // Realistic parts for a nonprofit building a volunteer tracker on its Frappe site.
 

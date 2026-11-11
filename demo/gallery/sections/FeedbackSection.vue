@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { Loader, Marker, MarkerContent, MarkerIcon, Shimmer, Suggestion, Suggestions } from "@bwhtech/frappe-ui-ai-elements";
+import { Loader, Marker, MarkerContent, MarkerIcon, Shimmer, Suggestion, Suggestions } from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { suggestions } from "../fixtures";
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { CodeBlock, CodeBlockActions, CodeBlockContent, CodeBlockCopyButton, CodeBlockHeader, CodeBlockTitle } from "@bwhtech/frappe-ui-ai-elements";
+import { CodeBlock, CodeBlockActions, CodeBlockContent, CodeBlockCopyButton, CodeBlockHeader, CodeBlockTitle } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { hugeJson, worst as w } from "../worst";

@@ -9,7 +9,7 @@ The components read the [Vercel AI SDK](https://ai-sdk.dev) message format (`UIM
 ## Install
 
 ```bash
-npm install @bwhtech/frappe-ui-ai-elements frappe-ui vue ai
+npm install frappe-ui-ai-elements frappe-ui vue ai
 ```
 
 The package also installs [KaTeX](https://katex.org) for maths in replies and [Pele](https://pele.run) for Mermaid diagrams. Pele loads only when a reply has a diagram.
@@ -21,7 +21,7 @@ The package also installs [KaTeX](https://katex.org) for maths in replies and [P
    ```js
    // tailwind.config.js
    import preset, { content as frappeUI } from "frappe-ui/tailwind";
-   import { content as aiElements } from "@bwhtech/frappe-ui-ai-elements/tailwind";
+   import { content as aiElements } from "frappe-ui-ai-elements/tailwind";
 
    export default {
    	presets: [preset],
@@ -33,7 +33,7 @@ The package also installs [KaTeX](https://katex.org) for maths in replies and [P
 
    ```css
    @import "frappe-ui/style.css";
-   @import "@bwhtech/frappe-ui-ai-elements/styles.css";
+   @import "frappe-ui-ai-elements/styles.css";
    ```
 
 3. Wrap the app in frappe-ui's `<FrappeUIProvider>`.
@@ -49,7 +49,7 @@ On touch screens (`pointer: coarse`), small controls get an invisible hit area o
 ```vue
 <script setup lang="ts">
 import { useChat } from "@ai-sdk/vue";
-import { Conversation, ConversationContent, ConversationItem, Message, MessageContent, MessageParts, PromptInput, PromptInputSubmit, PromptInputTextarea } from "@bwhtech/frappe-ui-ai-elements";
+import { Conversation, ConversationContent, ConversationItem, Message, MessageContent, MessageParts, PromptInput, PromptInputSubmit, PromptInputTextarea } from "frappe-ui-ai-elements";
 import { ref } from "vue";
 
 const { messages, sendMessage, addToolApprovalResponse, status, stop } = useChat();
@@ -228,7 +228,7 @@ Before the agent builds several things, it lists them all with a `propose_plan` 
 While it builds, the agent calls `update_plan` to mark items. That tool has an `execute` on the server. To make the plan card tick items off live, give it the thread's latest plan:
 
 ```ts
-import { currentPlan, provideBuildPlan } from "@bwhtech/frappe-ui-ai-elements";
+import { currentPlan, provideBuildPlan } from "frappe-ui-ai-elements";
 
 provideBuildPlan(computed(() => currentPlan(messages.value)));
 ```

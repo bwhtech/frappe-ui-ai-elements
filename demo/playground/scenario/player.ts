@@ -1,4 +1,4 @@
-import type { AskUserOutput } from "@bwhtech/frappe-ui-ai-elements";
+import type { AskUserOutput } from "frappe-ui-ai-elements";
 import type { ChatStatus, UIMessage } from "ai";
 import { ref } from "vue";
 import type { ScenarioAsk } from "./ask";

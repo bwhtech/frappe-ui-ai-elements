@@ -15,7 +15,7 @@ import {
 	type AskUserOutput,
 	type AskUserQuestion,
 	type QuestionnaireSubmitPayload,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { volunteerAnswers, volunteerQuestions } from "../fixtures";
 

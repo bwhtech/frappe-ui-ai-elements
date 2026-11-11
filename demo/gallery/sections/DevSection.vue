@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from "vue";
 import { Button } from "frappe-ui";
-import { FileTree, StackTrace, Subagent, Terminal, TestResults, ToolPart, type FileTreeNode, type TestSuite } from "@bwhtech/frappe-ui-ai-elements";
+import { FileTree, StackTrace, Subagent, Terminal, TestResults, ToolPart, type FileTreeNode, type TestSuite } from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { toolStates } from "../fixtures";
 

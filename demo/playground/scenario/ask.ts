@@ -1,4 +1,4 @@
-import type { AskUserInput, AskUserOutput } from "@bwhtech/frappe-ui-ai-elements";
+import type { AskUserInput, AskUserOutput } from "frappe-ui-ai-elements";
 import { worst } from "../worst";
 
 // The ask_user step of the Seva scenario: what the agent asks before it builds

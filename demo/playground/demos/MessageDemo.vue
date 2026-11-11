@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { Bubble, BubbleContent, Message, MessageAction, MessageActions, MessageAvatar, MessageContent, MessageCopyAction, MessageHeader, Response } from "@bwhtech/frappe-ui-ai-elements";
+import { Bubble, BubbleContent, Message, MessageAction, MessageActions, MessageAvatar, MessageContent, MessageCopyAction, MessageHeader, Response } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { worst as w } from "../worst";

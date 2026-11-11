@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { Conversation, ConversationContent, ConversationEmptyState, ConversationItem, ConversationScrollButton, Message, MessageContent, Response } from "@bwhtech/frappe-ui-ai-elements";
+import { Conversation, ConversationContent, ConversationEmptyState, ConversationItem, ConversationScrollButton, Message, MessageContent, Response } from "frappe-ui-ai-elements";
 import type { Values } from "../types";
 import { worst as w } from "../worst";
 

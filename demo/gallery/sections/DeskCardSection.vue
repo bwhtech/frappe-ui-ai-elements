@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { DeskCard } from "@bwhtech/frappe-ui-ai-elements";
+import { DeskCard } from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 
 const desk = "https://example.frappe.cloud/desk";

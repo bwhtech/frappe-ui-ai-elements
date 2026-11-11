@@ -10,7 +10,7 @@ import {
 	ConfirmationTitle,
 	ToolConfirmation,
 	type ToolState,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { hugeJson, worst as w } from "../worst";

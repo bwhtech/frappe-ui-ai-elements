@@ -18,7 +18,7 @@ import {
 	PromptInputAttachButton,
 	Suggestion,
 	Suggestions,
-} from "@bwhtech/frappe-ui-ai-elements";
+} from "frappe-ui-ai-elements";
 import DemoBlock from "../DemoBlock.vue";
 import { suggestions, transcript } from "../fixtures";
 import { useScriptedChat } from "../scripted-chat";

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { DynamicToolUIPart } from "ai";
 import { computed } from "vue";
-import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput, ToolPart, type ToolState } from "@bwhtech/frappe-ui-ai-elements";
+import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput, ToolPart, type ToolState } from "frappe-ui-ai-elements";
 import { useLog } from "../log";
 import type { Values } from "../types";
 import { hugeJson, worst as w } from "../worst";
