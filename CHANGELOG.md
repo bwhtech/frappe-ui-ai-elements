@@ -1,5 +1,7 @@
 # Changelog
 
+[GitHub releases](https://github.com/bwhtech/frappe-ui-ai-elements/releases) list every change in each version. This file lists the changes that you must act on, and the changes in 1.0.0.
+
 ## 1.0.0
 
 The first release on npm. It brings back the changes made while the components ran in Ponder Chat. From this version, the package follows semantic versioning: a breaking change gets a new major version.
