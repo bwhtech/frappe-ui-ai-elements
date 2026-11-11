@@ -70,8 +70,11 @@ The package settings on npmjs.com hold the trusted publisher:
 | Repository        | `frappe-ui-ai-elements` |
 | Workflow filename | `release.yml`           |
 | Environment       | (empty)                 |
+| Allowed actions   | Allow `npm publish`     |
 
-If you rename `release.yml`, change the trusted publisher on npmjs.com too. Otherwise the publish fails.
+The workflow runs `npm publish`, so "Allow `npm publish`" must be on. Without it, the workflow can only stage a version, and each release waits for approval on npmjs.com. A prerelease uses `npm publish --tag next`, so it does not need "Allow `npm dist-tag`".
+
+npm does not let you change these fields later. If you rename `release.yml`, delete the trusted publisher on npmjs.com and add a new one. Otherwise the publish fails.
 
 ### The first release
 
