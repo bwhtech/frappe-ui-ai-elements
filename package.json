@@ -1,6 +1,6 @@
 {
 	"name": "frappe-ui-ai-elements",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "AI chat and agent components for Vue 3, built on frappe-ui. A port of shadcn AI Elements.",
 	"keywords": [
 		"ai",
