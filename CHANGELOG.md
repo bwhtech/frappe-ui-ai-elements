@@ -1,10 +1,12 @@
 # Changelog
 
-## 0.2.0
+## 1.0.0
 
-The first release on npm. It brings back the changes made while the components ran in Ponder Chat.
+The first release on npm. It brings back the changes made while the components ran in Ponder Chat. From this version, the package follows semantic versioning: a breaking change gets a new major version.
 
 The package name is now `frappe-ui-ai-elements`. Before, it was `@bwhtech/frappe-ui-ai-elements`. Change your imports and your Tailwind config.
+
+The package now needs frappe-ui 1.1.0 or a later 1.x version.
 
 ### Added
 

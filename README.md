@@ -4,7 +4,7 @@ AI chat and agent components for Vue 3, built on [frappe-ui](https://github.com/
 
 The components read the [Vercel AI SDK](https://ai-sdk.dev) message format (`UIMessage` and its parts). `MessageParts` renders a whole message, and `ToolPart` renders one tool call in any of its seven states.
 
-> Status: 0.x. The API can change between minor versions. See [CHANGELOG.md](CHANGELOG.md).
+> The package follows semantic versioning. It needs frappe-ui 1.1 or a later 1.x version. See [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
