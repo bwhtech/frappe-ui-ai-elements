@@ -49,7 +49,9 @@ const name = computed(() => getToolName(props.part));
 const renderers = useToolRenderers();
 // The app's own name for the tool, such as a connector's "Linear · Create issue" (labels.ts).
 const labels = useToolLabels();
-const label = computed(() => labels(name.value));
+const label = computed(() => labels(name.value, props.part));
+// What the call shows as its input: the label's, for a tool that runs another tool.
+const shownInput = computed(() => (label.value?.input !== undefined ? label.value.input : props.part.input));
 const custom = computed(() => renderers[name.value]);
 const needsAnswer = computed(() => props.part.state === "approval-requested" && !props.part.approval.isAutomatic);
 const approved = computed(() => props.part.approval?.approved);
@@ -107,7 +109,7 @@ function answer(output: AskUserOutput) {
 		:key="part.toolCallId"
 		:tool-name="name"
 		:approval-id="part.approval.id"
-		:input="part.input"
+		:input="shownInput"
 		:reason="part.approval.requestReason"
 		:question="label?.question"
 		:always-allow="label?.alwaysAllow"
@@ -157,13 +159,13 @@ function answer(output: AskUserOutput) {
 			:state="part.state"
 			:tool-name="name"
 			:title="askUserTitle ?? label?.title"
-			:icon="icon"
+			:icon="icon ?? label?.icon"
 			:streaming="streaming"
 			:approved="approved"
 			:preliminary="preliminary"
 		/>
 		<ToolContent>
-			<ToolInput :input="part.input" />
+			<ToolInput :input="shownInput" />
 			<ToolOutput :output="part.output" :error-text="part.errorText" />
 		</ToolContent>
 	</Tool>

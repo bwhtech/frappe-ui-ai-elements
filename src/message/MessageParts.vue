@@ -16,6 +16,7 @@ import Response from "../response/Response.vue";
 import Sources from "../sources/Sources.vue";
 import ToolGroup from "../tool/ToolGroup.vue";
 import ToolPart from "../tool/ToolPart.vue";
+import { useToolLabels } from "../tool/labels";
 import { useUnfoldableTools } from "../tool/renderers";
 import type { ToolMessagePart } from "../tool/state";
 import { foldSteps, summarizeSteps, type WorkItem } from "../tool/work-group";
@@ -52,6 +53,7 @@ const role = useMessageRole();
 const inBubble = useInBubble();
 const viewOnClick = useViewOnClick();
 const customTools = useUnfoldableTools();
+const labels = useToolLabels();
 const buildPlan = useBuildPlan();
 const sources = computed(() =>
 	props.message.parts
@@ -185,7 +187,7 @@ function isStreamingText(part: Part) {
 		/>
 		<component :is="group.kind === 'plan-item' ? PlanItemSteps : 'div'" v-if="isStepsGroup(group)" v-bind="stepsAttrs(group)">
 			<template v-for="item in workItems(group)" :key="itemKey(item)">
-				<ToolGroup v-if="item.kind === 'fold'" v-bind="summarizeSteps(item.parts, streaming)">
+				<ToolGroup v-if="item.kind === 'fold'" v-bind="summarizeSteps(item.parts, streaming, labels)">
 					<template v-for="part in item.parts" :key="partKey(part)">
 						<ReasoningPart v-if="part.type === 'reasoning'" :text="part.text" :streaming="isReasoningStreaming(part)" />
 						<ToolPart v-else :part="asTool(part)" :streaming="streaming" />
