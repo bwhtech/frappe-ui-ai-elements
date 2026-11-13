@@ -2,6 +2,7 @@ import type { UIMessage } from "ai";
 import { ASK_USER_TOOL } from "../questionnaire/ask-user";
 import { PROPOSE_PLAN_TOOL, UPDATE_PLAN_TOOL } from "../plan/build-plan";
 import { SHOW_IN_DESK_TOOL } from "../desk-card/show-in-desk";
+import type { ToolAction, ToolLabeler } from "./labels";
 import { getToolName, getToolPhase, type ToolMessagePart } from "./state";
 
 type Part = UIMessage["parts"][number];
@@ -37,8 +38,11 @@ export function foldSteps(parts: Part[], custom: Set<string>): WorkItem[] {
 	return items;
 }
 
-/** "Looked up 4 things and made 2 changes", and whether a step failed or still runs. */
-export function summarizeSteps(parts: Part[], streaming: boolean) {
+/**
+ * "Looked up 4 things and made 2 changes", and whether a step failed or still runs. A
+ * label's `action` (provideToolLabels) says what a step did; without one, the tool's name.
+ */
+export function summarizeSteps(parts: Part[], streaming: boolean, labeler?: ToolLabeler) {
 	const tools = parts.filter((part) => part.type !== "reasoning") as ToolMessagePart[];
 	const counts = { read: 0, write: 0, other: 0 };
 	const phases = tools.map((tool) =>
@@ -52,7 +56,7 @@ export function summarizeSteps(parts: Part[], streaming: boolean) {
 	// A call the person denied did nothing, so it is not counted as a change.
 	const denied = phases.filter((phase) => phase === "denied").length;
 	tools.forEach((tool, index) => {
-		if (phases[index] !== "denied") counts[actionOf(getToolName(tool))]++;
+		if (phases[index] !== "denied") counts[labeler?.(getToolName(tool), tool)?.action ?? actionOf(getToolName(tool))]++;
 	});
 	const labels = [
 		counts.read && `looked up ${plural(counts.read, "thing")}`,
@@ -84,7 +88,7 @@ function isFoldable(part: Part, custom: Set<string>) {
 	return !(tool.state === "approval-requested" && !tool.approval.isAutomatic);
 }
 
-function actionOf(name: string): "read" | "write" | "other" {
+function actionOf(name: string): ToolAction {
 	if (/delete|remove|create|insert|add|new|update|edit|set|rename|patch|save|put|submit|cancel/.test(name)) return "write";
 	if (/search|find|query|lookup|get|read|list|fetch|load|schema|count|recall/.test(name)) return "read";
 	return "other";
