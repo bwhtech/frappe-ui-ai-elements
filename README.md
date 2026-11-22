@@ -428,7 +428,7 @@ It supports:
 - **Tables.** A wide table scrolls sideways. A column of numbers aligns right.
 - **Maths.** `$$…$$` and `\[…\]` render as a block, `$…$` and `\(…\)` inline. A single `$` follows the Pandoc rules, so "$5 and $10" stays text.
 - **Diagrams.** A ` ```mermaid ` fence renders as a diagram after the fence closes. A button shows the code.
-- **Citations.** With `citations`, a link to a cited page shows as a chip, with a card on hover or focus.
+- **Citations.** With `citations`, a link to a cited page gets a small raised number, with a card on hover, focus or tap. Numbers side by side, like `[1][2]`, become one link whose card lists every page.
 
 ```ts
 import { collectCitations } from "frappe-ui-ai-elements";

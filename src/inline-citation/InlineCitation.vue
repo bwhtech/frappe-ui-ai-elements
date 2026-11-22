@@ -7,6 +7,7 @@ export interface CitationSource {
 	title?: string;
 	description?: string;
 	quote?: string;
+	number?: number;
 }
 
 /**

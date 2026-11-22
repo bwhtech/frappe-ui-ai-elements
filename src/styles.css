@@ -325,7 +325,7 @@
 }
 
 /* Links in a reply, as frappe-ui's prose draws them: the text's own colour with a thin
-   gray line under it, which darkens on hover. Citation chips (below) have no line. */
+   gray line under it, which darkens on hover. Citations (below) have no line. */
 [data-slot="response"] a:not([data-citation]) {
 	color: var(--ink-gray-9);
 	text-decoration: none;
@@ -341,34 +341,54 @@
 	box-shadow: 0 0 0 2px var(--outline-gray-3);
 }
 
-/* Citations: a link to a page that a search or a page read returned (Response) shows as a chip. */
+/* Citations: a link to a page that a search or a page read returned (Response) carries a small
+   raised number. It stays inline with no line height, so it never makes its line taller and
+   never wraps away from the word before it. */
 [data-slot="response"] a[data-citation] {
-	display: inline-block;
-	max-width: 14rem;
-	margin: 0 0.125rem;
-	padding: 0 0.4rem;
-	overflow: hidden;
-	border-radius: 9999px;
-	background: var(--surface-gray-2);
-	color: var(--ink-gray-7);
-	font-size: 0.75rem;
-	line-height: 1.25rem;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	vertical-align: 1px;
+	color: inherit;
+	font-weight: inherit;
 	text-decoration: none;
-	transition: background-color 150ms var(--ease-out-strong);
+}
+[data-slot="response"] a[data-citation]:focus-visible {
+	outline: none;
+}
+[data-citation-tile] {
+	position: relative;
+	top: -0.4em;
+	margin-left: 2px;
+	padding: 1px 4px;
+	border-radius: 4px;
+	background: var(--surface-gray-2);
+	color: var(--ink-gray-6);
+	font-size: 10px;
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	line-height: 0;
+	white-space: nowrap;
+	transition:
+		background-color 150ms var(--ease-out-strong),
+		color 150ms var(--ease-out-strong);
 }
 @media (prefers-reduced-motion: reduce) {
-	[data-slot="response"] a[data-citation] {
+	[data-citation-tile] {
 		transition: none;
 	}
 }
-[data-slot="response"] a[data-citation]:hover,
-[data-slot="response"] a[data-citation]:focus-visible {
+[data-slot="response"] a[data-citation]:hover [data-citation-tile],
+[data-slot="response"] a[data-citation]:focus-visible [data-citation-tile] {
 	background: var(--surface-gray-3);
 	color: var(--ink-gray-9);
-	text-decoration: none;
+}
+[data-slot="response"] a[data-citation]:focus-visible [data-citation-tile] {
+	box-shadow: 0 0 0 2px var(--outline-gray-3);
+}
+/* The tap area stops at the line's height, so citations on neighbouring lines cannot overlap. */
+@media (pointer: coarse) {
+	[data-citation-tile]::after {
+		content: "";
+		position: absolute;
+		inset: -4px;
+	}
 }
 
 /* Maths (KaTeX): a wide formula scrolls on its own instead of widening the reply. */
