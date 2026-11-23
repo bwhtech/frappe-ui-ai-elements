@@ -4,11 +4,13 @@ import type { CitationSource } from "./InlineCitation.vue";
 /**
  * The pages a reply can cite: `source-url` parts, and the outputs of tools that return
  * pages, either `{ results: [{ url, title, text }] }` (a search) or `{ url, title }`
- * (a page read). A link in the reply to one of these becomes a citation chip (Response).
+ * (a page read). A link in the reply to one of these becomes a citation (Response), numbered
+ * by the order the reply first links to each page.
  */
 export type CitationIndex = Map<string, CitationSource>;
 
 const EXCERPT_CHARS = 220;
+const PAGE_URL = /https?:\/\/(?:[^\s()<>[\]]|\([^\s()<>]*\))+/g;
 
 export function collectCitations(message: UIMessage): CitationIndex {
 	const index: CitationIndex = new Map();
@@ -24,6 +26,14 @@ export function collectCitations(message: UIMessage): CitationIndex {
 		if (!output || output.error) continue;
 		if (Array.isArray(output.results)) output.results.forEach((result) => result && typeof result === "object" && add(result));
 		else add(output);
+	}
+	let cited = 0;
+	for (const part of message.parts) {
+		if (part.type !== "text") continue;
+		for (const [url] of part.text.matchAll(PAGE_URL)) {
+			const source = index.get(citationKey(url.replace(/[.,;:!?'"]+$/, "")));
+			if (source && !source.number) source.number = ++cited;
+		}
 	}
 	return index;
 }
